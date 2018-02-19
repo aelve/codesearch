@@ -18,6 +18,12 @@ project/plugins/project/
 *.class
 *.log
 
+### IntelliJ ###
+*.iml
+*.ipr
+*.iws
+.idea
+out
 
 # End of https://www.gitignore.io/api/sbt,scala
 
