@@ -4,14 +4,21 @@ import java.io.File
 
 import org.rauschig.jarchivelib.{ArchiveFormat, ArchiverFactory, CompressionType}
 import ammonite.ops._
-import com.typesafe.scalalogging
+
+def recursiveListFiles(f: File): Array[File] = {
+  val these = f.listFiles
+  these ++ these.filter(_.isDirectory).flatMap(recursiveListFiles)
+}
 
 object Updater {
   private val INDEX_LINK = "http://hackage.haskell.org/packages/index.tar.gz"
   private val INDEX_SOURCE = pwd / 'data / "index.tar.gz"
   private val SOURCE = pwd / 'data / 'index / "index"
+  private val VERSIONS_FILE = pwd / 'data / "package_versions.json"
 
   def update(): Unit = {
+
+
     // TODO: Logging
     new URL(INDEX_LINK) #> new File(INDEX_SOURCE.toString()) !!
 
@@ -20,5 +27,7 @@ object Updater {
 
     val archiver = ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP)
     archiver.extract(archive, destination)
+
+    print(recursiveListFiles(destination))
   }
 }
