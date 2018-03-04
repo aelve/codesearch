@@ -5,16 +5,16 @@ import java.io.File
 import org.rauschig.jarchivelib.{ArchiveFormat, ArchiverFactory, CompressionType}
 import ammonite.ops._
 
-def recursiveListFiles(f: File): Array[File] = {
-  val these = f.listFiles
-  these ++ these.filter(_.isDirectory).flatMap(recursiveListFiles)
-}
-
 object Updater {
   private val INDEX_LINK = "http://hackage.haskell.org/packages/index.tar.gz"
   private val INDEX_SOURCE = pwd / 'data / "index.tar.gz"
   private val SOURCE = pwd / 'data / 'index / "index"
   private val VERSIONS_FILE = pwd / 'data / "package_versions.json"
+
+  def recursiveListFiles(f: File): Array[File] = {
+    val these = f.listFiles
+    these ++ these.filter(_.isDirectory).flatMap(recursiveListFiles)
+  }
 
   def update(): Unit = {
 
