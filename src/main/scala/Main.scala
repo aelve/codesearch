@@ -3,21 +3,26 @@ import ammonite.ops._
 object Main {
 
   case class Config(updatePackages: Boolean = false,
+                    downloadIndex: Boolean = false,
                     sourcesDir: FilePath = pwd / 'sources
                    )
 
-  val parser = new scopt.OptionParser[Config]("main") {
+  private val parser = new scopt.OptionParser[Config]("main") {
     head("\nCodesearch command line interface\n\n")
 
-    opt[String]('u', "update-packages") action { (v, c) =>
+    opt[Unit]('u', "update-packages") action { (_, c) =>
       c.copy(updatePackages = true)
+    } text "update package-index"
+
+    opt[Unit]('d', "download-index") action { (_, c) =>
+      c.copy(downloadIndex = true)
     } text "update package-index"
   }
 
   def main(args: Array[String]): Unit = {
     parser.parse(args, Config()) foreach { c =>
       if (c.updatePackages) {
-        Updater.update()
+        Updater.update(c.downloadIndex)
       }
     }
   }

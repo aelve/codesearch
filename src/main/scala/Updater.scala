@@ -16,18 +16,20 @@ object Updater {
     these ++ these.filter(_.isDirectory).flatMap(recursiveListFiles)
   }
 
-  def update(): Unit = {
+  def update(downloadIndex: Boolean): Unit = {
 
 
-    // TODO: Logging
-    new URL(INDEX_LINK) #> new File(INDEX_SOURCE.toString()) !!
+    if (downloadIndex) {
+      new URL(INDEX_LINK) #> new File(INDEX_SOURCE.toString()) !!
 
-    val archive = new File(INDEX_SOURCE.toString)
-    val destination = new File(SOURCE.toString)
+      val archive = new File(INDEX_SOURCE.toString)
+      val destination = new File(SOURCE.toString)
 
-    val archiver = ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP)
-    archiver.extract(archive, destination)
+      val archiver = ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP)
+      archiver.extract(archive, destination)
+    }
 
-    print(recursiveListFiles(destination))
+    val indexDir = new File(INDEX_SOURCE.toString)
+    recursiveListFiles(indexDir).foreach(print)
   }
 }
