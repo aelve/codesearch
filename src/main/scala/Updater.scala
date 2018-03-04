@@ -29,7 +29,7 @@ object Updater {
       archiver.extract(archive, destination)
     }
 
-    val indexDir = new File(INDEX_SOURCE.toString)
-    recursiveListFiles(indexDir).foreach(print)
+    val indexDir = new File(SOURCE.toString)
+    recursiveListFiles(indexDir).foreach(println)
   }
 }
