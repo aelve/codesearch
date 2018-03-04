@@ -30,6 +30,12 @@ object Updater {
     }
 
     val indexDir = new File(SOURCE.toString)
-    recursiveListFiles(indexDir).foreach(println)
+    val packageNames = indexDir.listFiles.filter(_.isDirectory)
+    packageNames.foreach(packagePath =>
+      packagePath.listFiles.filter(_.isDirectory).foreach(versionPath =>
+        println(packagePath.getName, versionPath.getName)
+      )
+    )
+//    recursiveListFiles(indexDir).foreach(println)
   }
 }
