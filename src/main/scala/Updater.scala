@@ -3,6 +3,7 @@ import java.net.URL
 import java.io.File
 
 import org.rauschig.jarchivelib.{ArchiveFormat, ArchiverFactory, CompressionType}
+
 import ammonite.ops._
 
 object Updater {
@@ -11,14 +12,7 @@ object Updater {
   private val SOURCE = pwd / 'data / 'index / "index"
   private val VERSIONS_FILE = pwd / 'data / "package_versions.json"
 
-  def recursiveListFiles(f: File): Array[File] = {
-    val these = f.listFiles
-    these ++ these.filter(_.isDirectory).flatMap(recursiveListFiles)
-  }
-
   def update(downloadIndex: Boolean): Unit = {
-
-
     if (downloadIndex) {
       new URL(INDEX_LINK) #> new File(INDEX_SOURCE.toString()) !!
 
@@ -36,6 +30,5 @@ object Updater {
         println(packagePath.getName, versionPath.getName)
       )
     )
-//    recursiveListFiles(indexDir).foreach(println)
   }
 }
