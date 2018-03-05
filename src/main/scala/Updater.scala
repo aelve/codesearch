@@ -25,10 +25,11 @@ object Updater {
 
     val indexDir = new File(SOURCE.toString)
     val packageNames = indexDir.listFiles.filter(_.isDirectory)
-    packageNames.foreach(packagePath =>
-      packagePath.listFiles.filter(_.isDirectory).foreach(versionPath =>
-        println(packagePath.getName, versionPath.getName)
+    packageNames.flatMap(packagePath =>
+      packagePath.listFiles.filter(_.isDirectory).map(versionPath =>
+        (packagePath.getName, Version(versionPath.getName))
       )
-    )
+    ).groupBy(_._1).mapValues(_.map(_._2).max)
+      .foreach(println)
   }
 }
