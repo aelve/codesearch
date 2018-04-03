@@ -13,5 +13,5 @@ libraryDependencies ++= Seq(
   "commons-io" % "commons-io" % "2.6"
 )
 
-assemblyJarName in assembly := "something.jar"
-assemblyOutputPath in assembly := baseDirectory.value / ".."
+assemblyJarName in assembly := "codesearch.jar"
+assemblyOutputPath in assembly := baseDirectory.value / "codesearch.jar"
