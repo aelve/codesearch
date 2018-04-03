@@ -41,14 +41,19 @@ object SourcesUtility extends LazyLogging {
     val packageFileDir =
       pwd / 'data / 'packages / name / ver.verString / ver.verString
 
-    packageFileDir.toIO.mkdirs()
+    val archive = packageFileGZ.toIO
+    val destination = packageFileDir.toIO
 
-    new URL(packageURL) #> new FileOutputStream(packageFileGZ.toIO) !!
+    destination.mkdirs()
+
+    val archiveOS = new FileOutputStream(archive)
+
+    new URL(packageURL) #> archiveOS !!
+
+    archiveOS.flush()
 
     logger.info(s"downloaded")
 
-    val archive = packageFileGZ.toIO
-    val destination = packageFileDir.toIO
 
     val archiver = ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP)
     archiver.extract(archive, destination)
