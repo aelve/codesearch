@@ -22,7 +22,7 @@ object Main {
   def main(args: Array[String]): Unit = {
     parser.parse(args, Config()) foreach { c =>
       if (c.updatePackages) {
-        Updater.update(c.downloadIndex)
+        SourcesUtility.update(c.downloadIndex)
       }
     }
   }

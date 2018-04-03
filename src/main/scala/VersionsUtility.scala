@@ -1,7 +1,10 @@
 import sys.process._
 import java.io._
 import java.net.URL
+import java.nio.ByteBuffer
 
+import org.apache.commons.io.IOUtils
+import boopickle.Default._
 import ammonite.ops.{Path, pwd}
 import org.rauschig.jarchivelib.{ArchiveFormat, ArchiverFactory, CompressionType}
 
@@ -13,11 +16,13 @@ case class Version(verString: String) extends Ordered[Version] {
   override def compare(that: Version): Int = this.version compare that.version
 }
 
-object SourcesUtility {
+object VersionsUtility {
 
   val INDEX_LINK: String = "http://hackage.haskell.org/packages/index.tar.gz"
   val INDEX_SOURCE_GZ: Path = pwd / 'data / "index.tar.gz"
   val INDEX_SOURCE_DIR: Path = pwd / 'data / 'index / "index"
+
+  val VERSIONS_FILE: Path = pwd / 'data / "versions.obj"
 
   def updateIndex(): Unit = {
 
@@ -32,7 +37,7 @@ object SourcesUtility {
 
   def updateVersions(): Map[String, Version] = {
 
-    val indexDir = new File(SourcesUtility.INDEX_SOURCE_DIR.toString)
+    val indexDir = new File(VersionsUtility.INDEX_SOURCE_DIR.toString)
     val packageNames = indexDir.listFiles.filter(_.isDirectory)
 
     val lastVersions = packageNames.flatMap(packagePath =>
@@ -50,11 +55,11 @@ object SourcesUtility {
 
   def loadCurrentVersions(): Map[String, Version] = {
     try {
-      val fis = new FileInputStream("resources/versions.tmp")
-      val ois = new ObjectInputStream(fis)
+      val fis = new FileInputStream(VERSIONS_FILE.toIO)
 
-      val result = ois.readObject().asInstanceOf[Map[String, Version]]
-      ois.close()
+      val result = Unpickle[Map[String, Version]]
+        .fromBytes(ByteBuffer.wrap(IOUtils.toByteArray(fis)))
+      fis.close()
 
       result
     }
@@ -66,10 +71,10 @@ object SourcesUtility {
   }
 
   def saveLastVersions(lastVersions: Map[String, Version]): Unit = {
-    val fos = new FileOutputStream("resources/versions.tmp")
-    val oos = new ObjectOutputStream(fos)
+    val buf = Pickle.intoBytes(lastVersions)
 
-    oos.writeObject(lastVersions)
+    val oos = new FileOutputStream(VERSIONS_FILE.toIO)
+    oos.write(buf.array())
     oos.close()
   }
 }
