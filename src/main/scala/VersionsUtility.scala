@@ -3,9 +3,11 @@ import java.io._
 import java.net.URL
 import java.nio.ByteBuffer
 
+import SourcesUtility.logger
 import org.apache.commons.io.IOUtils
 import boopickle.Default._
 import ammonite.ops.{Path, pwd}
+import com.typesafe.scalalogging.LazyLogging
 import org.rauschig.jarchivelib.{ArchiveFormat, ArchiverFactory, CompressionType}
 
 import scala.math.Ordered.orderingToOrdered
@@ -16,7 +18,7 @@ case class Version(verString: String) extends Ordered[Version] {
   override def compare(that: Version): Int = this.version compare that.version
 }
 
-object VersionsUtility {
+object VersionsUtility extends LazyLogging {
 
   val INDEX_LINK: String = "http://hackage.haskell.org/packages/index.tar.gz"
   val INDEX_SOURCE_GZ: Path = pwd / 'data / "index.tar.gz"
@@ -25,6 +27,7 @@ object VersionsUtility {
   val VERSIONS_FILE: Path = pwd / 'data / "versions.obj"
 
   def updateIndex(): Unit = {
+    logger.info("update index")
 
     new URL(INDEX_LINK) #> INDEX_SOURCE_GZ.toIO !!
 
@@ -36,6 +39,7 @@ object VersionsUtility {
   }
 
   def updateVersions(): Map[String, Version] = {
+    logger.info("update Versions")
 
     val indexDir = VersionsUtility.INDEX_SOURCE_DIR.toIO
     val packageNames = indexDir.listFiles.filter(_.isDirectory)

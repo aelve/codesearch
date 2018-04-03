@@ -5,14 +5,12 @@ import ammonite.ops.pwd
 
 import sys.process._
 import org.rauschig.jarchivelib.{ArchiveFormat, ArchiverFactory, CompressionType}
-import com.typesafe.scalalogging.Logger
+import com.typesafe.scalalogging.{LazyLogging, Logger}
 
 class SourcesUtility {
 }
 
-object SourcesUtility {
-  private val logger = Logger[SourcesUtility]
-
+object SourcesUtility extends LazyLogging {
   def update(downloadIndex: Boolean): Unit = {
 
     if (downloadIndex) {
@@ -22,8 +20,8 @@ object SourcesUtility {
     val currentVersions = VersionsUtility.loadCurrentVersions()
     val lastVersions = VersionsUtility.updateVersions()
 
-    println(currentVersions.size)
-    println(lastVersions.size)
+    logger.info(s"old size of the index: ${currentVersions.size}")
+    logger.info(s"new size of the index: ${lastVersions.size}")
 
     lastVersions.filterNot { case (name, ver) =>
       currentVersions.get(name).contains(ver)
@@ -33,6 +31,7 @@ object SourcesUtility {
   }
 
   def downloadSources(name: String, ver: Version): Unit = {
+    logger.info(s"downloading package $name")
     val packageURL =
       s"https://hackage.haskell.org/package/$name-${ver.verString}/$name-${ver.verString}.tar.gz"
 
@@ -45,6 +44,8 @@ object SourcesUtility {
     packageFileDir.toIO.mkdirs()
 
     new URL(packageURL) #> new FileOutputStream(packageFileGZ.toIO) !!
+
+    logger.info(s"downloaded")
 
     val archive = packageFileGZ.toIO
     val destination = packageFileDir.toIO
