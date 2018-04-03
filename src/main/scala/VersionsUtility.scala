@@ -26,10 +26,10 @@ object VersionsUtility {
 
   def updateIndex(): Unit = {
 
-    new URL(INDEX_LINK) #> new File(INDEX_SOURCE_GZ.toString()) !!
+    new URL(INDEX_LINK) #> INDEX_SOURCE_GZ.toIO !!
 
-    val archive = new File(INDEX_SOURCE_GZ.toString)
-    val destination = new File(INDEX_SOURCE_DIR.toString)
+    val archive = INDEX_SOURCE_GZ.toIO
+    val destination = INDEX_SOURCE_DIR.toIO
 
     val archiver = ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP)
     archiver.extract(archive, destination)
@@ -37,7 +37,7 @@ object VersionsUtility {
 
   def updateVersions(): Map[String, Version] = {
 
-    val indexDir = new File(VersionsUtility.INDEX_SOURCE_DIR.toString)
+    val indexDir = VersionsUtility.INDEX_SOURCE_DIR.toIO
     val packageNames = indexDir.listFiles.filter(_.isDirectory)
 
     val lastVersions = packageNames.flatMap(packagePath =>
