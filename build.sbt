@@ -12,3 +12,6 @@ libraryDependencies ++= Seq(
   "io.suzaku" %% "boopickle" % "1.3.0",
   "commons-io" % "commons-io" % "2.6"
 )
+
+assemblyJarName in assembly := "something.jar"
+assemblyOutputPath in assembly := baseDirectory.value / ".."
