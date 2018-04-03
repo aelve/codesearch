@@ -1,6 +1,7 @@
-import java.io.FileOutputStream
+import java.io.{BufferedOutputStream, File, FileOutputStream}
 import java.net.URL
 
+import scala.io.Source.fromURL
 import ammonite.ops.pwd
 
 import sys.process._
@@ -46,11 +47,7 @@ object SourcesUtility extends LazyLogging {
 
     destination.mkdirs()
 
-    val archiveOS = new FileOutputStream(archive)
-
-    new URL(packageURL) #> archiveOS !!
-
-    archiveOS.flush()
+    downloadFile(packageURL, archive)
 
     logger.info(s"downloaded")
 
@@ -59,5 +56,9 @@ object SourcesUtility extends LazyLogging {
     archiver.extract(archive, destination)
 
     logger.info(s"downloaded and unarchived $name-$ver package")
+  }
+
+  def downloadFile(srcURL: String, dstFile: File): Unit = {
+    val s = s"curl -o ${dstFile.getPath} $srcURL" !!
   }
 }
