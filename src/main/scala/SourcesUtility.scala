@@ -37,10 +37,10 @@ object SourcesUtility {
       s"https://hackage.haskell.org/package/$name-$ver/$name-$ver.tar.gz"
 
     val packageFileGZ =
-      pwd / 'data / 'packages / name / ver.toString / s"$ver.tar.gz"
+      pwd / 'data / 'packages / name / ver.verString / s"${ver.verString}.tar.gz"
 
     val packageFileDir =
-      pwd / 'data / 'packages / name / ver.toString / ver.toString
+      pwd / 'data / 'packages / name / ver.verString / ver.verString
 
     new URL(packageURL) #> new FileOutputStream(packageFileGZ.toIO) !!
 
