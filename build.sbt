@@ -14,4 +14,4 @@ libraryDependencies ++= Seq(
 )
 
 assemblyJarName in assembly := "codesearch.jar"
-assemblyOutputPath in assembly := baseDirectory.value / "codesearch.jar"
+assemblyOutputPath in assembly := baseDirectory.value / "../codesearch.jar"
