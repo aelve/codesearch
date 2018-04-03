@@ -42,6 +42,8 @@ object SourcesUtility {
     val packageFileDir =
       pwd / 'data / 'packages / name / ver.verString / ver.verString
 
+    packageFileDir.toIO.mkdirs()
+
     new URL(packageURL) #> new FileOutputStream(packageFileGZ.toIO) !!
 
     val archive = packageFileGZ.toIO
