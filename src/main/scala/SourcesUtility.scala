@@ -34,7 +34,7 @@ object SourcesUtility {
 
   def downloadSources(name: String, ver: Version): Unit = {
     val packageURL =
-      s"https://hackage.haskell.org/package/$name-$ver/$name-$ver.tar.gz"
+      s"https://hackage.haskell.org/package/$name-${ver.verString}/$name-${ver.verString}.tar.gz"
 
     val packageFileGZ =
       pwd / 'data / 'packages / name / ver.verString / s"${ver.verString}.tar.gz"
