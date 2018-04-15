@@ -3,7 +3,6 @@ import java.io._
 import java.net.URL
 import java.nio.ByteBuffer
 
-import SourcesUtility.logger
 import org.apache.commons.io.IOUtils
 import boopickle.Default._
 import ammonite.ops.{Path, pwd}

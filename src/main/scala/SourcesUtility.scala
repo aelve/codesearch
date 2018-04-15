@@ -1,12 +1,10 @@
-import java.io.{BufferedOutputStream, File, FileOutputStream}
-import java.net.URL
+import java.io.File
 
-import scala.io.Source.fromURL
 import ammonite.ops.pwd
 
 import sys.process._
 import org.rauschig.jarchivelib.{ArchiveFormat, ArchiverFactory, CompressionType}
-import com.typesafe.scalalogging.{LazyLogging, Logger}
+import com.typesafe.scalalogging.{LazyLogging}
 
 class SourcesUtility {
 }
@@ -53,7 +51,12 @@ object SourcesUtility extends LazyLogging {
 
 
     val archiver = ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP)
-    archiver.extract(archive, destination)
+    try {
+      archiver.extract(archive, destination)
+    } catch {
+      case e: Exception =>
+        logger.info(e.getMessage)
+    }
 
     logger.info(s"downloaded and unarchived $name-$ver package")
   }

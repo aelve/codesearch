@@ -1,5 +1,4 @@
 import ammonite.ops._
-import com.typesafe.scalalogging.{LazyLogging, Logger}
 
 object Main {
 
