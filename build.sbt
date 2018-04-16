@@ -1,18 +1,4 @@
-name := "codesearch"
+lazy val root = Builder.root
 
-version := "0.1"
-
-scalaVersion := "2.12.4"
-
-libraryDependencies ++= Seq(
-  "com.github.scopt" %% "scopt" % "3.7.0" ,
-  "com.lihaoyi" %% "ammonite-ops" % "1.0.3",
-  "org.rauschig" % "jarchivelib" % "0.7.1",
-  "io.suzaku" %% "boopickle" % "1.3.0",
-  "commons-io" % "commons-io" % "2.6",
-  "com.typesafe.scala-logging" %% "scala-logging" % "3.8.0",
-  "ch.qos.logback" % "logback-classic" % "1.1.2"
-)
-
-assemblyJarName in assembly := "codesearch.jar"
-assemblyOutputPath in assembly := baseDirectory.value / "../codesearch.jar"
+lazy val core = Builder.core
+lazy val webServer = Builder.webServer
