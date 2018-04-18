@@ -1,10 +1,12 @@
+package codesearch.core.utilities
+
 import java.io.File
 
 import ammonite.ops.pwd
-
-import sys.process._
+import com.typesafe.scalalogging.LazyLogging
 import org.rauschig.jarchivelib.{ArchiveFormat, ArchiverFactory, CompressionType}
-import com.typesafe.scalalogging.{LazyLogging}
+
+import scala.sys.process._
 
 class SourcesUtility {
 }
@@ -62,6 +64,6 @@ object SourcesUtility extends LazyLogging {
   }
 
   def downloadFile(srcURL: String, dstFile: File): Unit = {
-    val s = s"curl -o ${dstFile.getPath} $srcURL" !!
+    s"curl -o ${dstFile.getPath} $srcURL" !!
   }
 }

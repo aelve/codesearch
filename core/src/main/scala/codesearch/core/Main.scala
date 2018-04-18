@@ -1,4 +1,10 @@
-import ammonite.ops._
+package codesearch.core
+
+import java.io.ByteArrayOutputStream
+
+import sys.process._
+
+import ammonite.ops.{FilePath, pwd}
 
 object Main {
 
@@ -22,8 +28,14 @@ object Main {
   def main(args: Array[String]): Unit = {
     parser.parse(args, Config()) foreach { c =>
       if (c.updatePackages) {
-        SourcesUtility.update(c.downloadIndex)
+        utilities.SourcesUtility.update(c.downloadIndex)
       }
     }
+  }
+
+  def csearch(query: String): String = {
+    val baos = new ByteArrayOutputStream()
+    s"csearch '$query'" #> baos !!;
+    baos.toString
   }
 }

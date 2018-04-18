@@ -1,3 +1,5 @@
+package codesearch.core.utilities
+
 import sys.process._
 import java.io._
 import java.net.URL
