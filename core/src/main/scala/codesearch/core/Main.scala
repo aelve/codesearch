@@ -34,8 +34,6 @@ object Main {
   }
 
   def csearch(query: String): String = {
-    val baos = new ByteArrayOutputStream()
-    s"csearch '$query'" #> baos !!;
-    baos.toString
+    Seq("csearch", query).!!;
   }
 }
