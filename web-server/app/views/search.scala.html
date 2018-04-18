@@ -1,4 +1,4 @@
-@(result: Seq[String])
+@(result: Seq[(String, String)])
 
 <!doctype html>
 
@@ -14,8 +14,8 @@
   </head>
 
   <body>
-      @for(link <- result) {
-	<a href=@link>@link</a> <br>
+      @for((link, nLine) <- result) {
+          <a href=@link>@link</a>:@nLine  <br>
       }
   </body>
 

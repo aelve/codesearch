@@ -35,13 +35,26 @@ object Main {
 
   def csearch(query: String): Seq[String] = {
     val answer = Seq("csearch", "-n", query).!!
-    answer.split('\n').map(toHackageLink)
+    answer.split('\n').map(toHackageLink).filterNot(_._1.isEmpty)
   }
 
-  def toHackageLink(uri: String): String = {
-    val dirs = uri.split('/').drop(8)
-    val suff = dirs.drop(1).mkString("/").split(".hs")(0)
-    val path = s"${dirs(0)}/src/$suff"
-    s"https://hackage.haskell.org/package/$path.hs"
+  def toHackageLink(uri: String): (String, String) = {
+
+    val elems: Seq[String] = uri.split(':')
+    if (elems.length < 2) {
+      print(s"bad uri: $uri")
+      ("", "")
+    } else {
+      val pathSeq: Seq[String] = elems.head.split('/').drop(8)
+      val nLine = elems.drop(1).head
+      pathSeq.headOption match {
+        case None =>
+          print(s"bad uri: $uri")
+          ("", "")
+        case Some(verName) =>
+          val remPath = pathSeq.drop(1).mkString("/")
+          (s"https://hackage.haskell.org/package/$verName/src/$remPath", nLine)
+      }
+    }
   }
 }
