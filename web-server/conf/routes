@@ -1,0 +1,6 @@
+GET     /                         codesearch.web.controllers.Application.index
+
+GET     /versionedAssets/*file    controllers.Assets.versioned(file)
+
+GET     /search                   codesearch.web.controllers.Searcher.index(query: String ?= "")
+

@@ -1,6 +1,8 @@
 import sbt.Keys._
 import sbt._
 import sbtassembly.AssemblyKeys._
+import play.sbt.PlayImport._
+import play.sbt.PlayScala
 import sbtassembly.AssemblyPlugin.autoImport.{assemblyJarName, assemblyOutputPath}
 
 object Builder {
@@ -28,7 +30,6 @@ object Builder {
     scalacOptions in (Compile, console) -= "-Ywarn-unused-import",
     scalacOptions in (Compile, doc) ++= Seq("-diagrams", "-implicits"),
     scalacOptions in Test ++= Seq("-Yrangepos"),
-    test in assembly := {}
   )
 
   lazy val commonDeps = Seq(
@@ -52,16 +53,21 @@ object Builder {
     .settings(commonSettings ++ commonDeps)
     .settings(
       name := "codesearch-web-server",
+      libraryDependencies ++= Seq(
+        guice,
+        "org.webjars"     % "bootstrap"        % "4.0.0",
+        "javax.inject"    % "javax.inject"     % "1"
+      )
     )
     .dependsOn(core)
+    .enablePlugins(PlayScala)
 
-  lazy val root = Project(id = "scavenger", base = file("."))
+  lazy val root = Project(id = "codesearch", base = file("."))
     .aggregate(core, webServer)
     .dependsOn(core, webServer)
     .settings(commonSettings)
     .settings(
       name := "Codesearch",
-//      mainClass in assembly := Some("org.aossie.scavenger.CLI"),
       assemblyJarName in assembly := "codesearch.jar",
       assemblyOutputPath in assembly := baseDirectory.value / "../codesearch.jar"
     )

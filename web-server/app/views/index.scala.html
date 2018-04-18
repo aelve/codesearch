@@ -1,0 +1,31 @@
+@()
+
+<!doctype html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("lib/bootstrap/css/bootstrap.min.css")">
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/main.css")">
+
+        <title>Codesearch</title>
+    </head>
+    <body>
+        <h1 class="text-center">Almost like hoogle, but with regexps</h1>
+
+        <div class="col-lg-6 mx-auto bg-dark p-3 text-center justify-content-center">
+
+            <form action="search" method="get">
+                <div class="input-group">
+                        <input type="text" class="form-control" name="query" placeholder="Search for...">
+                        <span class="input-group-btn">
+                            <input class="btn btn-secondary" type="submit" value="Go!">
+                        </span>
+                </div>
+            </form>
+        </div>
+
+    </body>
+</html>
