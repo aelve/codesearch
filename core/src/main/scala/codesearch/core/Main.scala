@@ -33,14 +33,15 @@ object Main {
     }
   }
 
-  def csearch(query: String): String = {
+  def csearch(query: String): Seq[String] = {
     val answer = Seq("csearch", "-n", query).!!
-    answer.split('\n').map(toHackageLink).mkString("")
+    answer.split('\n').map(toHackageLink)
   }
 
   def toHackageLink(uri: String): String = {
-    val dirs = uri.split('/').drop(7)
-    val path = s"${dirs(0)}/src/${dirs.drop(1).mkString("/")}"
-    s"<a href=https://hackage.haskell.org/package/$path></a><br>"
+    val dirs = uri.split('/').drop(8)
+    val suff = dirs.drop(1).mkString("/").split(".hs")(0)
+    val path = s"${dirs(0)}/src/$suff"
+    s"https://hackage.haskell.org/package/$path.hs"
   }
 }
