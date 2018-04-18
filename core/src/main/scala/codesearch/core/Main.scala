@@ -33,7 +33,8 @@ object Main {
     }
   }
 
-  def csearch(query: String): String = {
-    Seq("csearch", query).!!;
+  def csearch(query: String): Seq[String] = {
+    val answer = Seq("csearch", query).!!
+    answer.split('\n')
   }
 }
