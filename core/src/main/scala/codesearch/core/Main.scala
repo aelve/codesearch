@@ -35,6 +35,12 @@ object Main {
 
   def csearch(query: String): String = {
     val answer = Seq("csearch", "-n", query).!!
-    answer
+    answer.split('\n').map(toHackageLink).mkString("")
+  }
+
+  def toHackageLink(uri: String): String = {
+    val dirs = uri.split('/').drop(7)
+    val path = s"${dirs(0)}/src/${dirs.drop(1).mkString("/")}"
+    s"<a href=https://hackage.haskell.org/package/$path></a><br>"
   }
 }
