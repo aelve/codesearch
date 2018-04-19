@@ -33,8 +33,8 @@ object Main {
     }
   }
 
-  def csearch(query: String): Seq[String] = {
-    val answer = Seq("csearch", "-n", query).!!
+  def csearch(query: String): Seq[(String, String)] = {
+    val answer = (Seq("csearch", "-n", query) #| Seq("head", "-1000")) .!!
     answer.split('\n').map(toHackageLink).filterNot(_._1.isEmpty)
   }
 
