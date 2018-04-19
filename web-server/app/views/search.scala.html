@@ -1,4 +1,6 @@
-@(result: Seq[(String, String)])
+@import codesearch.core.utilities.PackageResult
+
+@(packages: Seq[PackageResult])
 
 <!doctype html>
 
@@ -14,8 +16,9 @@
   </head>
 
   <body>
-      @for((link, nLine) <- result) {
-          <a href=@link>@link</a>:@nLine  <br>
+      @for(pack <- packages) {
+          @pack.verName : @pack.results.size occurrencies <br>
+          @*<a href=@link>@link</a>:@nLine  <br>*@
       }
   </body>
 
