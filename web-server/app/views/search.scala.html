@@ -17,10 +17,10 @@
 
   <body>
       @for(pack <- packages) {
-          <h1 class="display-4">@pack.verName : @pack.results.size occurrencies</h1> <br>
+          <h3 class="display-6">@pack.verName : @pack.results.size occurrencies</h3> <br>
 
           @for(result <- pack.results) {
-              <h3 class="display-4"><a href=@result.link>@result.link</a>:@result.nLine </h3>
+	      <a href=@result.link>@result.link</a>:@result.nLine <br>
           }
           <br>
       }
