@@ -4,6 +4,7 @@ import sbtassembly.AssemblyKeys._
 import play.sbt.PlayImport._
 import play.sbt.PlayScala
 import sbtassembly.AssemblyPlugin.autoImport.{assemblyJarName, assemblyOutputPath}
+import sbtassembly._
 
 object Builder {
   lazy val commonSettings = Seq(
@@ -57,7 +58,25 @@ object Builder {
         guice,
         "org.webjars"     % "bootstrap"        % "4.0.0",
         "javax.inject"    % "javax.inject"     % "1"
-      )
+      ),
+      fullClasspath in assembly += Attributed.blank(PlayKeys.playPackageAssets.value),
+      assemblyMergeStrategy in assembly := {
+       case manifest if manifest.contains("MANIFEST.MF") =>
+          // We don't need manifest files since sbt-assembly will create
+          // one with the given settings
+          MergeStrategy.discard
+        case PathList("org", "scalatools", "testing", xs @ _*) =>
+          MergeStrategy.first
+        case referenceOverrides if referenceOverrides.contains("reference-overrides.conf") =>
+          MergeStrategy.concat
+        case "application.conf" => MergeStrategy.concat
+        case "logback.xml"      => MergeStrategy.first
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+      },
+      assemblyJarName in assembly := "codesearch-server.jar",
+      assemblyOutputPath in assembly := baseDirectory.value / "../codesearch-server.jar"
     )
     .dependsOn(core)
     .enablePlugins(PlayScala)
