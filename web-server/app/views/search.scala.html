@@ -8,26 +8,30 @@
 
   <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval' http://www.google.com">
 
     <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("lib/bootstrap/css/bootstrap.min.css")">
-    <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/main.css")">
+    <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("highlight.js/styles/default.css")">
+
+    <script src="@routes.Assets.versioned("highlight.js/highlight.min.js")"></script>
+    <script src="@routes.Assets.versioned("highlight.js/haskell.min.js")"></script>
+
+    <script>hljs.initHighlightingOnLoad();</script>
 
     <title>Title</title>
   </head>
 
   <body>
+	  <main class="wrapper">
+      <section class="container">
       @for(pack <- packages) {
-          <h3 class="display-6">@pack.verName : @pack.results.size occurrencies</h3> <br>
-
+          <h3 class="display-6">@pack.verName : @pack.results.size occurrencies</h3>
           @for(result <- pack.results) {
-              <a href=@result.link>@result.link</a>:@result.nLine <br>
-              @for(line <- result.ctxt) {
-                  line
-              }
-              <br>
+              <a href=@result.link>@result.link</a>:@result.nLine
+	      <pre> <code class="haskell hljs">@result.ctxt.mkString("\n")</code> </pre>
           }
-          <br>
       }
+      </section>
   </body>
 
 </html>
