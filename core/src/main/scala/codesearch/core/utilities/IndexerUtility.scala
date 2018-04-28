@@ -4,7 +4,7 @@ import scala.collection.mutable
 import scala.io.Source
 import sys.process._
 
-case class Result(link: String, nLine: String, ctxt: Seq[String])
+case class Result(link: String, firstLine: Int, nLine: Int, ctxt: Seq[String])
 case class PackageResult(verName: String, results: Seq[Result])
 
 object IndexerUtility {
@@ -32,29 +32,32 @@ object IndexerUtility {
           println(s"bad uri: $uri")
           None
         case Some(verName) =>
-          val rows = extractRows(fullPath, nLine.toInt)
+          val (firstLine, rows) = extractRows(fullPath, nLine.toInt)
 
           val remPath = pathSeq.drop(1).mkString("/")
 
           Some((verName, Result(
               s"https://hackage.haskell.org/package/$verName/src/$remPath",
-              nLine,
+              firstLine,
+              nLine.toInt - 1,
               rows
           )))
       }
     }
   }
 
-  def extractRows(path: String, i: Int): Seq[String] = {
+  def extractRows(path: String, i: Int): (Int, Seq[String]) = {
     val lines = Source.fromFile(path).getLines
     val result = mutable.Buffer[String]()
+    var firstLine = -1
     lines.zipWithIndex.takeWhile(_._2 <= i+1).foreach {
       case (line, ind) =>
-        if (ind >= i - 1) {
+        if (ind >= i - 2) {
+          if (firstLine < 0) firstLine = ind
           result.append(line)
         }
     }
-    result
+    (firstLine, result)
   }
 
 }
