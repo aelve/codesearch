@@ -12,6 +12,7 @@ object Builder {
     organization := "org.aelve",
     version := "0.1",
     scalaVersion := "2.12.4",
+    resolvers += Resolver.sbtPluginRepo("releases"),
 
     scalacOptions := Seq(
       "-encoding",
@@ -48,6 +49,10 @@ object Builder {
   lazy val core = Project(id = "core", base = file("core"))
     .settings(commonSettings ++ commonDeps)
     .settings(name := "codesearch-core")
+    .settings(
+      assemblyJarName in assembly := "codesearch-core.jar",
+      assemblyOutputPath in assembly := baseDirectory.value / "../../codesearch-core.jar"
+    )
 
 
   lazy val webServer = Project(id = "web-server", base = file("web-server"))
@@ -76,7 +81,7 @@ object Builder {
           oldStrategy(x)
       },
       assemblyJarName in assembly := "codesearch-server.jar",
-      assemblyOutputPath in assembly := baseDirectory.value / "../codesearch-server.jar"
+      assemblyOutputPath in assembly := baseDirectory.value / "../../codesearch-server.jar"
     )
     .dependsOn(core)
     .enablePlugins(PlayScala)
