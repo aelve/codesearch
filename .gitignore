@@ -25,5 +25,6 @@ project/plugins/project/
 .idea
 out
 
+*.jar
 # End of https://www.gitignore.io/api/sbt,scala
 
