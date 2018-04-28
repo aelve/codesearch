@@ -30,10 +30,13 @@ object VersionsUtility extends LazyLogging {
   def updateIndex(): Unit = {
     logger.info("update index")
 
-    new URL(INDEX_LINK) #> INDEX_SOURCE_GZ.toIO !!
-
     val archive = INDEX_SOURCE_GZ.toIO
     val destination = INDEX_SOURCE_DIR.toIO
+
+    archive.getParentFile.mkdirs()
+    destination.mkdirs()
+
+    new URL(INDEX_LINK) #> archive !!
 
     val archiver = ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP)
     archiver.extract(archive, destination)
