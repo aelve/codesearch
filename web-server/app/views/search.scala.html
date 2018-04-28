@@ -14,11 +14,15 @@
     <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("lib/highlightjs/styles/atom-one-light.css")">
 
     <script src="@routes.Assets.versioned("lib/highlightjs/highlight.min.js")"></script>
+    <script src="@routes.Assets.versioned("highlightjs-line-numbers.js/dist/highlightjs-line-numbers.min.js")"></script>
+    <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/main.css")">
     <script src="@routes.Assets.versioned("lib/highlightjs/languages/haskell.min.js")"></script>
 
     <script>hljs.initHighlightingOnLoad();</script>
+    <script>hljs.initLineNumbersOnLoad();</script>
 
     <title>Title</title>
+
   </head>
 
   <body>
@@ -28,7 +32,7 @@
           <h3 class="display-6">@pack.verName : @pack.results.size occurrencies</h3>
           @for(result <- pack.results) {
               <a href=@result.link>@result.link</a>:@result.nLine
-	      <pre> <code class="haskell hljs">@result.ctxt.mkString("\n")</code> </pre>
+              <pre> <code class="haskell hljs">@for((line, ind) <- result.ctxt.zipWithIndex) {<table class="hljs-ln"><tr><td class="hljs-ln-numbers"><div class="hljs-ln-line hljs-ln-n" data-line-number=@{ind+result.firstLine}></div></td><td class="hljs-ln-code"><div class="hljs-ln-line">@line</div></td></tr></table>} </code> </pre>
           }
       }
       </section>
