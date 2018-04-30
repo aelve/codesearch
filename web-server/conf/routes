@@ -1,6 +1,8 @@
 GET     /                         codesearch.web.controllers.Application.index
 
+GET     /haskell                  codesearch.web.controllers.Application.index_haskell
+GET     /haskell/search           codesearch.web.controllers.Searcher.index(query: String ?= "", insensitive: String ?= "", precise: String ?= "", sources: String ?= "on")
+
 GET     /versionedAssets/*file    controllers.Assets.versioned(file)
 
-GET     /search                   codesearch.web.controllers.Searcher.index(query: String ?= "", insensitive: String ?= "", precise: String ?= "", sources: String ?= "")
 

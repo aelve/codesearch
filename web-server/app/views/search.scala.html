@@ -58,10 +58,9 @@
       </section>
       <section class="container">
       @for(pack <- packages) {
-          <h3 class="display-6">@pack.verName : @pack.results.size occurrences</h3>
+          <h5 class="display-7">@pack.verName : @pack.results.size occurrences</h5>
           @for(result <- pack.results) {
               <a href=@result.link>@result.link</a>
-
 
               <pre data-start=@(result.firstLine) data-line=@(result.nLine - result.firstLine + 1)><code class="language-haskell line-numbers">@result.ctxt.mkString("\n")</code></pre>
           }
