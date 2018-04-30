@@ -51,7 +51,7 @@ object Builder {
     .settings(name := "codesearch-core")
     .settings(
       assemblyJarName in assembly := "codesearch-core.jar",
-      assemblyOutputPath in assembly := baseDirectory.value / "../../codesearch-core.jar"
+      assemblyOutputPath in assembly := baseDirectory.value / "../codesearch-core.jar"
     )
 
 
@@ -82,7 +82,7 @@ object Builder {
           oldStrategy(x)
       },
       assemblyJarName in assembly := "codesearch-server.jar",
-      assemblyOutputPath in assembly := baseDirectory.value / "../../codesearch-server.jar"
+      assemblyOutputPath in assembly := baseDirectory.value / "../codesearch-server.jar"
     )
     .dependsOn(core)
     .enablePlugins(PlayScala)
