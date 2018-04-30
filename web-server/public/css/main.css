@@ -1,26 +1,14 @@
-.hljs-ln {border-collapse:collapse}
-.hljs-ln td{padding:0}
-.hljs-ln-n :before{content:attr(data-line-number)}
-
-td.hljs-ln-numbers {
- text-align: center;
- color: #ccc;
- border-right: 1px solid #999;
- vertical-align: top;
- padding-right: 5px;
-
- -webkit-touch-callout: none;
- -webkit-user-select: none;
- -khtml-user-select: none;
- -moz-user-select: none;
- -ms-user-select: none;
- user-select: none;
-}
-td.hljs-ln-code {
-  padding-left: 10px;
+/* fight weird background change in the default style */
+.token.operator {
+    background: inherit;
 }
 
-code {
-  white-space: pre-wrap;
-  overflow: auto;
+/* don't highlight lines with a gradient */
+.line-highlight {
+    background: hsla(24,20%,50%,.2);
+}
+
+/* fix line number alignment (see https://github.com/PrismJS/prism/issues/1132) */
+pre.line-numbers code {
+    display: inline-block;
 }

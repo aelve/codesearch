@@ -62,7 +62,7 @@ object Builder {
       libraryDependencies ++= Seq(
         guice,
         "org.webjars"       % "bootstrap"        % "4.1.0",
-        "org.webjars"       % "highlightjs"      % "9.8.0",
+        "org.webjars"       % "prismjs"          % "1.6.0",
         "javax.inject"      % "javax.inject"     % "1"
       ),
       fullClasspath in assembly += Attributed.blank(PlayKeys.playPackageAssets.value),
