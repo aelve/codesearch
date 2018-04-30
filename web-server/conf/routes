@@ -2,5 +2,5 @@ GET     /                         codesearch.web.controllers.Application.index
 
 GET     /versionedAssets/*file    controllers.Assets.versioned(file)
 
-GET     /search                   codesearch.web.controllers.Searcher.index(query: String ?= "")
+GET     /search                   codesearch.web.controllers.Searcher.index(query: String ?= "", insensitive: String ?= "", precise: String ?= "", sources: String ?= "")
 

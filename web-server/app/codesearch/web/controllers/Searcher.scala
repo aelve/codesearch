@@ -11,7 +11,13 @@ class Searcher @Inject() (
   implicit val executionContext: ExecutionContext
 ) extends InjectedController {
 
-  def index(query: String) = Action { implicit request =>
-    Ok(views.html.search(IndexerUtility.csearch(query)))
+  def index(query: String, insensitive: String, precise: String, sources: String) = Action { implicit request =>
+    Ok(views.html.search(
+      IndexerUtility.csearch(query, insensitive == "on", precise == "on", sources == "on"),
+      query,
+      insensitive == "on",
+      precise == "on",
+      sources == "on"
+    ))
   }
 }

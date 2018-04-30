@@ -9,8 +9,27 @@ case class PackageResult(verName: String, results: Seq[Result])
 
 object IndexerUtility {
 
-  def csearch(query: String): Seq[PackageResult] = {
-    val answer = (Seq("csearch", "-n", query) #| Seq("head", "-1000")) .!!
+  private val SPECIAL_CHARS = "$^*+().?|"
+
+  def csearch(searchQuery: String, insensitive: Boolean, precise: Boolean, sources: Boolean): Seq[PackageResult] = {
+    val query: String = {
+      if (precise) {
+        hideSymbols(searchQuery)
+      } else {
+        searchQuery
+      }
+    }
+
+    val args: mutable.ListBuffer[String] = mutable.ListBuffer("csearch", "-n")
+    if (insensitive) {
+      args.append("-i")
+    }
+    if (sources) {
+      args.append("-f", ".*\\.(hs|lhs|hsc|hs-boot|lhs-boot)$")
+    }
+    args.append(query)
+
+    val answer = (args #| Seq("head", "-1000")) .!!
 
     answer.split('\n').flatMap(toHackageLink).groupBy(_._1).map {
       case (verName, results) =>
@@ -60,4 +79,12 @@ object IndexerUtility {
     (firstLine, result)
   }
 
+  def hideSymbols(str: String): String = {
+    str.foldRight("") {
+      case (c, res) if SPECIAL_CHARS contains c =>
+        s"\\$c$res"
+      case (c, res) =>
+        s"$c$res"
+    }
+  }
 }
