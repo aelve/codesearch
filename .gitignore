@@ -28,3 +28,5 @@ out
 *.jar
 # End of https://www.gitignore.io/api/sbt,scala
 
+*.DS_Store
+
