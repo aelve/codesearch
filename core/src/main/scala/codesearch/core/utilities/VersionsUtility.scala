@@ -1,25 +1,15 @@
 package codesearch.core.utilities
 
 import sys.process._
-import java.io._
 import java.net.URL
-import java.nio.ByteBuffer
 
-import org.apache.commons.io.IOUtils
-import boopickle.Default._
 import ammonite.ops.{Path, pwd}
-import com.typesafe.scalalogging.LazyLogging
 import org.rauschig.jarchivelib.{ArchiveFormat, ArchiverFactory, CompressionType}
+import codesearch.core.model.Version
+import org.slf4j.{Logger, LoggerFactory}
 
-import scala.math.Ordered.orderingToOrdered
-
-case class Version(verString: String) extends Ordered[Version] {
-  val version: Iterable[Int] = verString.split('.').map(_.toInt)
-
-  override def compare(that: Version): Int = this.version compare that.version
-}
-
-object VersionsUtility extends LazyLogging {
+object VersionsUtility {
+  private val logger: Logger = LoggerFactory.getLogger(VersionsUtility.getClass)
 
   val INDEX_LINK: String = "http://hackage.haskell.org/packages/index.tar.gz"
   val INDEX_SOURCE_GZ: Path = pwd / 'data / "index.tar.gz"
@@ -42,7 +32,7 @@ object VersionsUtility extends LazyLogging {
     archiver.extract(archive, destination)
   }
 
-  def updateVersions(): Map[String, Version] = {
+  def getLastVersions: Map[String, Version] = {
     logger.info("update Versions")
 
     val indexDir = VersionsUtility.INDEX_SOURCE_DIR.toIO
@@ -54,35 +44,6 @@ object VersionsUtility extends LazyLogging {
       )
     ).groupBy(_._1).mapValues(_.map(_._2).max)
 
-    saveLastVersions(lastVersions)
-
     lastVersions
-
-  }
-
-
-  def loadCurrentVersions(): Map[String, Version] = {
-    try {
-      val fis = new FileInputStream(VERSIONS_FILE.toIO)
-
-      val result = Unpickle[Map[String, Version]]
-        .fromBytes(ByteBuffer.wrap(IOUtils.toByteArray(fis)))
-      fis.close()
-
-      result
-    }
-    catch {
-      case e: Exception =>
-        println(e.getMessage)
-        Map()
-    }
-  }
-
-  def saveLastVersions(lastVersions: Map[String, Version]): Unit = {
-    val buf = Pickle.intoBytes(lastVersions)
-
-    val oos = new FileOutputStream(VERSIONS_FILE.toIO)
-    oos.write(buf.array())
-    oos.close()
   }
 }
