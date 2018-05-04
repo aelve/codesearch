@@ -1,7 +1,8 @@
 package codesearch.web.controllers
 
-import javax.inject.{Inject, Named}
-import play.api.mvc.{Action, InjectedController}
+import codesearch.core.index.{CratesIndex, HackageIndex}
+import javax.inject.Inject
+import play.api.mvc.InjectedController
 
 import scala.concurrent.ExecutionContext
 
@@ -10,11 +11,15 @@ class Application @Inject() (
 ) extends InjectedController {
 
   def haskell = Action.async { implicit request =>
-    HackageDB.updated.map(updated => Ok(views.html.haskell(updated)))
+    HackageIndex.updated.map(updated => Ok(views.html.haskell(updated)))
+  }
+
+  def rust = Action.async { implicit request =>
+    CratesIndex.updated.map(updated => Ok(views.html.rust(updated)))
   }
 
   def index = Action.async { implicit request =>
-    HackageDB.updated.map(updated => Ok(views.html.index(updated)))
+    HackageIndex.updated.map(updated => Ok(views.html.index(updated)))
   }
 
 }
