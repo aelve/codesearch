@@ -9,13 +9,13 @@ import slick.sql.SqlProfile.ColumnOption.SqlType
 
 class DefaultTable(tag: Tag, tableName: String)
   extends Table[(String, String,  Timestamp)](tag, tableName) {
-  def packageName = column[String]("PACKAGE_NAME", O.PrimaryKey)
-  def lastVersion = column[String]("LAST_VERSION")
+  def packageName = column[String](s"${tableName}_PACKAGE_NAME", O.PrimaryKey)
+  def lastVersion = column[String](s"${tableName}_VERSION")
 
-  def updated = column[Timestamp]("LAST_UPDATE")
+  def updated = column[Timestamp](s"${tableName}_UPDATED")
 
   def * = (packageName, lastVersion, updated)
 
-  def indexTimestamps = index("INDEX_UPDATED", updated)
+  def indexTimestamps = index(s"${tableName}_LAST_UPDATED", updated)
 
 }
