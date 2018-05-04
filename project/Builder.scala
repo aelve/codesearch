@@ -40,9 +40,10 @@ object Builder {
       "com.lihaoyi" %% "ammonite-ops" % "1.0.3",
       "org.rauschig" % "jarchivelib" % "0.7.1",
       "commons-io" % "commons-io" % "2.6",
-      "com.typesafe.scala-logging" %% "scala-logging" % "3.8.0",
       "javax.inject"      % "javax.inject"     % "1",
-      "org.slf4j" % "slf4j-simple" % "1.7.25"
+      "ch.qos.logback" % "logback-classic" % "1.2.3",
+
+      "com.typesafe.play" %% "play-json" % "2.6.9"
     )
   )
 
