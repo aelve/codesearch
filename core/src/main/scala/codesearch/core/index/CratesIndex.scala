@@ -9,6 +9,9 @@ import play.api.libs.json._
 import codesearch.core.util.Helper
 import codesearch.core.model
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+
 object CratesIndex extends Index with CratesDB {
   private val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
@@ -44,23 +47,25 @@ object CratesIndex extends Index with CratesDB {
       None
     } else {
       val fullPath = elems.head
-      val pathSeq: Seq[String] = elems.head.split('/').drop(8)
-      val nLine = elems.drop(1).head
+      val pathSeq: Seq[String] = elems.head.split('/').drop(6)
+      val nLine = elems.drop(1).mkString(":")
       pathSeq.headOption match {
         case None =>
           println(s"bad uri: $uri")
           None
-        case Some(verName) =>
-          val (firstLine, rows) = Helper.extractRows(fullPath, nLine.toInt)
+        case Some(packageName) =>
+          Await.result(CratesIndex.verByName(packageName), Duration.Inf).map { verName => {
+            val (firstLine, rows) = Helper.extractRows(fullPath, nLine.toInt)
 
-          val remPath = pathSeq.drop(1).mkString("/")
+            val remPath = pathSeq.drop(1).mkString("/")
 
-          Some((verName, Result(
-            s"nope", // TOOD:
-            firstLine,
-            nLine.toInt - 1,
-            rows
-          )))
+            (verName, Result(
+              s"https://docs.rs/crate/$packageName/$verName/source/$remPath",
+              firstLine,
+              nLine.toInt - 1,
+              rows
+            ))
+          } }
       }
     }
   }
