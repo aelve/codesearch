@@ -59,7 +59,7 @@ object CratesSources extends Sources[CratesTable] {
       logger.info("DB updated")
       future
     } catch {
-      case e: IOException =>
+      case e: Exception =>
         Future[Int] {
           logger.info(e.getMessage)
           0
