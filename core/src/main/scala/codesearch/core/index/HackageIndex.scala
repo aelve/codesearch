@@ -53,7 +53,7 @@ object HackageIndex extends Index with HackageDB {
     } else {
       val fullPath = elems.head
       val pathSeq: Seq[String] = elems.head.split('/').drop(8)
-      val nLine = elems.drop(1).mkString(":")
+      val nLine = elems.drop(1).head
       pathSeq.headOption match {
         case None =>
           println(s"bad uri: $uri")

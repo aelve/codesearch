@@ -48,7 +48,7 @@ object CratesIndex extends Index with CratesDB {
     } else {
       val fullPath = elems.head
       val pathSeq: Seq[String] = elems.head.split('/').drop(6)
-      val nLine = elems.drop(1).mkString(":")
+      val nLine = elems.drop(1).head
       pathSeq.headOption match {
         case None =>
           println(s"bad uri: $uri")
