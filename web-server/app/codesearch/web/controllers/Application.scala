@@ -19,7 +19,9 @@ class Application @Inject() (
   }
 
   def index = Action.async { implicit request =>
-    HackageIndex.updated.map(updated => Ok(views.html.index(updated)))
+    HackageIndex.updated.zip(CratesIndex.updated).map {
+      case (updatedHaskell, updatedCrates) =>
+        Ok(views.html.index(updatedHaskell, updatedCrates))
+    }
   }
-
 }

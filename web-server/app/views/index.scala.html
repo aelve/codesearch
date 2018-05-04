@@ -1,5 +1,5 @@
 @import java.sql.Timestamp
-@(updated: Timestamp)
+@(updatedHaskell: Timestamp, updatedRust: Timestamp)
 
 <!doctype html>
 
@@ -16,7 +16,10 @@
     </head>
     <body>
         <span class="lean h3"><a href="/haskell">Haskell</a>
-            @updated
+            @updatedHaskell
+        </span>
+        <span class="lean h3"><a href="/rust">Rust</a>
+            @updatedRust
         </span>
     </body>
 </html>
