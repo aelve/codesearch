@@ -1,12 +1,14 @@
 package codesearch.core
 
 import ammonite.ops.{FilePath, pwd}
-import codesearch.core.db.HackageDB
-import codesearch.core.utilities.VersionsUtility
+import codesearch.core.index.{CratesIndex, CratesSources, HackageIndex, HackageSources}
+import codesearch.core.db.{CratesDB, HackageDB}
 import org.slf4j.{Logger, LoggerFactory}
 
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object Main {
   private val logger: Logger = LoggerFactory.getLogger(Main.getClass)
@@ -38,16 +40,23 @@ object Main {
 
     parser.parse(args, Config()) foreach { c =>
       if (c.initDB) {
-        val future = HackageDB.initDB()
+        val future = Future.sequence(Seq(
+          HackageDB.initDB(), CratesDB.initDB()))
         Await.result(future, Duration.Inf)
       }
 
       if (c.downloadIndex) {
-        VersionsUtility.updateIndex()
+        HackageIndex.updateIndex()
+        CratesIndex.updateIndex()
       }
 
       if (c.updatePackages) {
-        utilities.SourcesUtility.update()
+        val future = Future.sequence(Seq(
+          CratesSources.update(), HackageSources.update()))
+            .map(_.sum)
+        val cntUpdated = Await.result(future, Duration.Inf)
+
+        logger.info(s"updated: $cntUpdated")
       }
     }
   }

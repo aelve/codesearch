@@ -2,27 +2,26 @@ package codesearch.core.db
 
 import java.sql.Timestamp
 
+import codesearch.core.model.{CratesTable, DefaultTable, HackageTable}
+import slick.lifted.TableQuery
 import slick.jdbc.PostgresProfile.api._
-import codesearch.core.model._
 
 import scala.concurrent.Future
+
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.slf4j.{Logger, LoggerFactory}
 
-object HackageDB {
-  private val logger: Logger = LoggerFactory.getLogger(HackageDB.getClass)
-
-  val hackage = TableQuery[Hackage]
+trait DefaultDB[T <: DefaultTable] {
+  val table: TableQuery[T]
   val db = Database.forConfig("mydb")
 
   def insertOrUpdate(packageName: String, lastVersion: String): Future[Int] = {
-    val insOrUpdate = hackage
+    val insOrUpdate = table
       .insertOrUpdate((packageName, lastVersion, new Timestamp(System.currentTimeMillis())))
     db.run(insOrUpdate)
   }
 
   def updated: Future[Timestamp] = {
-    val act = hackage
+    val act = table
       .map(_.updated)
       .max
       .result
@@ -31,21 +30,21 @@ object HackageDB {
   }
 
   def getSize: Future[Int] = {
-    val act = hackage
+    val act = table
       .size
       .result
     db.run(act)
   }
 
   def verNames(): Future[Seq[(String, String)]] = {
-    val act = hackage
+    val act = table
       .map(row => (row.packageName, row.lastVersion))
       .result
     db.run(act)
   }
 
   def verByName(packageName: String): Future[Option[String]] = {
-    val act = hackage
+    val act = table
       .filter(_.packageName === packageName)
       .map(_.lastVersion)
       .result
@@ -54,6 +53,17 @@ object HackageDB {
   }
 
   def initDB() = {
-    db.run(hackage.schema.create)
+    db.run(table.schema.create)
   }
 }
+
+trait HackageDB extends DefaultDB[HackageTable] {
+  val table = TableQuery[HackageTable]
+}
+
+trait CratesDB extends DefaultDB[CratesTable] {
+  val table = TableQuery[CratesTable]
+}
+
+object HackageDB extends HackageDB
+object CratesDB extends CratesDB
