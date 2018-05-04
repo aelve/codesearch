@@ -9,7 +9,9 @@ import play.api.libs.json._
 import codesearch.core.util.Helper
 import codesearch.core.model
 
-import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
+
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
 
 object CratesIndex extends Index with CratesDB {
@@ -39,21 +41,24 @@ object CratesIndex extends Index with CratesDB {
     Map(seq: _*)
   }
 
-  def contentByURI(uri: String): Option[(String, Result)] = {
+  def contentByURI(uri: String): Future[Option[(String, Result)]] = {
     val elems: Seq[String] = uri.split(':')
     if (elems.length < 2) {
       println(s"bad uri: $uri")
-      None
+      Future {
+        None
+      }
     } else {
       val fullPath = elems.head
       val pathSeq: Seq[String] = elems.head.split('/').drop(6)
       val nLine = elems.drop(1).head
-      val versions = Map(Await.result(CratesIndex.verNames(), Duration.Inf): _*)
       pathSeq.headOption match {
         case None =>
           println(s"bad uri: $uri")
-          None
-        case Some(packageName) => versions.get(packageName).map { verName =>
+          Future {
+            None
+          }
+        case Some(packageName) => CratesIndex.verByName(packageName).map { optName => optName.map { verName =>
           val (firstLine, rows) = Helper.extractRows(fullPath, nLine.toInt)
 
           val remPath = pathSeq.drop(1).mkString("/")
@@ -64,7 +69,7 @@ object CratesIndex extends Index with CratesDB {
             nLine.toInt - 1,
             rows
           ))
-        }
+        } }
       }
     }
   }

@@ -11,14 +11,16 @@ class CratesSearcher @Inject() (implicit val executionContext: ExecutionContext
                                ) extends InjectedController {
 
   def index(query: String, insensitive: String, precise: String, sources: String) = Action.async { implicit request =>
-    CratesDB.updated.map(updated =>
+    CratesDB.updated
+      .zip(CratesSources.csearch(query, insensitive == "on", precise == "on", sources == "on"))
+    .map { case (updated, results) =>
       Ok(views.html.rust_search(updated,
-        CratesSources.csearch(query, insensitive == "on", precise == "on", sources == "on"),
+        results,
         query,
         insensitive == "on",
         precise == "on",
         sources == "on"
       ))
-    )
+    }
   }
 }
