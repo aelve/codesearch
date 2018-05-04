@@ -4,10 +4,10 @@ import sys.process._
 import java.net.URL
 
 import ammonite.ops.{Path, pwd}
-import codesearch.core.db.{DefaultDB, HackageDB}
+import codesearch.core.db.HackageDB
 import codesearch.core.util.Helper
 import org.rauschig.jarchivelib.{ArchiveFormat, ArchiverFactory, CompressionType}
-import codesearch.core.model.{HackageTable, Version}
+import codesearch.core.model.Version
 import org.slf4j.{Logger, LoggerFactory}
 
 object HackageIndex extends Index with HackageDB {

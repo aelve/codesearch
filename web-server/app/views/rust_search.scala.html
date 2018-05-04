@@ -1,0 +1,73 @@
+@import codesearch.core.index.PackageResult
+@import java.sql.Timestamp
+
+@(updated: Timestamp, packages: Seq[PackageResult], query: String, insensitive: Boolean, precise: Boolean, sources: Boolean)
+
+<!doctype html>
+
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval' http://www.google.com">
+
+        <script src="@routes.Assets.versioned("lib/prismjs/components/prism-core.min.js")"></script>
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("lib/prismjs/themes/prism.css")">
+
+        <script src="@routes.Assets.versioned("lib/prismjs/components/prism-haskell.min.js")"></script>
+
+        <script src="@routes.Assets.versioned("lib/prismjs/plugins/line-numbers/prism-line-numbers.min.js")"></script>
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("lib/prismjs/plugins/line-numbers/prism-line-numbers.css")">
+
+        <script src="@routes.Assets.versioned("lib/prismjs/plugins/line-highlight/prism-line-highlight.min.js")"></script>
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("lib/prismjs/plugins/line-highlight/prism-line-highlight.css")">
+
+
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("lib/bootstrap/css/bootstrap.min.css")">
+
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/main.css")">
+
+        <title>Codesearch</title>
+
+    </head>
+
+    <body>
+        <main class="wrapper">
+            <section class="container">
+                <div class="col-lg-6 mx-auto bg-white p-3 h7 justify-content-center">
+                    <form action="search" method="get">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="query" value="@query">
+                            <span class="input-group-btn">
+                                <input class="btn btn-secondary" type="submit" value="Go!">
+                            </span>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input type="checkbox" class="form-check-input" name="insensitive" id="insensitive-search" @(if (insensitive) "checked")>
+                            <label class="form-check-label" for="insensitive-search">Case-insensitive search</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input type="checkbox" class="form-check-input" name="precise" id="precise-match" @(if (precise) "checked")>
+                            <label class="form-check-label" for="precise-match">Precise match</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input type="checkbox" class="form-check-input" name="sources" id="sources-only" @(if (sources) "checked")>
+                            <label class="form-check-label" for="sources-only">Sources only</label>
+                        </div>
+                    </form>
+                </div>
+            </section>
+            <section class="container">
+                <span class="text-secondary">Index updated at: @updated</span>
+                @for(pack <- packages) {
+                    <h5 class="display-7">@pack.verName : @pack.results.size occurrences</h5>
+                    @for(result <- pack.results) {
+                        <a href=@result.link>@result.link</a>
+
+                        <pre data-start=@(result.firstLine) data-line=@(result.nLine - result.firstLine + 1)><code class="language-haskell line-numbers">@result.ctxt.mkString("\n")</code></pre>
+                    }
+                }
+            </section>
+    </body>
+
+</html>

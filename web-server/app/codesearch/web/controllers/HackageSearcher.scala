@@ -1,12 +1,12 @@
 package codesearch.web.controllers
 
+import codesearch.core.db.HackageDB
 import javax.inject.{Inject, Named}
 import play.api.mvc.{Action, InjectedController}
 
 import scala.concurrent.ExecutionContext
-import codesearch.core.index.IndexerUtility
 
-class Searcher @Inject() (
+class HackageSearcher @Inject() (
   implicit val executionContext: ExecutionContext
 ) extends InjectedController {
 

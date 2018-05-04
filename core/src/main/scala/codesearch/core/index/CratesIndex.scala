@@ -36,4 +36,32 @@ object CratesIndex extends Index with CratesDB {
     }.toSeq
     Map(seq: _*)
   }
+
+  def contentByURI(uri: String): Option[(String, Result)] = {
+    val elems: Seq[String] = uri.split(':')
+    if (elems.length < 2) {
+      println(s"bad uri: $uri")
+      None
+    } else {
+      val fullPath = elems.head
+      val pathSeq: Seq[String] = elems.head.split('/').drop(8)
+      val nLine = elems.drop(1).head
+      pathSeq.headOption match {
+        case None =>
+          println(s"bad uri: $uri")
+          None
+        case Some(verName) =>
+          val (firstLine, rows) = Helper.extractRows(fullPath, nLine.toInt)
+
+          val remPath = pathSeq.drop(1).mkString("/")
+
+          Some((verName, Result(
+            s"nope", // TOOD:
+            firstLine,
+            nLine.toInt - 1,
+            rows
+          )))
+      }
+    }
+  }
 }

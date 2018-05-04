@@ -10,6 +10,7 @@ trait Sources[VTable <: DefaultTable] {
   protected val indexAPI: Index with DefaultDB[VTable]
 
   def downloadSources(name: String, ver: String): Future[Int]
+  def csearch(searchQuery: String, insensitive: Boolean, precise: Boolean, sources: Boolean): Seq[PackageResult]
 
   def update(): Future[Int] = {
     val lastVersions = indexAPI.getLastVersions.mapValues(_.verString)
