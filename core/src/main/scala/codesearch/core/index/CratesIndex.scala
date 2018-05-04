@@ -49,23 +49,23 @@ object CratesIndex extends Index with CratesDB {
       val fullPath = elems.head
       val pathSeq: Seq[String] = elems.head.split('/').drop(6)
       val nLine = elems.drop(1).head
+      val versions = Map(Await.result(CratesIndex.verNames(), Duration.Inf): _*)
       pathSeq.headOption match {
         case None =>
           println(s"bad uri: $uri")
           None
-        case Some(packageName) =>
-          Await.result(CratesIndex.verByName(packageName), Duration.Inf).map { verName => {
-            val (firstLine, rows) = Helper.extractRows(fullPath, nLine.toInt)
+        case Some(packageName) => versions.get(packageName).map { verName =>
+          val (firstLine, rows) = Helper.extractRows(fullPath, nLine.toInt)
 
-            val remPath = pathSeq.drop(1).mkString("/")
+          val remPath = pathSeq.drop(1).mkString("/")
 
-            (verName, Result(
-              s"https://docs.rs/crate/$packageName/$verName/source/$remPath",
-              firstLine,
-              nLine.toInt - 1,
-              rows
-            ))
-          } }
+          (verName, Result(
+            s"https://docs.rs/crate/$packageName/$verName/source/$remPath",
+            firstLine,
+            nLine.toInt - 1,
+            rows
+          ))
+        }
       }
     }
   }
