@@ -1,4 +1,5 @@
-@()
+@import java.sql.Timestamp
+@(updated: Timestamp)
 
 <!doctype html>
 
@@ -14,6 +15,8 @@
         <title>Codesearch</title>
     </head>
     <body>
-        <span class="lean h3"><a href="/haskell">Haskell</a></span>
+        <span class="lean h3"><a href="/haskell">Haskell</a>
+            @updated
+        </span>
     </body>
 </html>

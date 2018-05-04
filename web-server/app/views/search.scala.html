@@ -1,6 +1,7 @@
-@import codesearch.core.utilities.PackageResult
+@import codesearch.core.index.PackageResult
+@import java.sql.Timestamp
 
-@(packages: Seq[PackageResult], query: String, insensitive: Boolean, precise: Boolean, sources: Boolean)
+@(updated: Timestamp, packages: Seq[PackageResult], query: String, insensitive: Boolean, precise: Boolean, sources: Boolean)
 
 <!doctype html>
 
@@ -57,6 +58,7 @@
           </div>
       </section>
       <section class="container">
+          <span class="text-secondary">Index updated at: @updated</span>
       @for(pack <- packages) {
           <h5 class="display-7">@pack.verName : @pack.results.size occurrences</h5>
           @for(result <- pack.results) {

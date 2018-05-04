@@ -9,12 +9,12 @@ class Application @Inject() (
   implicit val executionContext: ExecutionContext
 ) extends InjectedController {
 
-  def index_haskell = Action { implicit request =>
-    Ok(views.html.index_haskell())
+  def haskell = Action.async { implicit request =>
+    HackageDB.updated.map(updated => Ok(views.html.haskell(updated)))
   }
 
-  def index = Action { implicit request =>
-    Ok(views.html.index())
+  def index = Action.async { implicit request =>
+    HackageDB.updated.map(updated => Ok(views.html.index(updated)))
   }
 
 }
