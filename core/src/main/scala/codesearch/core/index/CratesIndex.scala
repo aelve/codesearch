@@ -31,7 +31,6 @@ object CratesIndex extends Index with CratesDB {
   override def getLastVersions: Map[String, Version] = {
     val seq = Helper.recursiveListFiles(REPO_DIR.toIO).collect { case file if !(IGNORE_FILES contains file.getName) =>
       val lastVersionJSON = scala.io.Source.fromFile(file).getLines().toSeq.last
-      println(s"$file :: $lastVersionJSON")
       val obj = Json.parse(lastVersionJSON)
       val name = (obj \ "name").as[String]
       val vers = (obj \ "vers").as[String]
