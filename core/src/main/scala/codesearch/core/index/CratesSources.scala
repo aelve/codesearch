@@ -36,7 +36,7 @@ object CratesSources extends Sources[CratesTable] {
     }
     args.append(query)
 
-    val answer = (args #| Seq("head", "-1000")) .!!
+    val answer = (args #| Seq("head", "-100")) .!!
 
     Future.sequence(
       answer.split('\n').map(CratesIndex.contentByURI).toSeq
