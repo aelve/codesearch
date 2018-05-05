@@ -18,7 +18,7 @@ object CratesSources extends Sources[CratesTable] {
   private val logger: Logger = LoggerFactory.getLogger(CratesSources.getClass)
   override val indexAPI: CratesIndex.type = CratesIndex
 
-  def csearch(searchQuery: String, insensitive: Boolean, precise: Boolean, sources: Boolean): Future[Seq[PackageResult]] = Future {
+  def csearch(searchQuery: String, insensitive: Boolean, precise: Boolean, sources: Boolean): Future[Seq[PackageResult]] = {
     val query: String = {
       if (precise) {
         Helper.hideSymbols(searchQuery)
@@ -38,11 +38,13 @@ object CratesSources extends Sources[CratesTable] {
 
     val answer = (args #| Seq("head", "-100")) .!!
 
-    val nameToVersion = CratesIndex.getLastVersions.mapValues(_.verString)
+    CratesIndex.verNames().map { verSeq =>
+      val nameToVersion = Map(verSeq: _*)
       answer.split('\n').flatMap(uri => CratesIndex contentByURI(uri, nameToVersion)).groupBy(_._1).map {
         case (verName, results) =>
           PackageResult(verName, results.map(_._2))
       }.toSeq
+    }
   }
 
 
