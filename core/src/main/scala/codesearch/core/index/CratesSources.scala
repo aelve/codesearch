@@ -36,7 +36,7 @@ object CratesSources extends Sources[CratesTable] {
     }
     args.append(query)
 
-    val answer = (args #| Seq("head", "-100")) .!!
+    val answer = (args #| Seq("head", "-1000")) .!!
 
     CratesIndex.verNames().map { verSeq =>
       val nameToVersion = Map(verSeq: _*)

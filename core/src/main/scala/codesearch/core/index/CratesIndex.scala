@@ -59,7 +59,7 @@ object CratesIndex extends Index with CratesDB {
 
           val remPath = pathSeq.drop(1).mkString("/")
 
-          (ver, Result(
+          (packageName, Result(
             s"https://docs.rs/crate/$packageName/$ver/source/$remPath",
             firstLine,
             nLine.toInt - 1,
