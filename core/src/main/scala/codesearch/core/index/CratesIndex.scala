@@ -41,13 +41,11 @@ object CratesIndex extends Index with CratesDB {
     Map(seq: _*)
   }
 
-  def contentByURI(uri: String): Future[Option[(String, Result)]] = {
+  def contentByURI(uri: String, nameToVersion: Map[String, String]): Option[(String, Result)] = {
     val elems: Seq[String] = uri.split(':')
     if (elems.length < 2) {
       println(s"bad uri: $uri")
-      Future {
-        None
-      }
+      None
     } else {
       val fullPath = elems.head
       val pathSeq: Seq[String] = elems.head.split('/').drop(6)
@@ -55,21 +53,19 @@ object CratesIndex extends Index with CratesDB {
       pathSeq.headOption match {
         case None =>
           println(s"bad uri: $uri")
-          Future {
-            None
-          }
-        case Some(packageName) => CratesIndex.verByName(packageName).map { optName => optName.map { verName =>
+          None
+        case Some(packageName) => nameToVersion.get(packageName).map{ ver =>
           val (firstLine, rows) = Helper.extractRows(fullPath, nLine.toInt)
 
           val remPath = pathSeq.drop(1).mkString("/")
 
-          (verName, Result(
-            s"https://docs.rs/crate/$packageName/$verName/source/$remPath",
+          (ver, Result(
+            s"https://docs.rs/crate/$packageName/$ver/source/$remPath",
             firstLine,
             nLine.toInt - 1,
             rows
           ))
-        } }
+        }
       }
     }
   }
