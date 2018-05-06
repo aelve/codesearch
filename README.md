@@ -18,7 +18,7 @@ The project is written in Scala. You need to install the following:
 
 Install PostgreSQL. Specify database name, user, and password in [application.conf](https://github.com/aelve/codesearch/blob/master/core/src/main/resources/application.conf).
 
-### `cargo-clone`
+### cargo-clone
 
 To fetch Rust packages we use `cargo-clone`. Install Cargo, Ruby, and `cmake`. Then you can use Cargo to install `cargo-clone`:
 
