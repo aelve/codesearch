@@ -2,6 +2,7 @@ package codesearch.web.controllers
 
 import codesearch.core.db.CratesDB
 import codesearch.core.index.CratesSources
+import com.github.marlonlom.utilities.timeago.TimeAgo
 import javax.inject.Inject
 import play.api.mvc.InjectedController
 
@@ -14,7 +15,8 @@ class CratesSearcher @Inject() (implicit val executionContext: ExecutionContext
     CratesDB.updated
       .zip(CratesSources.csearch(query, insensitive == "on", precise == "on", sources == "on"))
     .map { case (updated, results) =>
-      Ok(views.html.rust_search(updated,
+      Ok(views.html.rust_search(
+        TimeAgo.using(updated.getTime),
         results,
         query,
         insensitive == "on",
