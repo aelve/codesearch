@@ -121,5 +121,5 @@ h2 {
 
 @media only screen and (max-width: 900px) {
     /* for smaller screens, set font size based on screen size */
-    html { font-size: 2.2wv }
+    html { font-size: 2.2vw }
 }
