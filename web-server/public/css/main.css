@@ -12,6 +12,13 @@
 pre.line-numbers code {
     display: inline-block;
 }
+
+@media only screen and (max-width: 600px) {
+    html {
+        font-size: 15px;
+    }
+}
+
 html {
     font-size: 20px;
 }
