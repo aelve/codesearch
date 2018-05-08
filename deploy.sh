@@ -1,8 +1,7 @@
 #!/bin/bash
 
-set -x
-
 ssh root@167.99.88.190 "
+  set -x
   cd /root/aelve/codesearch
   git pull
   sbt web-server/assembly
