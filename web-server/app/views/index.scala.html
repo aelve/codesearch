@@ -1,5 +1,5 @@
-@import java.sql.Timestamp
-@(updatedHaskell: Timestamp, updatedRust: Timestamp)
+@import codesearch.web.controllers.LangInfo
+@(hackageInfo: LangInfo, cratesInfo: LangInfo)
 
 <!doctype html>
 
@@ -9,23 +9,40 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
         <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("lib/bootstrap/css/bootstrap.min.css")">
-
         <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/main.css")">
 
         <title>Codesearch</title>
     </head>
     <body>
-	<ul class="list-group">
-            <li class="list-group-item">
-                <span class="lean h3"><a href="/haskell">Haskell</a>
-                    @updatedHaskell
-                </span>
-	    </li>
-	    <li class="list-group-item">
-                <span class="lean h3"><a href="/rust">Rust</a>
-                    @updatedRust
-                </span>
-	    </li>
-	</ul>
+        <div class="container-fluid">
+            <div class="container-fluid text-center h1 bg-light" style="padding-bottom: 2rem; font: 110% sans-seif;">
+                <div class="display-1">
+                    CODESEARCH
+                </div>
+            </div>
+
+            <div class="container text-center h3" style="padding-bottom: 1rem; font: 100% sans-serif;">
+                <div class="card border-0">
+                    <div class="card-body text-left" style="padding-bottom: 0rem;">
+                        <span class="lean display-3"><a href="/haskell">Haskell</a></span>
+                    </div>
+                    <div class="card-subtitle mb-2 text-left text-muted font-italic" style="margin-left: 1rem;">
+                        Index updated @{hackageInfo.updatedAgo}
+                        @{hackageInfo.totalPackages} packages in total
+                    </div>
+                </div>
+            </div>
+            <div class="container text-center h3" style="font: 100% sans-serif;">
+                <div class="card border-0">
+                    <div class="card-body text-left" style="padding-bottom: 0rem;">
+                        <span class="lean display-3"><a href="/rust">Rust</a></span>
+                    </div>
+                    <div class="card-subtitle mb-2 text-left text-muted font-italic" style="margin-left: 1rem;">
+                        Index updated @{hackageInfo.updatedAgo}
+                        @{hackageInfo.totalPackages} packages in total
+                    </div>
+                </div>
+            </div>
+        </div>
     </body>
 </html>
