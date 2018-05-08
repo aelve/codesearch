@@ -1,0 +1,26 @@
+@(actSearch: String, query: String, insensitive: Boolean, precise: Boolean, sources: Boolean)
+
+<section class="container-fluid">
+    <div class="col-lg-6 mx-auto bg-white p-3 h7 justify-content-center">
+        <form action=@actSearch method="get">
+            <div class="input-group">
+                <input type="text" class="form-control" name="query" value="@query">
+                <span class="input-group-btn">
+                    <input class="btn btn-secondary" type="submit" value="Go!">
+                </span>
+            </div>
+            <div class="form-check form-check-inline">
+                <input type="checkbox" class="form-check-input" name="insensitive" id="insensitive-search" @(if (insensitive) "checked")>
+                <label class="form-check-label" for="insensitive-search">Case-insensitive search</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input type="checkbox" class="form-check-input" name="precise" id="precise-match" @(if (precise) "checked")>
+                <label class="form-check-label" for="precise-match">Precise match</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input type="checkbox" class="form-check-input" name="sources" id="sources-only" @(if (sources) "checked")>
+                <label class="form-check-label" for="sources-only">Sources only</label>
+            </div>
+        </form>
+    </div>
+</section>
