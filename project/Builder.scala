@@ -69,8 +69,9 @@ object Builder {
       libraryDependencies ++= Seq(
         guice,
         "org.webjars"       % "bootstrap"        % "4.1.0",
-        "org.webjars"       % "prismjs"          % "1.6.0"
-      ),
+        "org.webjars"       % "prismjs"          % "1.6.0",
+        "com.github.marlonlom" % "timeago"       % "3.0.2"
+  ),
       fullClasspath in assembly += Attributed.blank(PlayKeys.playPackageAssets.value),
       assemblyMergeStrategy in assembly := {
        case manifest if manifest.contains("MANIFEST.MF") =>
