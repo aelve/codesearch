@@ -1,34 +1,25 @@
-/* fight weird background change in the default style */
 .token.operator {
+    /* fight weird background change in the default style */
     background: inherit;
 }
 
-/* don't highlight lines with a gradient */
 .line-highlight {
+    /* don't highlight lines with a gradient */
     background: hsla(24,20%,50%,.2);
 }
 
-/* fix line number alignment (see https://github.com/PrismJS/prism/issues/1132) */
 pre.line-numbers code {
+    /* fix line number alignment (see https://github.com/PrismJS/prism/issues/1132) */
     display: inline-block;
 }
 
-@media only screen and (max-width: 600px) {
-    html {
-        font-size: 15px;
-    }
-}
-
 html {
-    font-size: 20px;
-}
-
-html {
+    /* this is root font size; everything else (specified with "rem") depends on it */
     font-size: 20px;
 }
 
 body {
-    /* nicer fonts */
+    /* let's use nicer fonts */
     font-family: Roboto, sans-serif;
     font-weight: 300;
 
@@ -36,11 +27,13 @@ body {
     color: #333;
     background-color: #fafafa;
 
+    /* use flexbox to center-align everything */
     display: flex;
     justify-content: center;
 }
 
 main {
+    /* make <main> wrapper inside of <body> as wide as its content */
     display: inline-block;
 }
 
@@ -62,12 +55,6 @@ h1 {
 }
 
 .header {
-    /* to align the header and the subtitle,
-       we have to make .header as wide as its
-       content, as opposed to the default of
-       "as wide as the page is" */
-
-
     /* give the header space */
     margin-top: 4rem;
     margin-bottom: 3rem;
@@ -82,26 +69,57 @@ h2 {
     /* other subtitles should stick too */
     margin-bottom: 0;
 
+    /* change header size */
     font-weight: 500;
     font-size: 2.5rem;
 
-    /* some contrast */
+    /* add some red for contrast */
     color: #f44336;
 }
 
-.item {display: flex; padding: 2.5rem 3.5rem; font-size: 1.3rem;}
-.list > * {border-bottom: 0.5px solid #aaa;}
-.list :last-child {border-bottom: none !important}
+.item {
+    /* use flex to create "columns" inside list items */
+    display: flex;
+
+    padding: 2.5rem 3.5rem;
+    font-size: 1.3rem;
+}
+
+.list > * {
+    /* add rulers between items */
+    border-bottom: 0.5px solid #aaa;
+}
+.list :last-child {
+    /* except for the last item */
+    border-bottom: none !important;
+}
+
 .item:hover {
+    /* highlight items on hover */
     background-color: #f0f0f0;
     cursor: pointer;
 }
-.lang {width: 50%}
-.lang h2 {margin-top: 0; line-height: 100%;}
+
+.lang {
+    /* set up the columns */
+    width: 50%;
+}
+
+.lang h2 {
+    /* don't have any extra vertical space in headers; we have padding already */
+    margin-top: 0;
+    line-height: 100%;
+}
 
 .info {
+    /* vertically align the second column */
     display: flex;
     flex-direction: column;
     justify-content: center;
     line-height: 120%;
+}
+
+@media only screen and (max-width: 900px) {
+    /* for smaller screens, set font size based on screen size */
+    html { font-size: 2.2wv }
 }
