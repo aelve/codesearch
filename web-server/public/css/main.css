@@ -12,6 +12,9 @@
 pre.line-numbers code {
     display: inline-block;
 }
+html {
+    font-size: 20px;
+}
 
 body {
     /* nicer fonts */
@@ -32,7 +35,7 @@ main {
 
 h1 {
     /* bigger, thinner header */
-    font-size: 330%;
+    font-size: 5rem;
     font-weight: 500;
 
     /* make the subtitle stick */
@@ -41,7 +44,7 @@ h1 {
 
 .header .subtitle {
     /* the main subtitle should be bigger */
-    font-size: 132%;
+    font-size: 2rem;
 
     /* left-alignment everywhere is obnoxious */
     text-align: right;
@@ -55,8 +58,8 @@ h1 {
 
 
     /* give the header space */
-    margin-top: 3em;
-    margin-bottom: 2em;
+    margin-top: 4rem;
+    margin-bottom: 3rem;
 }
 
 .subtitle {
@@ -69,25 +72,25 @@ h2 {
     margin-bottom: 0;
 
     font-weight: 500;
-    font-size: 180%;
+    font-size: 2.5rem;
 
     /* some contrast */
     color: #f44336;
 }
 
-.item {display: flex; padding: 1.8em}
+.item {display: flex; padding: 2.5rem 3.5rem; font-size: 1.3rem;}
 .list > * {border-bottom: 0.5px solid #aaa;}
 .list :last-child {border-bottom: none !important}
 .item:hover {
     background-color: #f0f0f0;
     cursor: pointer;
 }
-.lang {width: 40%}
+.lang {width: 50%}
 .lang h2 {margin-top: 0; line-height: 100%;}
 
 .info {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    line-height: 120%
+    line-height: 120%;
 }
