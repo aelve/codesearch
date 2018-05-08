@@ -12,3 +12,82 @@
 pre.line-numbers code {
     display: inline-block;
 }
+
+body {
+    /* nicer fonts */
+    font-family: Roboto, sans-serif;
+    font-weight: 300;
+
+    /* gray = "modern" */
+    color: #333;
+    background-color: #fafafa;
+
+    display: flex;
+    justify-content: center;
+}
+
+main {
+    display: inline-block;
+}
+
+h1 {
+    /* bigger, thinner header */
+    font-size: 330%;
+    font-weight: 500;
+
+    /* make the subtitle stick */
+    margin-bottom: 0;
+}
+
+.header .subtitle {
+    /* the main subtitle should be bigger */
+    font-size: 132%;
+
+    /* left-alignment everywhere is obnoxious */
+    text-align: right;
+}
+
+.header {
+    /* to align the header and the subtitle,
+       we have to make .header as wide as its
+       content, as opposed to the default of
+       "as wide as the page is" */
+
+
+    /* give the header space */
+    margin-top: 3em;
+    margin-bottom: 2em;
+}
+
+.subtitle {
+    /* italics for subtitles */
+    font-style: italic;
+}
+
+h2 {
+    /* other subtitles should stick too */
+    margin-bottom: 0;
+
+    font-weight: 500;
+    font-size: 180%;
+
+    /* some contrast */
+    color: #f44336;
+}
+
+.item {display: flex; padding: 1.8em}
+.list > * {border-bottom: 0.5px solid #aaa;}
+.list :last-child {border-bottom: none !important}
+.item:hover {
+    background-color: #f0f0f0;
+    cursor: pointer;
+}
+.lang {width: 40%}
+.lang h2 {margin-top: 0; line-height: 100%;}
+
+.info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 120%
+}

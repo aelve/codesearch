@@ -14,35 +14,41 @@
         <title>Codesearch</title>
     </head>
     <body>
-        <div class="container-fluid">
-            <div class="container-fluid text-center h1 bg-light" style="padding-bottom: 2rem; font: 110% sans-seif;">
-                <div class="display-1">
-                    CODESEARCH
-                </div>
-            </div>
-
-            <div class="container text-center h3" style="padding-bottom: 1rem; font: 100% sans-serif;">
-                <div class="card border-0">
-                    <div class="card-body text-left" style="padding-bottom: 0rem;">
-                        <span class="lean display-3"><a href="/haskell">Haskell</a></span>
-                    </div>
-                    <div class="card-subtitle mb-2 text-left text-muted font-italic" style="margin-left: 1rem;">
-                        Index updated @{hackageInfo.updatedAgo} <br>
-                        @{hackageInfo.totalPackages} packages in total
+        <main>
+            <div class="container">
+                <div class="header">
+                    <h1>Aelve Codesearch</h1>
+                    <div class="subtitle">
+                        grep over package repositories
                     </div>
                 </div>
-            </div>
-            <div class="container text-center h3" style="font: 100% sans-serif;">
-                <div class="card border-0">
-                    <div class="card-body text-left" style="padding-bottom: 0rem;">
-                        <span class="lean display-3"><a href="/rust">Rust</a></span>
+                <div class="list">
+                    <div class="item">
+                        <div class="lang">
+                            <a href="/haskell"><h2>Haskell</h2></a>
+                            <a href="https://hackage.haskell.org"><div class="subtitle">
+                                hackage.haskell.org
+                            </div></a>
+                        </div>
+                        <div class="info">
+                            @{hackageInfo.totalPackages} packages<br>
+                            Last updated: @{hackageInfo.updatedAgo}
+                        </div>
                     </div>
-                    <div class="card-subtitle mb-2 text-left text-muted font-italic" style="margin-left: 1rem;">
-                        Index updated @{cratesInfo.updatedAgo} <br>
-                        @{cratesInfo.totalPackages} packages in total
+                    <div class="item">
+                        <div class="lang">
+                            <a href="/rust"><h2>Rust</h2></a>
+                            <a href="https://crates.io"><div class="subtitle">
+                                crates.io
+                            </div></a>
+                        </div>
+                        <div class="info">
+                            @{cratesInfo.totalPackages} packages<br>
+                            Last updated: @{cratesInfo.updatedAgo}
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
     </body>
 </html>
