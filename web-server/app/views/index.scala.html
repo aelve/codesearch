@@ -14,41 +14,39 @@
         <title>Codesearch</title>
     </head>
     <body>
-        <main>
-            <div class="container">
-                <div class="header">
-                    <h1>Aelve Codesearch</h1>
-                    <div class="subtitle">
-                        grep over package repositories
+        <div class="container">
+            <div class="header">
+                <h1>Aelve Codesearch</h1>
+                <div class="subtitle">
+                    grep over package repositories
+                </div>
+            </div>
+            <div class="list">
+                <div class="item">
+                    <div class="lang">
+                        <a href="/haskell"><h2>Haskell</h2></a>
+                        <a href="https://hackage.haskell.org"><div class="subtitle">
+                            hackage.haskell.org
+                        </div></a>
+                    </div>
+                    <div class="info">
+                        @{hackageInfo.totalPackages} packages<br>
+                        Last updated: @{hackageInfo.updatedAgo}
                     </div>
                 </div>
-                <div class="list">
-                    <div class="item">
-                        <div class="lang">
-                            <a href="/haskell"><h2>Haskell</h2></a>
-                            <a href="https://hackage.haskell.org"><div class="subtitle">
-                                hackage.haskell.org
-                            </div></a>
-                        </div>
-                        <div class="info">
-                            @{hackageInfo.totalPackages} packages<br>
-                            Last updated: @{hackageInfo.updatedAgo}
-                        </div>
+                <div class="item">
+                    <div class="lang">
+                        <a href="/rust"><h2>Rust</h2></a>
+                        <a href="https://crates.io"><div class="subtitle">
+                            crates.io
+                        </div></a>
                     </div>
-                    <div class="item">
-                        <div class="lang">
-                            <a href="/rust"><h2>Rust</h2></a>
-                            <a href="https://crates.io"><div class="subtitle">
-                                crates.io
-                            </div></a>
-                        </div>
-                        <div class="info">
-                            @{cratesInfo.totalPackages} packages<br>
-                            Last updated: @{cratesInfo.updatedAgo}
-                        </div>
+                    <div class="info">
+                        @{cratesInfo.totalPackages} packages<br>
+                        Last updated: @{cratesInfo.updatedAgo}
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
     </body>
 </html>

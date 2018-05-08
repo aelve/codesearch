@@ -32,8 +32,8 @@ body {
     justify-content: center;
 }
 
-main {
-    /* make <main> wrapper inside of <body> as wide as its content */
+.container {
+    /* make the wrapper inside of <body> as wide as its *content* */
     display: inline-block;
 }
 
