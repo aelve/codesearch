@@ -12,3 +12,12 @@ pre.line-numbers code {
     /* fix line number alignment (see https://github.com/PrismJS/prism/issues/1132) */
     display: inline-block;
 }
+
+mark {
+    /* highlight marks with gray */
+    background-color: rgba(0,0,0,0.1);
+    /* don't add horizontal padding, it breaks monospace */
+    padding: .2em 0;
+    /* don't reset the color to black */
+    color: inherit;
+}
