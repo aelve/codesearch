@@ -21,10 +21,13 @@
     <script src="@routes.Assets.versioned("lib/prismjs/plugins/line-highlight/prism-line-highlight.min.js")"></script>
     <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("lib/prismjs/plugins/line-highlight/prism-line-highlight.css")">
 
+    <script src="@routes.Assets.versioned("lib/prismjs/plugins/keep-markup/prism-keep-markup.min.js")"></script>
 
     <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("lib/bootstrap/css/bootstrap.min.css")">
 
     <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/main.css")">
+    <script src="@routes.Assets.versioned("lib/mark.js/dist/mark.min.js")"></script>
+
 
     <title>Codesearch</title>
 
@@ -34,7 +37,7 @@
     <main class="wrapper">
 	  <section class="container-fluid">
           @searchBox("/haskell/search", query, insensitive, precise, sources)
-          @resultFrame(updated, packages)
+          @resultFrame("haskell", query, updated, packages)
       </section>
     </main>
   </body>

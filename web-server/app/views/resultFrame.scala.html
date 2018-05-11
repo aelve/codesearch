@@ -1,14 +1,44 @@
 @import codesearch.core.index.PackageResult
-@(updated: String, packages: Seq[PackageResult])
+@import scala.collection.mutable
+@import scala.math.max
+@(lang: String, query: String, updated: String, packages: Seq[PackageResult])
 
-<section class="container-fluid">
+<section class="container">
     <span class="text-secondary">Index updated @updated</span>
     @for(pack <- packages) {
         <h5 class="display-7">@pack.verName : @pack.results.size occurrences</h5>
         @for(result <- pack.results) {
             <a href=@result.link>@result.link</a>
+            <pre data-start=@result.firstLine><code class="@("language-" + lang + " line-numbers")">@{
+                val re = query.r
+                val id = result.nLine - result.firstLine
+                val hLine = result.ctxt(id)
+                val matches = re.findAllMatchIn(hLine)
+                var lastL = 0
+                var lastR = 0
+                val hRes = mutable.ListBuffer[Char]()
 
-            <pre data-start=@(result.firstLine) data-line=@(result.nLine - result.firstLine + 1)><code class="language-rust line-numbers">@result.ctxt.mkString("\n")</code></pre>
+                matches.map(m => (m.start, m.end)).foreach { case (l, r) =>
+                    if(lastR <= l) {
+                        if (lastR != 0) {
+                            hRes ++= "</mark>"
+                        }
+                        hRes ++= hLine.substring(lastR, l)
+                        hRes ++= "<mark>"
+                        hRes ++= hLine.substring(l, r)
+                        lastL = l
+                        lastR = r
+                    } else {
+                        hRes ++= hLine.substring(lastR, max(lastR, r))
+                        lastR = max(lastR, r)
+                    }
+                }
+                if (lastR != 0) {
+                    hRes ++= "</mark>"
+                }
+                hRes ++= hLine.substring(lastR)
+                Html(result.ctxt.take(id).mkString("\n") ++ "\n" ++ hRes ++ "\n" ++ result.ctxt.drop(id + 1).mkString("\n"))
+            }</code></pre>
         }
     }
 </section>
