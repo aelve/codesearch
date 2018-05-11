@@ -1,0 +1,14 @@
+.token.operator {
+    /* fight weird background change in the default style */
+    background: inherit;
+}
+
+.line-highlight {
+    /* don't highlight lines with a gradient */
+    background: hsla(24,20%,50%,.2);
+}
+
+pre.line-numbers code {
+    /* fix line number alignment (see https://github.com/PrismJS/prism/issues/1132) */
+    display: inline-block;
+}

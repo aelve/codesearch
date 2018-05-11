@@ -1,39 +1,16 @@
-.token.operator {
-    /* fight weird background change in the default style */
-    background: inherit;
-}
-
-.line-highlight {
-    /* don't highlight lines with a gradient */
-    background: hsla(24,20%,50%,.2);
-}
-
-pre.line-numbers code {
-    /* fix line number alignment (see https://github.com/PrismJS/prism/issues/1132) */
-    display: inline-block;
-}
-
 html {
     /* this is root font size; everything else (specified with "rem") depends on it */
-    font-size: 20px;
+    font-size: 18px;
 }
 
-body {
-    /* let's use nicer fonts */
-    font-family: Roboto, sans-serif;
-    font-weight: 300;
-
-    /* gray = "modern" */
-    color: #333;
-    background-color: #fafafa;
-
+.container {
     /* use flexbox to center-align everything */
     display: flex;
     justify-content: center;
 }
 
-.container {
-    /* make the wrapper inside of <body> as wide as its *content* */
+main {
+    /* make the wrapper as wide as its *content* */
     display: inline-block;
 }
 
@@ -44,6 +21,9 @@ h1 {
 
     /* make the subtitle stick */
     margin-bottom: 0;
+
+    /* never word-wrap */
+    white-space: nowrap;
 }
 
 .header .subtitle {
@@ -121,5 +101,5 @@ h2 {
 
 @media only screen and (max-width: 900px) {
     /* for smaller screens, set font size based on screen size */
-    html { font-size: 2.2vw }
+    html { font-size: 2vw }
 }

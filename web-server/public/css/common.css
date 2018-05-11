@@ -1,0 +1,9 @@
+body {
+    /* let's use nicer fonts */
+    font-family: Roboto, sans-serif;
+    font-weight: 300;
+
+    /* gray = "modern" */
+    color: #333;
+    background-color: #fafafa;
+}
