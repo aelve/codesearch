@@ -8,6 +8,11 @@
     background: hsla(24,20%,50%,.2);
 }
 
+pre.line-numbers {
+    /* increase padding so that four-digit line numbers would fit */
+    padding-left: 5em;
+}
+
 pre.line-numbers code {
     /* fix line number alignment (see https://github.com/PrismJS/prism/issues/1132) */
     display: inline-block;
