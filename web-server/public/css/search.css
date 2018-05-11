@@ -26,3 +26,8 @@ mark {
     /* don't reset the color to black */
     color: inherit;
 }
+
+h5 {
+    /* add space between search results */
+    margin-top: 2em;
+}
