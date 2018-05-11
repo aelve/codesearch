@@ -35,10 +35,8 @@
 
   <body>
     <main class="wrapper">
-	  <section class="container-fluid">
-          @searchBox("/haskell/search", query, insensitive, precise, sources)
-          @resultFrame("haskell", query, updated, packages)
-      </section>
+      @searchBox("/haskell/search", query, insensitive, precise, sources)
+      @resultFrame("haskell", query, updated, packages)
     </main>
   </body>
 
