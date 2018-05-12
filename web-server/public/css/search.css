@@ -25,6 +25,14 @@ mark {
     padding: .2em 0;
     /* don't reset the color to black */
     color: inherit;
+    /* make it easier to see where one mark ends and another begins */
+    border-radius: 4px;
+    box-shadow: 0px 0px 0px 0.5px rgba(255,255,255,0.5) inset;
+}
+
+code[class*="language-"] {
+    /* the shadow looks ugly when combined with marks */
+    text-shadow: none !important;
 }
 
 h5 {
