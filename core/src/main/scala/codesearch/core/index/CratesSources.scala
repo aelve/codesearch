@@ -40,9 +40,9 @@ object CratesSources extends Sources[CratesTable] {
 
     CratesIndex.verNames().map { verSeq =>
       val nameToVersion = Map(verSeq: _*)
-      answer.split('\n').flatMap(uri => CratesIndex contentByURI(uri, nameToVersion)).groupBy(_._1).map {
-        case (verName, results) =>
-          PackageResult(verName, results.map(_._2))
+      answer.split('\n').flatMap(uri => CratesIndex contentByURI(uri, nameToVersion)).groupBy(x => (x._1, x._2)).map {
+        case ((name, packageLink), results) =>
+          PackageResult(name, packageLink, results.map(_._3))
       }.toSeq
     }
   }

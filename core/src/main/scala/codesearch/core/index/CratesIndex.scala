@@ -41,7 +41,7 @@ object CratesIndex extends Index with CratesDB {
     Map(seq: _*)
   }
 
-  def contentByURI(uri: String, nameToVersion: Map[String, String]): Option[(String, Result)] = {
+  def contentByURI(uri: String, nameToVersion: Map[String, String]): Option[(String, String, Result)] = {
     val elems: Seq[String] = uri.split(':')
     if (elems.length < 2) {
       println(s"bad uri: $uri")
@@ -59,8 +59,8 @@ object CratesIndex extends Index with CratesDB {
 
           val remPath = pathSeq.drop(1).mkString("/")
 
-          (packageName, Result(
-            s"https://docs.rs/crate/$packageName/$ver/source/$remPath",
+          (packageName, s"https://docs.rs/crate/$packageName/$ver/source/", Result(
+            remPath,
             firstLine,
             nLine.toInt - 1,
             rows

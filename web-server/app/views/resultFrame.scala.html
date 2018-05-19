@@ -6,9 +6,9 @@
 <section class="container">
     <span class="text-secondary">Index updated @updated</span>
     @for(pack <- packages) {
-        <h5 class="display-7">@pack.verName : @pack.results.size occurrences</h5>
+        <h5 class="display-7"><a href="@pack.packageLink">@pack.name</a> : @pack.results.size occurrences</h5>
         @for(result <- pack.results) {
-            <a href=@result.link>@result.link</a>
+            <a href=@(pack.packageLink ++ result.fileLink)>@result.fileLink</a>
             <pre data-start=@result.firstLine><code class="@("language-" + lang + " line-numbers")">@{
                 val re = query.r
                 val id = result.nLine - result.firstLine

@@ -15,8 +15,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 
-case class Result(link: String, firstLine: Int, nLine: Int, ctxt: Seq[String])
-case class PackageResult(verName: String, results: Seq[Result])
+case class Result(fileLink: String, firstLine: Int, nLine: Int, ctxt: Seq[String])
+case class PackageResult(name: String, packageLink: String, results: Seq[Result])
 
 object HackageSources extends Sources[HackageTable] {
   private val logger: Logger = LoggerFactory.getLogger(HackageSources.getClass)
@@ -42,9 +42,9 @@ object HackageSources extends Sources[HackageTable] {
 
     val answer = (args #| Seq("head", "-1000")) .!!
 
-    answer.split('\n').flatMap(HackageIndex.contentByURI).groupBy(_._1).map {
-      case (verName, results) =>
-        PackageResult(verName, results.map(_._2).toSeq)
+    answer.split('\n').flatMap(HackageIndex.contentByURI).groupBy { x => (x._1, x._2) }.map {
+      case ((verName, packageLink), results) =>
+        PackageResult(verName, packageLink, results.map(_._3).toSeq)
     }.toSeq
   }
 

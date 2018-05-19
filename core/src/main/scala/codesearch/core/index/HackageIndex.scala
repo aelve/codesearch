@@ -45,7 +45,7 @@ object HackageIndex extends Index with HackageDB {
     lastVersions
   }
 
-  def contentByURI(uri: String): Option[(String, Result)] = {
+  def contentByURI(uri: String): Option[(String, String, Result)] = {
     val elems: Seq[String] = uri.split(':')
     if (elems.length < 2) {
       println(s"bad uri: $uri")
@@ -63,8 +63,8 @@ object HackageIndex extends Index with HackageDB {
 
           val remPath = pathSeq.drop(1).mkString("/")
 
-          Some((verName, Result(
-            s"https://hackage.haskell.org/package/$verName/src/$remPath",
+          Some((verName, s"https://hackage.haskell.org/package/$verName/src/", Result(
+            remPath,
             firstLine,
             nLine.toInt - 1,
             rows
