@@ -1,6 +1,6 @@
 @import codesearch.core.index.PackageResult
 
-@(updated: String, packages: Seq[PackageResult], query: String, insensitive: Boolean, precise: Boolean, sources: Boolean, page: Int, callURI: String)
+@(updated: String, packages: Seq[PackageResult], query: String, insensitive: Boolean, precise: Boolean, sources: Boolean, page: Int, count: Int, callURI: String)
 
 <!doctype html>
 
@@ -36,7 +36,7 @@
 
   <body>
     <main class="container">
-      @searchBox("/haskell/search", query, insensitive, precise, sources, page, callURI)
+      @searchBox("/haskell/search", query, insensitive, precise, sources, page, count, callURI)
       @resultFrame("haskell", query, updated, packages)
     </main>
   </body>

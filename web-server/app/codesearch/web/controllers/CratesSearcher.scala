@@ -16,7 +16,7 @@ class CratesSearcher @Inject() (implicit val executionContext: ExecutionContext
 
     CratesDB.updated
       .zip(CratesSources.csearch(query, insensitive == "on", precise == "on", sources == "on", page.toInt))
-    .map { case (updated, results) =>
+    .map { case (updated, (count, results)) =>
       Ok(views.html.rust_search(
         TimeAgo.using(updated.getTime),
         results,
@@ -25,6 +25,7 @@ class CratesSearcher @Inject() (implicit val executionContext: ExecutionContext
         precise == "on",
         sources == "on",
         page = page.toInt,
+        count,
         callURI
       ))
     }

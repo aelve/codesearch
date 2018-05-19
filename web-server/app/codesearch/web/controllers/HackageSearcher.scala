@@ -16,16 +16,20 @@ class HackageSearcher @Inject() (
     val callURI = s"/haskell/search?query=$query&insensitive=$insensitive&precise=$precise&sources=$sources"
 
     HackageDB.updated.map(updated =>
-      Ok(views.html.search(
-        TimeAgo.using(updated.getTime),
-        HackageSources.csearch(query, insensitive == "on", precise == "on", sources == "on", page.toInt),
-        query,
-        insensitive == "on",
-        precise == "on",
-        sources == "on",
-        page = page.toInt,
-        callURI
-      ))
+      HackageSources.csearch(query, insensitive == "on", precise == "on", sources == "on", page.toInt) match {
+        case (count, results) =>
+          Ok(views.html.search(
+            TimeAgo.using(updated.getTime),
+            results,
+            query,
+            insensitive == "on",
+            precise == "on",
+            sources == "on",
+            page = page.toInt,
+            count,
+            callURI
+          ))
+      }
     )
   }
 }
