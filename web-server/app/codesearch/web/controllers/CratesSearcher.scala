@@ -11,9 +11,9 @@ import scala.concurrent.ExecutionContext
 class CratesSearcher @Inject() (implicit val executionContext: ExecutionContext
                                ) extends InjectedController {
 
-  def index(query: String, insensitive: String, precise: String, sources: String) = Action.async { implicit request =>
+  def index(query: String, insensitive: String, precise: String, sources: String, page: String) = Action.async { implicit request =>
     CratesDB.updated
-      .zip(CratesSources.csearch(query, insensitive == "on", precise == "on", sources == "on"))
+      .zip(CratesSources.csearch(query, insensitive == "on", precise == "on", sources == "on", page.toInt))
     .map { case (updated, results) =>
       Ok(views.html.rust_search(
         TimeAgo.using(updated.getTime),

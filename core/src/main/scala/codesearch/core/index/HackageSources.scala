@@ -22,7 +22,7 @@ object HackageSources extends Sources[HackageTable] {
   private val logger: Logger = LoggerFactory.getLogger(HackageSources.getClass)
   override val indexAPI: HackageIndex.type = HackageIndex
 
-  def csearch(searchQuery: String, insensitive: Boolean, precise: Boolean, sources: Boolean): Seq[PackageResult] = {
+  def csearch(searchQuery: String, insensitive: Boolean, precise: Boolean, sources: Boolean, page: Int): Seq[PackageResult] = {
     val query: String = {
       if (precise) {
         Helper.hideSymbols(searchQuery)
@@ -40,7 +40,7 @@ object HackageSources extends Sources[HackageTable] {
     }
     args.append(query)
 
-    val answer = (args #| Seq("head", "-1000")) .!!
+    val answer = (args #| Seq("head", "-1001")).!!.slice(math.max(page - 1, 0) * 100, page * 100)
 
     answer.split('\n').flatMap(HackageIndex.contentByURI).groupBy { x => (x._1, x._2) }.map {
       case ((verName, packageLink), results) =>

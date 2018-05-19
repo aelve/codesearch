@@ -1,10 +1,10 @@
 GET     /                         codesearch.web.controllers.Application.index
 
 GET     /haskell                  codesearch.web.controllers.Application.haskell
-GET     /haskell/search           codesearch.web.controllers.HackageSearcher.index(query: String ?= "", insensitive: String ?= "", precise: String ?= "", sources: String ?= "on")
+GET     /haskell/search           codesearch.web.controllers.HackageSearcher.index(query: String ?= "", insensitive: String ?= "", precise: String ?= "", sources: String ?= "on", page: String ?= "1")
 
 GET     /rust                     codesearch.web.controllers.Application.rust
-GET     /rust/search              codesearch.web.controllers.CratesSearcher.index(query: String ?= "", insensitive: String ?= "", precise: String ?= "", sources: String ?= "on")
+GET     /rust/search              codesearch.web.controllers.CratesSearcher.index(query: String ?= "", insensitive: String ?= "", precise: String ?= "", sources: String ?= "on", page: String ?= "1")
 
 GET     /versionedAssets/*file    controllers.Assets.versioned(file)
 

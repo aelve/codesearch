@@ -12,11 +12,11 @@ class HackageSearcher @Inject() (
   implicit val executionContext: ExecutionContext
 ) extends InjectedController {
 
-  def index(query: String, insensitive: String, precise: String, sources: String) = Action.async { implicit request =>
+  def index(query: String, insensitive: String, precise: String, sources: String, page: String) = Action.async { implicit request =>
     HackageDB.updated.map(updated =>
       Ok(views.html.search(
         TimeAgo.using(updated.getTime),
-        HackageSources.csearch(query, insensitive == "on", precise == "on", sources == "on"),
+        HackageSources.csearch(query, insensitive == "on", precise == "on", sources == "on", page.toInt),
         query,
         insensitive == "on",
         precise == "on",
