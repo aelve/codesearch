@@ -16,9 +16,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 case class Result(fileLink: String, firstLine: Int, nLine: Int, ctxt: Seq[String])
-case class PackageResult(name: String, packageLink: String, results: Seq[Result]) {
-  def compare(that: PackageResult): Int = this.name compare that.name
-}
+case class PackageResult(name: String, packageLink: String, results: Seq[Result])
 
 object HackageSources extends Sources[HackageTable] {
   private val logger: Logger = LoggerFactory.getLogger(HackageSources.getClass)
@@ -49,7 +47,7 @@ object HackageSources extends Sources[HackageTable] {
       .flatMap(HackageIndex.contentByURI).groupBy { x => (x._1, x._2) }.map {
       case ((verName, packageLink), results) =>
         PackageResult(verName, packageLink, results.map(_._3).toSeq)
-    }.toSeq.sortBy(identity))
+    }.toSeq.sortBy(_.name))
   }
 
   def downloadSources(name: String, ver: String): Future[Int] = {
