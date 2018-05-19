@@ -6,6 +6,7 @@
 
 <section class="container">
     <span class="text-secondary">Index updated @updated</span>
+
     @for(pack <- packages) {
         <h5 class="display-7" style="margin-bottom: 0"><a href=@pack.packageLink>@pack.name</a></h5>
         <span class="text-secondary" style="margin-bottom: 1em">@pack.results.size matches</span> <br>

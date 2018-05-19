@@ -13,6 +13,8 @@ class HackageSearcher @Inject() (
 ) extends InjectedController {
 
   def index(query: String, insensitive: String, precise: String, sources: String, page: String) = Action.async { implicit request =>
+    val callURI = s"/haskell/search?query=$query&insensitive=$insensitive&precise=$precise&sources=$sources"
+
     HackageDB.updated.map(updated =>
       Ok(views.html.search(
         TimeAgo.using(updated.getTime),
@@ -20,7 +22,9 @@ class HackageSearcher @Inject() (
         query,
         insensitive == "on",
         precise == "on",
-        sources == "on"
+        sources == "on",
+        page = page.toInt,
+        callURI
       ))
     )
   }
