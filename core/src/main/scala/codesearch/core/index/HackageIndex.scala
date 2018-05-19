@@ -58,12 +58,12 @@ object HackageIndex extends Index with HackageDB {
         case None =>
           println(s"bad uri: $uri")
           None
-        case Some(verName) =>
+        case Some(name) =>
           val (firstLine, rows) = Helper.extractRows(fullPath, nLine.toInt)
 
           val remPath = pathSeq.drop(1).mkString("/")
 
-          Some((verName, s"https://hackage.haskell.org/package/$verName/src/", Result(
+          Some((name, s"https://hackage.haskell.org/package/$name", Result(
             remPath,
             firstLine,
             nLine.toInt - 1,

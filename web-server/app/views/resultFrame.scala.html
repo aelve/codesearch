@@ -1,4 +1,5 @@
 @import codesearch.core.index.PackageResult
+@import codesearch.core.util.Helper
 @import scala.collection.mutable
 @import scala.math.max
 @(lang: String, query: String, updated: String, packages: Seq[PackageResult])
@@ -6,9 +7,11 @@
 <section class="container">
     <span class="text-secondary">Index updated @updated</span>
     @for(pack <- packages) {
-        <h5 class="display-7"><a href="@pack.packageLink">@pack.name</a> : @pack.results.size occurrences</h5>
+        <h5 class="display-7" style="margin-bottom: 0"><a href=@pack.packageLink>@pack.name</a></h5>
+        <span class="text-secondary" style="margin-bottom: 1em">@pack.results.size matches</span> <br>
+
         @for(result <- pack.results) {
-            <a href=@(pack.packageLink ++ result.fileLink)>@result.fileLink</a>
+            <a href=@(Helper.linkByLang(lang, pack.packageLink, result.fileLink))>@result.fileLink</a>
             <pre data-start=@result.firstLine><code class="@("language-" + lang + " line-numbers")">@{
                 val re = query.r
                 val id = result.nLine - result.firstLine

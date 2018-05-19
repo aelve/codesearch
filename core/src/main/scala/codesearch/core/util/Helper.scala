@@ -47,4 +47,12 @@ object Helper {
     }
   }
 
+  def linkByLang(lang: String, packageLink: String, fileLink: String): String = lang match {
+    case "haskell" =>
+      packageLink + "/src/" + fileLink
+    case "rust" =>
+      packageLink + "/sources/" + fileLink
+    case _ =>
+      ""
+  }
 }
