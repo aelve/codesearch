@@ -1,5 +1,5 @@
 @import scala.math
-@(actSearch: String, query: String, insensitive: Boolean, precise: Boolean, sources: Boolean, totalMatches: Int)
+@(actSearch: String, query: String, insensitive: Boolean, precise: Boolean, sources: Boolean)
 
 <section class="container-fluid">
     <div class="col-lg-6 mx-auto p-3 h7 justify-content-center">
@@ -24,10 +24,5 @@
             </div>
         </form>
     </div>
-    @{if (totalMatches > 1000) {
-        <span class="text-secondary">total matches: more than 1000</span>
-    } else {
-        <span class="text-secondary">total matches: {totalMatches}</span>
-    }}
 
 </section>

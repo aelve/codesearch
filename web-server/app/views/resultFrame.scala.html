@@ -2,13 +2,19 @@
 @import codesearch.core.util.Helper
 @import scala.collection.mutable
 @import scala.math.max
-@(lang: String, query: String, updated: String, packages: Seq[PackageResult])
+@(lang: String, query: String, updated: String, packages: Seq[PackageResult], totalMatches: Int)
 
 <section class="container">
-    <span class="text-secondary">Index updated @updated</span>
+    <span class="text-secondary">Index updated @updated</span> <br>
+
+    @{if (totalMatches > 1000) {
+            <h4 class="display-7" style="margin-bottom: 0em; margin-top: 2em; text-align: left;">total matches: more than 1000</h4>
+    } else {
+            <h4 class="display-7" style="margin-bottom: 0em; margin-top: 2em; text-align: left;">total matches: {totalMatches}</h4>
+    }}
 
     @for(pack <- packages) {
-        <h5 class="display-7" style="margin-bottom: 0"><a href=@pack.packageLink>@pack.name</a></h5>
+        <h5 class="display-7" style="margin-bottom: 0em; margin-top: 1em;"><a href=@pack.packageLink>@pack.name</a></h5>
         <span class="text-secondary" style="margin-bottom: 1em">@pack.results.size matches</span> <br>
 
         @for(result <- pack.results) {
