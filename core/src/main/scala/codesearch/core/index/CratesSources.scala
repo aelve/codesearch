@@ -46,7 +46,7 @@ object CratesSources extends Sources[CratesTable] {
         .flatMap(uri => CratesIndex contentByURI(uri, nameToVersion)).groupBy(x => (x._1, x._2)).map {
         case ((name, packageLink), results) =>
           PackageResult(name, packageLink, results.map(_._3))
-      }.toSeq)
+      }.toSeq.sortBy(_.name))
     }
   }
 
