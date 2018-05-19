@@ -42,12 +42,12 @@ object HackageSources extends Sources[HackageTable] {
 
     val answer = (args #| Seq("head", "-1001")).!!
     val answers = answer.split('\n')
-    (answers.length, answers.sortBy(identity)
+    (answers.length, answers
       .slice(math.max(page - 1, 0) * 100, page * 100)
       .flatMap(HackageIndex.contentByURI).groupBy { x => (x._1, x._2) }.map {
       case ((verName, packageLink), results) =>
         PackageResult(verName, packageLink, results.map(_._3).toSeq)
-    }.toSeq)
+    }.toSeq.sortBy(identity))
   }
 
   def downloadSources(name: String, ver: String): Future[Int] = {
