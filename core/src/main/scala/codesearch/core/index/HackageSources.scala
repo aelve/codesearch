@@ -42,7 +42,7 @@ object HackageSources extends Sources[HackageTable] {
 
     val answer = (args #| Seq("head", "-1001")).!!
     val answers = answer.split('\n')
-    (answers.length, answers
+    (answers.length, answers.sortBy(identity)
       .slice(math.max(page - 1, 0) * 100, page * 100)
       .flatMap(HackageIndex.contentByURI).groupBy { x => (x._1, x._2) }.map {
       case ((verName, packageLink), results) =>
