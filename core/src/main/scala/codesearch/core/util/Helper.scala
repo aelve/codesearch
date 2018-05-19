@@ -51,7 +51,7 @@ object Helper {
     case "haskell" =>
       packageLink + "/src/" + fileLink
     case "rust" =>
-      packageLink + "/sources/" + fileLink
+      packageLink + "/source/" + fileLink
     case _ =>
       ""
   }
