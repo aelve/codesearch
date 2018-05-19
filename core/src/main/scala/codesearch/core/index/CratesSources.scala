@@ -36,11 +36,13 @@ object CratesSources extends Sources[CratesTable] {
     }
     args.append(query)
 
-    val answer = (args #| Seq("head", "-1001")).!!.slice(math.max(page - 1, 0) * 100, math.max(page - 1, 0) * 100 + 100)
+    val answer = (args #| Seq("head", "-1001")).!!
 
     CratesIndex.verNames().map { verSeq =>
       val nameToVersion = Map(verSeq: _*)
-      answer.split('\n').flatMap(uri => CratesIndex contentByURI(uri, nameToVersion)).groupBy(x => (x._1, x._2)).map {
+      answer.split('\n')
+        .slice(math.max(page - 1, 0) * 100, page * 100)
+        .flatMap(uri => CratesIndex contentByURI(uri, nameToVersion)).groupBy(x => (x._1, x._2)).map {
         case ((name, packageLink), results) =>
           PackageResult(name, packageLink, results.map(_._3))
       }.toSeq

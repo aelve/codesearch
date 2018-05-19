@@ -40,9 +40,11 @@ object HackageSources extends Sources[HackageTable] {
     }
     args.append(query)
 
-    val answer = (args #| Seq("head", "-1001")).!!.slice(math.max(page - 1, 0) * 100, page * 100)
+    val answer = (args #| Seq("head", "-1001")).!!
 
-    answer.split('\n').flatMap(HackageIndex.contentByURI).groupBy { x => (x._1, x._2) }.map {
+    answer.split('\n')
+      .slice(math.max(page - 1, 0) * 100, page * 100)
+      .flatMap(HackageIndex.contentByURI).groupBy { x => (x._1, x._2) }.map {
       case ((verName, packageLink), results) =>
         PackageResult(verName, packageLink, results.map(_._3).toSeq)
     }.toSeq
