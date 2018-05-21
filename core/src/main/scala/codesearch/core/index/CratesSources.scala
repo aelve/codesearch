@@ -1,7 +1,5 @@
 package codesearch.core.index
 
-import java.io.IOException
-
 import ammonite.ops.{Path, pwd}
 import codesearch.core.model.CratesTable
 import codesearch.core.util.Helper

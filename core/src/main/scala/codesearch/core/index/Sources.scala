@@ -1,7 +1,13 @@
 package codesearch.core.index
 
+import java.io.File
+
+import ammonite.ops.Path
+import sys.process._
 import codesearch.core.db.DefaultDB
 import codesearch.core.model.DefaultTable
+import org.rauschig.jarchivelib.{ArchiveFormat, ArchiverFactory, CompressionType}
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -28,4 +34,38 @@ trait Sources[VTable <: DefaultTable] {
     futureAction
   }
 
+  def archiveDownloadAndExtract(name: String, ver: String, packageURL: String,
+                                packageFileGZ: Path,
+                                packageFileDir: Path): Future[Int] = {
+
+    val archive = packageFileGZ.toIO
+    val destination = packageFileDir.toIO
+
+    destination.mkdirs()
+
+    val archiver = ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP)
+    try {
+      downloadFile(packageURL, archive)
+//      logger.info(s"downloaded")
+
+      archiver.extract(archive, destination)
+//      logger.info("extacted")
+
+      val future = indexAPI.insertOrUpdate(name, ver)
+//      logger.info("DB updated")
+
+      future
+    } catch {
+      case e: Exception =>
+        Future[Int] {
+//          logger.info(e.getMessage)
+          0
+        }
+    }
+
+  }
+
+  def downloadFile(srcURL: String, dstFile: File): Unit = {
+    s"curl -o ${dstFile.getPath} $srcURL" !!
+  }
 }

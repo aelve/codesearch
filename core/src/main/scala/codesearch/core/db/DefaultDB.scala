@@ -2,12 +2,11 @@ package codesearch.core.db
 
 import java.sql.Timestamp
 
-import codesearch.core.model.{CratesTable, DefaultTable, HackageTable}
+import codesearch.core.model.{CratesTable, DefaultTable, HackageTable, NpmTable}
 import slick.lifted.TableQuery
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.Future
-
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait DefaultDB[T <: DefaultTable] {

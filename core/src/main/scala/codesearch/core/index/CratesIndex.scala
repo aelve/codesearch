@@ -2,17 +2,14 @@ package codesearch.core.index
 
 import sys.process._
 import ammonite.ops.pwd
-import codesearch.core.db.{CratesDB, DefaultDB}
-import codesearch.core.model.{CratesTable, Version}
+import codesearch.core.db.CratesDB
+import codesearch.core.model.Version
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json._
 import codesearch.core.util.Helper
 import codesearch.core.model
 
 import scala.concurrent.ExecutionContext.Implicits.global
-
-import scala.concurrent.{Await, Future}
-import scala.concurrent.duration.Duration
 
 object CratesIndex extends Index with CratesDB {
   private val logger: Logger = LoggerFactory.getLogger(this.getClass)
