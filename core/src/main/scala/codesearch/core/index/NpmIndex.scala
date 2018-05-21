@@ -48,7 +48,7 @@ object NpmIndex extends Index with NpmDB {
 
           val remPath = pathSeq.drop(1).mkString("/")
 
-          Some((decodedName, s"https://hackage.haskell.org/package/$decodedName", Result(
+          Some((decodedName, s"https://www.npmjs.com/package/$decodedName", Result(
             remPath,
             firstLine,
             nLine.toInt - 1,
