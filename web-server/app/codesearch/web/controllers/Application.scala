@@ -1,6 +1,6 @@
 package codesearch.web.controllers
 
-import codesearch.core.index.{CratesIndex, HackageIndex}
+import codesearch.core.index.{CratesIndex, HackageIndex, NpmIndex}
 import com.github.marlonlom.utilities.timeago.TimeAgo
 import javax.inject.Inject
 import play.api.mvc.InjectedController
@@ -23,6 +23,12 @@ class Application @Inject() (
 
   def rust = Action.async { implicit request =>
     CratesIndex.updated.map(updated => Ok(views.html.rust(
+      TimeAgo.using(updated.getTime)
+    )))
+  }
+
+  def javascript = Action.async { implicit request =>
+    NpmIndex.updated.map(updated => Ok(views.html.rust(
       TimeAgo.using(updated.getTime)
     )))
   }
