@@ -1,5 +1,7 @@
 package codesearch.core.index
 
+import java.net.URLEncoder
+
 import ammonite.ops.{Path, pwd}
 import codesearch.core.db.DefaultDB
 import codesearch.core.index.HackageSources.{downloadFile, indexAPI, logger}
@@ -18,22 +20,23 @@ object NpmSources extends Sources[NpmTable] {
   override protected val indexAPI: Index with DefaultDB[NpmTable] = NpmIndex
 
   override def downloadSources(name: String, ver: String): Future[Int] = {
+    val encodedName = URLEncoder.encode(name, "UTF-8")
     SOURCES.toIO.mkdirs()
 
-    s"rm -rf ${SOURCES / name}" !!
+    s"rm -rf ${SOURCES / encodedName}" !!
 
     val packageURL =
       s"https://registry.npmjs.org/$name/-/$name-$ver.tgz"
 
     val packageFileGZ =
-      pwd / 'data / 'js / 'packages / name / s"$ver.tar.gz"
+      pwd / 'data / 'js / 'packages / encodedName / s"$ver.tar.gz"
 
     val packageFileDir =
-      pwd / 'data / 'js / 'packages / name / ver
+      pwd / 'data / 'js / 'packages / encodedName / ver
 
-    logger.debug(s"EXTRACTING $name-$ver")
+    logger.info(s"EXTRACTING $name-$ver (dir: $encodedName)")
     val result = archiveDownloadAndExtract(name, ver, packageURL, packageFileGZ, packageFileDir)
-    logger.debug("EXTRACTED")
+    logger.info("EXTRACTED")
     result
   }
 }
