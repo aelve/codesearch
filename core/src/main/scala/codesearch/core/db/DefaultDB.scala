@@ -65,5 +65,10 @@ trait CratesDB extends DefaultDB[CratesTable] {
   val table = TableQuery[CratesTable]
 }
 
+trait NpmDB extends DefaultDB[NpmTable] {
+  val table = TableQuery[NpmTable]
+}
+
 object HackageDB extends HackageDB
 object CratesDB extends CratesDB
+object NpmDB extends NpmDB
