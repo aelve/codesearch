@@ -32,7 +32,8 @@ object NpmSources extends Sources[NpmTable] {
       pwd / 'data / 'js / 'packages / name / ver
 
     logger.debug(s"EXTRACTING $name-$ver")
-    archiveDownloadAndExtract(name, ver, packageURL, packageFileGZ, packageFileDir)
-    logger.debug(s"EXTRACTED")
+    val result = archiveDownloadAndExtract(name, ver, packageURL, packageFileGZ, packageFileDir)
+    logger.debug("EXTRACTED")
+    result
   }
 }
