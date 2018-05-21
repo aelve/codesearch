@@ -36,12 +36,12 @@ object CratesSources extends Sources[CratesTable] {
 
     val answer = (args #| Seq("head", "-1001")).!!
 
-    CratesIndex.verNames().map { verSeq =>
+    indexAPI.verNames().map { verSeq =>
       val nameToVersion = Map(verSeq: _*)
       val answers = answer.split('\n')
       (answers.length, answers
         .slice(math.max(page - 1, 0) * 100, page * 100)
-        .flatMap(uri => CratesIndex contentByURI(uri, nameToVersion)).groupBy(x => (x._1, x._2)).map {
+        .flatMap(uri => indexAPI contentByURI(uri, nameToVersion)).groupBy(x => (x._1, x._2)).map {
         case ((name, packageLink), results) =>
           PackageResult(name, packageLink, results.map(_._3))
       }.toSeq.sortBy(_.name))

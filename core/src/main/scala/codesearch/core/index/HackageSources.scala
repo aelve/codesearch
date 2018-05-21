@@ -23,28 +23,18 @@ object HackageSources extends Sources[HackageTable] {
   override val indexAPI: HackageIndex.type = HackageIndex
 
   def csearch(searchQuery: String, insensitive: Boolean, precise: Boolean, sources: Boolean, page: Int): (Int, Seq[PackageResult]) = {
-    val query: String = {
-      if (precise) {
-        Helper.hideSymbols(searchQuery)
+    val pathRegex = {
+      if (sources) {
+        ".*\\.(hs|lhs|hsc|hs-boot|lhs-boot)$"
       } else {
-        searchQuery
+        "*"
       }
     }
-
-    val args: mutable.ListBuffer[String] = mutable.ListBuffer("csearch", "-n")
-    if (insensitive) {
-      args.append("-i")
-    }
-    if (sources) {
-      args.append("-f", ".*\\.(hs|lhs|hsc|hs-boot|lhs-boot)$")
-    }
-    args.append(query)
-
-    val answer = (args #| Seq("head", "-1001")).!!
+    val answer = runCsearch(searchQuery, insensitive, precise, pathRegex)
     val answers = answer.split('\n')
     (answers.length, answers
       .slice(math.max(page - 1, 0) * 100, page * 100)
-      .flatMap(HackageIndex.contentByURI).groupBy { x => (x._1, x._2) }.map {
+      .flatMap(indexAPI.contentByURI).groupBy { x => (x._1, x._2) }.map {
       case ((verName, packageLink), results) =>
         PackageResult(verName, packageLink, results.map(_._3).toSeq)
     }.toSeq.sortBy(_.name))
