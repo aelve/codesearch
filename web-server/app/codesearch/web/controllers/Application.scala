@@ -34,13 +34,15 @@ class Application @Inject() (
   }
 
   def index = Action.async { implicit request =>
-    HackageIndex.updated.zip(HackageIndex.getSize).zip(
-      CratesIndex.updated.zip(CratesIndex.getSize)
-    ).map {
-      case ((updatedHackage, sizeHackage), (updatedCrates, sizeCrates)) =>
+    HackageIndex.updated.zip(HackageIndex.getSize)
+      .zip(CratesIndex.updated.zip(CratesIndex.getSize))
+      .zip(NpmIndex.updated.zip(NpmIndex.getSize))
+      .map {
+      case (((updatedHackage, sizeHackage), (updatedCrates, sizeCrates)), (updatedNpm, sizeNpm)) =>
         Ok(views.html.index(
           LangInfo(updatedHackage.getTime, sizeHackage),
-          LangInfo(updatedCrates.getTime, sizeCrates)
+          LangInfo(updatedCrates.getTime, sizeCrates),
+          LangInfo(updatedNpm.getTime, sizeNpm)
         ))
     }
   }

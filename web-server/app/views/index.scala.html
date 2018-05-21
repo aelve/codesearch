@@ -1,5 +1,5 @@
 @import codesearch.web.controllers.LangInfo
-@(hackageInfo: LangInfo, cratesInfo: LangInfo)
+@(hackageInfo: LangInfo, cratesInfo: LangInfo, npmInfo: LangInfo)
 
 <!doctype html>
 
@@ -47,6 +47,18 @@
                         <div class="info">
                             @{cratesInfo.totalPackages} packages<br>
                             Last updated: @{cratesInfo.updatedAgo}
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="lang">
+                            <a href="/js"><h2>Rust</h2></a>
+                            <a href="https://npmjs.com"><div class="subtitle">
+                                npmjs.com
+                            </div></a>
+                        </div>
+                        <div class="info">
+                            @{npmInfo.totalPackages} packages<br>
+                            Last updated: @{npmInfo.updatedAgo}
                         </div>
                     </div>
                 </div>
