@@ -31,6 +31,8 @@ object NpmSources extends Sources[NpmTable] {
     val packageFileDir =
       pwd / 'data / 'js / 'packages / name / ver
 
+    logger.debug(s"EXTRACTING $name-$ver")
     archiveDownloadAndExtract(name, ver, packageURL, packageFileGZ, packageFileDir)
+    logger.debug(s"EXTRACTED")
   }
 }
