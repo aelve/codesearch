@@ -28,7 +28,7 @@ class Application @Inject() (
   }
 
   def javascript = Action.async { implicit request =>
-    NpmIndex.updated.map(updated => Ok(views.html.rust(
+    NpmIndex.updated.map(updated => Ok(views.html.javascript(
       TimeAgo.using(updated.getTime)
     )))
   }
