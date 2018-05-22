@@ -14,7 +14,7 @@ import org.slf4j.{Logger, LoggerFactory}
 import scala.concurrent.Future
 
 object NpmSources extends Sources[NpmTable] {
-  private val logger: Logger = LoggerFactory.getLogger(CratesSources.getClass)
+  private val logger: Logger = LoggerFactory.getLogger(NpmSources.getClass)
   private val SOURCES: Path = pwd / 'data / 'js / 'packages
 
   override protected val indexAPI: Index with DefaultDB[NpmTable] = NpmIndex
@@ -38,7 +38,7 @@ object NpmSources extends Sources[NpmTable] {
   }
 
   override def downloadSources(name: String, ver: String): Future[Int] = {
-    Future {
+//    Future {
       val encodedName = URLEncoder.encode(name, "UTF-8")
       SOURCES.toIO.mkdirs()
 
@@ -54,12 +54,10 @@ object NpmSources extends Sources[NpmTable] {
         pwd / 'data / 'js / 'packages / encodedName / ver
 
       logger.info(s"EXTRACTING $name-$ver (dir: $encodedName)")
-      (packageURL, packageFileGZ, packageFileDir)
-    } flatMap { case (packageURL, packageFileGZ, packageFileDir) =>
+//      (packageURL, packageFileGZ, packageFileDir)
       val result = archiveDownloadAndExtract(name, ver, packageURL, packageFileGZ, packageFileDir)
       logger.info(s"EXTRACTED $name-$ver")
       result
-    }
-
+//    }
   }
 }
