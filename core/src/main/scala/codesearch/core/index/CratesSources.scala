@@ -7,7 +7,6 @@ import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable
 import scala.sys.process._
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object CratesSources extends Sources[CratesTable] {
