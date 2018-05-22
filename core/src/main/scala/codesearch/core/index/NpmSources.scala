@@ -38,23 +38,28 @@ object NpmSources extends Sources[NpmTable] {
   }
 
   override def downloadSources(name: String, ver: String): Future[Int] = {
-    val encodedName = URLEncoder.encode(name, "UTF-8")
-    SOURCES.toIO.mkdirs()
+    Future {
+      val encodedName = URLEncoder.encode(name, "UTF-8")
+      SOURCES.toIO.mkdirs()
 
-    s"rm -rf ${SOURCES / encodedName}" !!
+      s"rm -rf ${SOURCES / encodedName}" !!
 
-    val packageURL =
-      s"https://registry.npmjs.org/$name/-/$name-$ver.tgz"
+      val packageURL =
+        s"https://registry.npmjs.org/$name/-/$name-$ver.tgz"
 
-    val packageFileGZ =
-      pwd / 'data / 'js / 'packages / encodedName / s"$ver.tar.gz"
+      val packageFileGZ =
+        pwd / 'data / 'js / 'packages / encodedName / s"$ver.tar.gz"
 
-    val packageFileDir =
-      pwd / 'data / 'js / 'packages / encodedName / ver
+      val packageFileDir =
+        pwd / 'data / 'js / 'packages / encodedName / ver
 
-    logger.info(s"EXTRACTING $name-$ver (dir: $encodedName)")
-    val result = archiveDownloadAndExtract(name, ver, packageURL, packageFileGZ, packageFileDir)
-    logger.info("EXTRACTED")
-    result
+      logger.info(s"EXTRACTING $name-$ver (dir: $encodedName)")
+      (packageURL, packageFileGZ, packageFileDir)
+    } flatMap { case (packageURL, packageFileGZ, packageFileDir) =>
+      val result = archiveDownloadAndExtract(name, ver, packageURL, packageFileGZ, packageFileDir)
+      logger.info(s"EXTRACTED $name-$ver")
+      result
+    }
+
   }
 }
