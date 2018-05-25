@@ -58,6 +58,7 @@ trait Sources[VTable <: DefaultTable] {
                                 packageFileDir: Path, extensions: Option[Set[String]] = None): Future[Int] = {
     val archive = packageFileGZ.toIO
     val destination = packageFileDir.toIO
+    println(archive, "->", destination)
 
     Future {
 
@@ -101,7 +102,8 @@ trait Sources[VTable <: DefaultTable] {
   }
 
   def downloadFile(srcURL: String, dstFile: File): Unit = {
-    s"curl -o ${dstFile.getPath} $srcURL" !!
+    Seq("curl", "-o", dstFile.getAbsolutePath, srcURL) !!
+//    s"curl -o ${dstFile.getPath} $srcURL" !!
   }
 
   def runCsearch(searchQuery: String,
