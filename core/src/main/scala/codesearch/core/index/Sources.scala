@@ -78,7 +78,7 @@ trait Sources[VTable <: DefaultTable] {
       }
     } map {
       case true =>
-        extensions.isEmpty || applyFilter(extensions.get, destination)
+        extensions.isEmpty || applyFilter(extensions.get, destination) || applyFilter(extensions.get, archive)
       case false =>
         false
     } flatMap {
