@@ -58,7 +58,7 @@ object NpmSources extends Sources[NpmTable] {
       logger.info(s"EXTRACTING $name-$ver (dir: $encodedName)")
 //      (packageURL, packageFileGZ, packageFileDir)
       val result = archiveDownloadAndExtract(name, ver, packageURL, packageFileGZ, packageFileDir, Some(extensions))
-      logger.info(s"EXTRACTED $name-$ver")
+//      logger.info(s"EXTRACTED $name-$ver")
       result
 //    }
   }

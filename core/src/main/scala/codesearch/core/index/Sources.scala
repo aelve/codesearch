@@ -56,11 +56,10 @@ trait Sources[VTable <: DefaultTable] {
   def archiveDownloadAndExtract(name: String, ver: String, packageURL: String,
                                 packageFileGZ: Path,
                                 packageFileDir: Path, extensions: Option[Set[String]] = None): Future[Int] = {
-    val archive = packageFileGZ.toIO
-    val destination = packageFileDir.toIO
-    println(archive, "->", destination)
 
     Future {
+      val archive = packageFileGZ.toIO
+      val destination = packageFileDir.toIO
 
       try {
         destination.mkdirs()
@@ -79,7 +78,10 @@ trait Sources[VTable <: DefaultTable] {
       }
     } map {
       case true =>
-        extensions.isEmpty || applyFilter(extensions.get, destination) || applyFilter(extensions.get, archive)
+        val archive = packageFileGZ.toIO
+        val destination = packageFileDir.toIO
+
+        extensions.isEmpty || (applyFilter(extensions.get, destination) && applyFilter(extensions.get, archive))
       case false =>
         false
     } flatMap {
@@ -102,7 +104,7 @@ trait Sources[VTable <: DefaultTable] {
   }
 
   def downloadFile(srcURL: String, dstFile: File): Unit = {
-    Seq("curl", "-o", dstFile.getAbsolutePath, srcURL) !!
+    Seq("curl", "-o", dstFile.getCanonicalPath, srcURL) !!
 //    s"curl -o ${dstFile.getPath} $srcURL" !!
   }
 
