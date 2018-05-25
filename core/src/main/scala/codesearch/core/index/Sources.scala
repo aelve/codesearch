@@ -8,6 +8,7 @@ import sys.process._
 import codesearch.core.db.DefaultDB
 import codesearch.core.model.DefaultTable
 import codesearch.core.util.Helper
+import org.apache.commons.io.FilenameUtils
 import org.rauschig.jarchivelib.{ArchiveFormat, ArchiverFactory, CompressionType}
 
 import scala.collection.mutable
@@ -54,10 +55,11 @@ trait Sources[VTable <: DefaultTable] {
 
   def archiveDownloadAndExtract(name: String, ver: String, packageURL: String,
                                 packageFileGZ: Path,
-                                packageFileDir: Path): Future[Int] = {
+                                packageFileDir: Path, extensions: Option[Set[String]] = None): Future[Int] = {
+    val archive = packageFileGZ.toIO
+    val destination = packageFileDir.toIO
+
     Future {
-      val archive = packageFileGZ.toIO
-      val destination = packageFileDir.toIO
 
       try {
         destination.mkdirs()
@@ -74,6 +76,11 @@ trait Sources[VTable <: DefaultTable] {
 
           false
       }
+    } map {
+      case true =>
+        extensions.isEmpty || applyFilter(extensions.get, destination)
+      case false =>
+        false
     } flatMap {
       case true =>
         indexAPI.insertOrUpdate(name, ver)
@@ -81,6 +88,15 @@ trait Sources[VTable <: DefaultTable] {
         Future {
           0
         }
+    }
+  }
+
+  def applyFilter(extensions: Set[String], curFile: File): Boolean = {
+    if (curFile.isDirectory) {
+      curFile.listFiles.forall(applyFilter(extensions, _))
+    } else {
+      val ext = FilenameUtils.getExtension(curFile.getName)
+      !curFile.exists || (extensions contains ext) || curFile.delete
     }
   }
 

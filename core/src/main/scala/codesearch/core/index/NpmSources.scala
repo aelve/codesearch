@@ -17,6 +17,8 @@ object NpmSources extends Sources[NpmTable] {
   private val logger: Logger = LoggerFactory.getLogger(NpmSources.getClass)
   private val SOURCES: Path = pwd / 'data / 'js / 'packages
 
+  private val extensions: Set[String] = Set("js", "json", "xml", "yml", "coffee", "markdown", "md", "yaml", "txt")
+
   override protected val indexAPI: Index with DefaultDB[NpmTable] = NpmIndex
 
   def csearch(searchQuery: String, insensitive: Boolean, precise: Boolean, sources: Boolean, page: Int): (Int, Seq[PackageResult]) = {
@@ -55,7 +57,7 @@ object NpmSources extends Sources[NpmTable] {
 
       logger.info(s"EXTRACTING $name-$ver (dir: $encodedName)")
 //      (packageURL, packageFileGZ, packageFileDir)
-      val result = archiveDownloadAndExtract(name, ver, packageURL, packageFileGZ, packageFileDir)
+      val result = archiveDownloadAndExtract(name, ver, packageURL, packageFileGZ, packageFileDir, Some(extensions))
       logger.info(s"EXTRACTED $name-$ver")
       result
 //    }
