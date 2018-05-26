@@ -64,10 +64,13 @@ trait Sources[VTable <: DefaultTable] {
       try {
         destination.mkdirs()
 
-        val archiver = ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP)
-        downloadFile(packageURL, archive)
+//        val archiver = ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP)
+        (Seq("curl", "-o", archive.getCanonicalPath, packageURL) #&&
+          Seq("tar", "-xvfz", archive.getCanonicalPath, "-C", destination.getCanonicalPath)
+          ) !!
 
-        archiver.extract(archive, destination)
+
+//        archiver.extract(archive, destination)
 
         true
       } catch {
@@ -104,7 +107,6 @@ trait Sources[VTable <: DefaultTable] {
   }
 
   def downloadFile(srcURL: String, dstFile: File): Unit = {
-    Seq("curl", "-o", dstFile.getCanonicalPath, srcURL) !!
 //    s"curl -o ${dstFile.getPath} $srcURL" !!
   }
 
