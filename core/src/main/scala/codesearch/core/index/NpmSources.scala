@@ -21,6 +21,8 @@ object NpmSources extends Sources[NpmTable] {
 
   override protected val indexAPI: Index with DefaultDB[NpmTable] = NpmIndex
 
+  private var counter: Int = 0
+
   def csearch(searchQuery: String, insensitive: Boolean, precise: Boolean, sources: Boolean, page: Int): (Int, Seq[PackageResult]) = {
     val pathRegex = {
       if (sources) {
@@ -40,6 +42,11 @@ object NpmSources extends Sources[NpmTable] {
   }
 
   override def downloadSources(name: String, ver: String): Future[Int] = {
+    counter += 1
+    if (counter == 100) {
+      counter = 0
+      Thread.sleep(10000)
+    }
       val encodedName = URLEncoder.encode(name, "UTF-8")
       SOURCES.toIO.mkdirs()
 
