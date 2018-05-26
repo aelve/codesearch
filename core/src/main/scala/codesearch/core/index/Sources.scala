@@ -56,42 +56,26 @@ trait Sources[VTable <: DefaultTable] {
                                 packageFileGZ: Path,
                                 packageFileDir: Path, extensions: Option[Set[String]] = None): Future[Int] = {
 
-    Future {
-      val archive = packageFileGZ.toIO
-      val destination = packageFileDir.toIO
+    val archive = packageFileGZ.toIO
+    val destination = packageFileDir.toIO
 
-      try {
-        destination.mkdirs()
-        println(s"::::::START::::::::$name-$ver")
+    try {
+      destination.mkdirs()
 
-//        val archiver = ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP)
-        (Seq("curl", "-o", archive.getCanonicalPath, packageURL) #&&
-          Seq("tar", "-I", "pigz", "-xvfz", archive.getCanonicalPath, "-C", destination.getCanonicalPath)
-          ) !!
+      Seq("curl", "-o", archive.getCanonicalPath, packageURL) !!
 
+      Seq("tar", "-xvf", archive.getCanonicalPath, "-C", destination.getCanonicalPath) !!
 
-//        archiver.extract(archive, destination)
-
-        true
-      } catch {
-        case e: Exception =>
-          println(s"::::::FAILED::::::::$name-$ver")
-          e.printStackTrace()
-
-          false
+      if (extensions.isDefined) {
+        applyFilter(extensions.get, archive)
+        applyFilter(extensions.get, destination)
       }
-    } flatMap {
-      case true =>
-        val archive = packageFileGZ.toIO
-        val destination = packageFileDir.toIO
 
-        if (extensions.isDefined) {
-          applyFilter(extensions.get, archive)
-          applyFilter(extensions.get, destination)
-        }
-
-        indexAPI.insertOrUpdate(name, ver)
-      case false =>
+      indexAPI.insertOrUpdate(name, ver)
+    } catch {
+      case e: Exception =>
+        println(s"::::::FAILED::::::::$name-$ver")
+        e.printStackTrace()
         Future {
           0
         }
