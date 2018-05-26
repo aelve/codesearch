@@ -9,7 +9,6 @@ import codesearch.core.db.DefaultDB
 import codesearch.core.model.DefaultTable
 import codesearch.core.util.Helper
 import org.apache.commons.io.FilenameUtils
-import org.rauschig.jarchivelib.{ArchiveFormat, ArchiverFactory, CompressionType}
 
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
@@ -63,10 +62,11 @@ trait Sources[VTable <: DefaultTable] {
 
       try {
         destination.mkdirs()
+        println(s"::::::START::::::::$name-$ver")
 
 //        val archiver = ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP)
         (Seq("curl", "-o", archive.getCanonicalPath, packageURL) #&&
-          Seq("tar", "-xvfz", archive.getCanonicalPath, "-C", destination.getCanonicalPath)
+          Seq("tar", "-I", "pigz", "-xvfz", archive.getCanonicalPath, "-C", destination.getCanonicalPath)
           ) !!
 
 
@@ -75,20 +75,21 @@ trait Sources[VTable <: DefaultTable] {
         true
       } catch {
         case e: Exception =>
+          println(s"::::::FAILED::::::::$name-$ver")
           e.printStackTrace()
 
           false
       }
-    } map {
+    } flatMap {
       case true =>
         val archive = packageFileGZ.toIO
         val destination = packageFileDir.toIO
 
-        extensions.isEmpty || (applyFilter(extensions.get, destination) && applyFilter(extensions.get, archive))
-      case false =>
-        false
-    } flatMap {
-      case true =>
+        if (extensions.isDefined) {
+          applyFilter(extensions.get, archive)
+          applyFilter(extensions.get, destination)
+        }
+
         indexAPI.insertOrUpdate(name, ver)
       case false =>
         Future {
@@ -97,12 +98,14 @@ trait Sources[VTable <: DefaultTable] {
     }
   }
 
-  def applyFilter(extensions: Set[String], curFile: File): Boolean = {
+  def applyFilter(extensions: Set[String], curFile: File): Unit = {
     if (curFile.isDirectory) {
-      curFile.listFiles.forall(applyFilter(extensions, _))
+      curFile.listFiles.foreach(applyFilter(extensions, _))
     } else {
       val ext = FilenameUtils.getExtension(curFile.getName)
-      !curFile.exists || (extensions contains ext) || curFile.delete
+      if (curFile.exists() && !(extensions contains ext)) {
+        curFile.delete
+      }
     }
   }
 
