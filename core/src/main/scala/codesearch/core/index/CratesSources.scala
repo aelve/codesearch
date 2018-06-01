@@ -12,6 +12,8 @@ import scala.concurrent.Future
 object CratesSources extends Sources[CratesTable] {
   val SOURCES: Path = pwd / 'data / 'rust / 'packages
 
+  private val CARGO_PATH = "./cargo"
+
   override val logger: Logger = LoggerFactory.getLogger(CratesSources.getClass)
   override val indexAPI: CratesIndex.type = CratesIndex
 
@@ -54,7 +56,7 @@ object CratesSources extends Sources[CratesTable] {
     try {
       s"rm -rf ${SOURCES / name}" !!
 
-      s"cargo clone $name --vers $ver --prefix $SOURCES" !!
+      s"$CARGO_PATH clone $name --vers $ver --prefix $SOURCES" !!
 
       logger.info("package cloned")
 
