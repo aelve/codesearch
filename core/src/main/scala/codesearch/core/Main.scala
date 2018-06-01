@@ -1,13 +1,13 @@
 package codesearch.core
 
 import ammonite.ops.{FilePath, pwd}
-import codesearch.core.index.{CratesIndex, CratesSources, HackageIndex, HackageSources}
-import codesearch.core.db.{CratesDB, HackageDB}
+import codesearch.core.index._
+import codesearch.core.db.{CratesDB, DefaultDB, HackageDB, NpmDB}
+import codesearch.core.model.{CratesTable, DefaultTable, HackageTable, NpmTable}
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
-
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object Main {
@@ -16,7 +16,8 @@ object Main {
   case class Config(updatePackages: Boolean = false,
                     downloadIndex: Boolean = false,
                     sourcesDir: FilePath = pwd / 'sources,
-                    initDB: Boolean = false
+                    initDB: Boolean = false,
+                    lang: String = "all"
                    )
 
   private val parser = new scopt.OptionParser[Config]("main") {
@@ -33,27 +34,58 @@ object Main {
     opt[Unit]('i', "init-database") action { (_, c) =>
       c.copy(initDB = true)
     } text "create tables for database"
+
+    opt[String]('l', "lang") action { (l, c) =>
+      c.copy(lang = l)
+    }
   }
+
+  case class LangRep[T <: DefaultTable](db: DefaultDB[T],
+                                        index: Index,
+                                        sources: Sources[T]
+                                       )
+
+  private val langReps = Map(
+    "hackage" -> LangRep[HackageTable](HackageDB, HackageIndex, HackageSources),
+    "crates" -> LangRep[CratesTable](CratesDB, CratesIndex, CratesSources),
+    "npm" -> LangRep[NpmTable](NpmDB, NpmIndex, NpmSources)
+  )
 
   def main(args: Array[String]): Unit = {
     logger.info("Codesearch-core started")
 
     parser.parse(args, Config()) foreach { c =>
+
+      if (c.lang != "all" && !(langReps.keySet contains c.lang)) {
+        throw new IllegalArgumentException(s"available languages: ${langReps.keys}")
+      }
+
       if (c.initDB) {
-        val future = Future.sequence(Seq(
-          HackageDB.initDB(), CratesDB.initDB()))
+        val future = c.lang match {
+          case "all" =>
+            Future.sequence(langReps.values.map(_.db.initDB()))
+          case lang =>
+            langReps(lang).db.initDB()
+        }
         Await.result(future, Duration.Inf)
       }
 
-      if (c.downloadIndex) {
-        HackageIndex.updateIndex()
-        CratesIndex.updateIndex()
-      }
+      if (c.downloadIndex) { c.lang match {
+        case "all" =>
+          langReps.values.foreach(_.index.updateIndex())
+        case lang =>
+          langReps(lang).index.updateIndex()
+      } }
 
       if (c.updatePackages) {
-        val future = Future.sequence(Seq(
-          CratesSources.update(), HackageSources.update()))
-            .map(_.sum)
+        val future = c.lang match {
+          case "all" =>
+            Future
+              .sequence(langReps.values.map(_.sources.update()))
+              .map(_.sum)
+          case lang =>
+            langReps(lang).sources.update()
+        }
         val cntUpdated = Await.result(future, Duration.Inf)
 
         logger.info(s"updated: $cntUpdated")

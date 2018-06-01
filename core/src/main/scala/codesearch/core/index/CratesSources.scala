@@ -12,7 +12,7 @@ import scala.concurrent.Future
 object CratesSources extends Sources[CratesTable] {
   val SOURCES: Path = pwd / 'data / 'rust / 'packages
 
-  private val logger: Logger = LoggerFactory.getLogger(CratesSources.getClass)
+  override val logger: Logger = LoggerFactory.getLogger(CratesSources.getClass)
   override val indexAPI: CratesIndex.type = CratesIndex
 
   def csearch(searchQuery: String, insensitive: Boolean, precise: Boolean, sources: Boolean, page: Int = 0): Future[(Int, Seq[PackageResult])] = {

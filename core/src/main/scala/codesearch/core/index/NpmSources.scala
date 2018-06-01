@@ -8,13 +8,12 @@ import codesearch.core.index.HackageSources.{downloadFile, indexAPI, logger, run
 
 import scala.sys.process._
 import codesearch.core.model.NpmTable
-import org.rauschig.jarchivelib.{ArchiveFormat, ArchiverFactory, CompressionType}
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.Future
 
 object NpmSources extends Sources[NpmTable] {
-  private val logger: Logger = LoggerFactory.getLogger(NpmSources.getClass)
+  override val logger: Logger = LoggerFactory.getLogger(NpmSources.getClass)
   private val SOURCES: Path = pwd / 'data / 'js / 'packages
 
   private val extensions: Set[String] = Set("js", "json", "xml", "yml", "coffee", "markdown", "md", "yaml", "txt")

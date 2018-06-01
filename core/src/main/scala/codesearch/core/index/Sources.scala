@@ -9,12 +9,14 @@ import codesearch.core.db.DefaultDB
 import codesearch.core.model.DefaultTable
 import codesearch.core.util.Helper
 import org.apache.commons.io.FilenameUtils
+import org.slf4j.Logger
 
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 
 trait Sources[VTable <: DefaultTable] {
   protected val indexAPI: Index with DefaultDB[VTable]
+  protected val logger: Logger
 
   def downloadSources(name: String, ver: String): Future[Int]
 
@@ -49,7 +51,11 @@ trait Sources[VTable <: DefaultTable] {
       })
     }.map(_.sum)
 
-    futureAction
+    Future {
+      logger.debug("UPDATE PACKAGES")
+    } flatMap { _ =>
+      futureAction
+    }
   }
 
   def archiveDownloadAndExtract(name: String, ver: String, packageURL: String,
@@ -74,8 +80,7 @@ trait Sources[VTable <: DefaultTable] {
       indexAPI.insertOrUpdate(name, ver)
     } catch {
       case e: Exception =>
-        println(s"::::::FAILED::::::::$name-$ver")
-        e.printStackTrace()
+        logger.debug(e.getLocalizedMessage)
         Future {
           0
         }

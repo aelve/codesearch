@@ -19,7 +19,7 @@ case class Result(fileLink: String, firstLine: Int, nLine: Int, ctxt: Seq[String
 case class PackageResult(name: String, packageLink: String, results: Seq[Result])
 
 object HackageSources extends Sources[HackageTable] {
-  private val logger: Logger = LoggerFactory.getLogger(HackageSources.getClass)
+  override val logger: Logger = LoggerFactory.getLogger(HackageSources.getClass)
   override val indexAPI: HackageIndex.type = HackageIndex
 
   def csearch(searchQuery: String, insensitive: Boolean, precise: Boolean, sources: Boolean, page: Int): (Int, Seq[PackageResult]) = {
