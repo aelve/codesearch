@@ -21,16 +21,11 @@ case class PackageResult(name: String, packageLink: String, results: Seq[Result]
 object HackageSources extends Sources[HackageTable] {
   override val logger: Logger = LoggerFactory.getLogger(HackageSources.getClass)
   override val indexAPI: HackageIndex.type = HackageIndex
+  override val indexFile: String = ".hackage_csearch_index"
+  override val langExts: String = ".*\\.(hs|lhs|hsc|hs-boot|lhs-boot)$"
 
   def csearch(searchQuery: String, insensitive: Boolean, precise: Boolean, sources: Boolean, page: Int): (Int, Seq[PackageResult]) = {
-    val pathRegex = {
-      if (sources) {
-        ".*\\.(hs|lhs|hsc|hs-boot|lhs-boot)$"
-      } else {
-        "*"
-      }
-    }
-    val answer = runCsearch(searchQuery, insensitive, precise, pathRegex)
+    val answer = runCsearch(searchQuery, insensitive, precise, sources)
     val answers = answer.split('\n')
     (answers.length, answers
       .slice(math.max(page - 1, 0) * 100, page * 100)

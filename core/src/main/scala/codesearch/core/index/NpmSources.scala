@@ -19,18 +19,14 @@ object NpmSources extends Sources[NpmTable] {
   private val extensions: Set[String] = Set("js", "json", "xml", "yml", "coffee", "markdown", "md", "yaml", "txt")
 
   override protected val indexAPI: Index with DefaultDB[NpmTable] = NpmIndex
+  override val indexFile: String = ".npm_csearch_index"
+
+  override val langExts: String = ".*\\.(js|json)$"
 
   private var counter: Int = 0
 
   def csearch(searchQuery: String, insensitive: Boolean, precise: Boolean, sources: Boolean, page: Int): (Int, Seq[PackageResult]) = {
-    val pathRegex = {
-      if (sources) {
-        ".*\\.(js)$"
-      } else {
-        "*"
-      }
-    }
-    val answer = runCsearch(searchQuery, insensitive, precise, pathRegex)
+    val answer = runCsearch(searchQuery, insensitive, precise, sources)
     val answers = answer.split('\n')
     (answers.length, answers
       .slice(math.max(page - 1, 0) * 100, page * 100)

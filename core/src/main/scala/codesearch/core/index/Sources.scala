@@ -2,7 +2,7 @@ package codesearch.core.index
 
 import java.io.File
 
-import ammonite.ops.Path
+import ammonite.ops.{Path, pwd}
 
 import sys.process._
 import codesearch.core.db.DefaultDB
@@ -17,6 +17,10 @@ import scala.concurrent.{ExecutionContext, Future}
 trait Sources[VTable <: DefaultTable] {
   protected val indexAPI: Index with DefaultDB[VTable]
   protected val logger: Logger
+  protected val indexFile: String
+  protected val langExts: String
+
+  protected val path: Path = pwd / 'data / indexFile
 
   def downloadSources(name: String, ver: String): Future[Int]
 
@@ -103,7 +107,15 @@ trait Sources[VTable <: DefaultTable] {
   }
 
   def runCsearch(searchQuery: String,
-                 insensitive: Boolean, precise: Boolean, pathRegex: String) = {
+                 insensitive: Boolean, precise: Boolean, sources: Boolean) = {
+    val pathRegex = {
+      if (sources) {
+        langExts
+      } else {
+        "*"
+      }
+    }
+
     val query: String = {
       if (precise) {
         Helper.hideSymbols(searchQuery)
@@ -118,6 +130,6 @@ trait Sources[VTable <: DefaultTable] {
     }
     args.append("-f", pathRegex)
     args.append(query)
-    (args #| Seq("head", "-1001")).!!
+    (Process(args, None, "CSEARCHINDEX" -> path.toString()) #| Seq("head", "-1001")).!!
   }
 }

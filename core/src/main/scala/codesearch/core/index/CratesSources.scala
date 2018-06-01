@@ -16,27 +16,12 @@ object CratesSources extends Sources[CratesTable] {
 
   override val logger: Logger = LoggerFactory.getLogger(CratesSources.getClass)
   override val indexAPI: CratesIndex.type = CratesIndex
+  override val indexFile: String = ".crates_csearch_index"
+  override val langExts: String = ".*\\.(rs)$"
+
 
   def csearch(searchQuery: String, insensitive: Boolean, precise: Boolean, sources: Boolean, page: Int = 0): Future[(Int, Seq[PackageResult])] = {
-    val query: String = {
-      if (precise) {
-        Helper.hideSymbols(searchQuery)
-      } else {
-        searchQuery
-      }
-    }
-
-    val args: mutable.ListBuffer[String] = mutable.ListBuffer("csearch", "-n")
-    if (insensitive) {
-      args.append("-i")
-    }
-    if (sources) {
-      args.append("-f", ".*\\.(rs)$")
-    }
-    args.append(query)
-
-    val answer = (args #| Seq("head", "-1001")).!!
-
+    val answer = runCsearch(searchQuery, insensitive, precise, sources)
     indexAPI.verNames().map { verSeq =>
       val nameToVersion = Map(verSeq: _*)
       val answers = answer.split('\n')
