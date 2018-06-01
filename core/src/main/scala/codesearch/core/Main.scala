@@ -48,16 +48,21 @@ object Main {
   private val langReps = Map(
     "hackage" -> LangRep[HackageTable](HackageDB, HackageIndex, HackageSources),
     "crates" -> LangRep[CratesTable](CratesDB, CratesIndex, CratesSources),
-    "npm" -> LangRep[NpmTable](NpmDB, NpmIndex, NpmSources)
+//    "npm" -> LangRep[NpmTable](NpmDB, NpmIndex, NpmSources)
   )
 
   def main(args: Array[String]): Unit = {
-    logger.info("Codesearch-core started")
 
     parser.parse(args, Config()) foreach { c =>
 
       if (c.lang != "all" && !(langReps.keySet contains c.lang)) {
-        throw new IllegalArgumentException(s"available languages: ${langReps.keys}")
+        throw new IllegalArgumentException(s"Unsupported lanuages\n Available languages: ${langReps.keys}")
+      }
+
+      if (c.lang == "all") {
+        logger.info("Codesearch-core started for all supported languages")
+      } else {
+        logger.info(s"Codesearch-core started for language ${c.lang}")
       }
 
       if (c.initDB) {
