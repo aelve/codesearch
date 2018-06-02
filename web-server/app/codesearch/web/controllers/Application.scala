@@ -46,4 +46,8 @@ class Application @Inject() (
         ))
     }
   }
+
+  def untrail(path: String) = Action {
+    MovedPermanently("/" + path)
+  }
 }
