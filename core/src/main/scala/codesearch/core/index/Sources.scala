@@ -17,10 +17,10 @@ import scala.concurrent.{ExecutionContext, Future}
 trait Sources[VTable <: DefaultTable] {
   protected val indexAPI: Index with DefaultDB[VTable]
   protected val logger: Logger
-  protected val indexFile: String
   protected val langExts: String
 
-  protected val path: Path = pwd / 'data / indexFile
+  protected val indexFile: String
+  protected lazy val indexPath: Path = pwd / 'data / indexFile
 
   def downloadSources(name: String, ver: String): Future[Int]
 
@@ -107,7 +107,7 @@ trait Sources[VTable <: DefaultTable] {
   }
 
   def runCsearch(searchQuery: String,
-                 insensitive: Boolean, precise: Boolean, sources: Boolean) = {
+                 insensitive: Boolean, precise: Boolean, sources: Boolean): String = {
     val pathRegex = {
       if (sources) {
         langExts
@@ -130,6 +130,6 @@ trait Sources[VTable <: DefaultTable] {
     }
     args.append("-f", pathRegex)
     args.append(query)
-    (Process(args, None, "CSEARCHINDEX" -> path.toString()) #| Seq("head", "-1001")).!!
+    (Process(args, None, "CSEARCHINDEX" -> indexPath.toString()) #| Seq("head", "-1001")).!!
   }
 }
