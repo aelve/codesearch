@@ -20,7 +20,7 @@ trait Sources[VTable <: DefaultTable] {
   protected val langExts: String
 
   protected val indexFile: String
-  protected lazy val indexPath: Path = root / 'aelve / 'data / indexFile // FIXME
+  protected lazy val indexPath: Path = root / 'root / 'aelve / 'data / indexFile // FIXME
 
   def downloadSources(name: String, ver: String): Future[Int]
 
