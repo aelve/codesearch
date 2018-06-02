@@ -107,7 +107,7 @@ trait Sources[VTable <: DefaultTable] {
   }
 
   def runCsearch(searchQuery: String,
-                 insensitive: Boolean, precise: Boolean, sources: Boolean): String = {
+                 insensitive: Boolean, precise: Boolean, sources: Boolean): Array[String] = {
     val pathRegex = {
       if (sources) {
         langExts
@@ -131,6 +131,13 @@ trait Sources[VTable <: DefaultTable] {
     args.append("-f", pathRegex)
     args.append(query)
     logger.debug(indexPath.toString())
-    (Process(args, None, "CSEARCHINDEX" -> indexPath.toString()) #| Seq("head", "-1001")).!!
+
+    val answer = (Process(args, None, "CSEARCHINDEX" -> indexPath.toString()) #| Seq("head", "-1001")).!!
+
+    if (answer.nonEmpty) {
+      answer.split('\n')
+    } else {
+      Array()
+    }
   }
 }

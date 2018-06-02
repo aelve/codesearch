@@ -26,8 +26,7 @@ object NpmSources extends Sources[NpmTable] {
   private var counter: Int = 0
 
   def csearch(searchQuery: String, insensitive: Boolean, precise: Boolean, sources: Boolean, page: Int): (Int, Seq[PackageResult]) = {
-    val answer = runCsearch(searchQuery, insensitive, precise, sources)
-    val answers = answer.split('\n')
+    val answers = runCsearch(searchQuery, insensitive, precise, sources)
     (answers.length, answers
       .slice(math.max(page - 1, 0) * 100, page * 100)
       .flatMap(NpmIndex.contentByURI).groupBy { x => (x._1, x._2) }.map {

@@ -21,10 +21,9 @@ object CratesSources extends Sources[CratesTable] {
 
 
   def csearch(searchQuery: String, insensitive: Boolean, precise: Boolean, sources: Boolean, page: Int = 0): Future[(Int, Seq[PackageResult])] = {
-    val answer = runCsearch(searchQuery, insensitive, precise, sources)
+    val answers = runCsearch(searchQuery, insensitive, precise, sources)
     indexAPI.verNames().map { verSeq =>
       val nameToVersion = Map(verSeq: _*)
-      val answers = answer.split('\n')
       (answers.length, answers
         .slice(math.max(page - 1, 0) * 100, page * 100)
         .flatMap(uri => indexAPI contentByURI(uri, nameToVersion)).groupBy(x => (x._1, x._2)).map {
