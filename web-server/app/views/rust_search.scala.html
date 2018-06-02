@@ -35,7 +35,7 @@
     <body>
         <main class="container">
             @searchBox("/rust/search", query, insensitive, precise, sources)
-            @resultFrame("rust", query, updated, packages, totalMatches)
+            @resultFrame("rust", precise, query, updated, packages, totalMatches)
             @pagination(page, totalMatches, callURI)
         </main>
     </body>

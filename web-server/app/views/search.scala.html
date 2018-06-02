@@ -37,7 +37,7 @@
   <body>
     <main class="container">
       @searchBox("/haskell/search", query, insensitive, precise, sources)
-      @resultFrame("haskell", query, updated, packages, totalMatches)
+      @resultFrame("haskell", precise, query, updated, packages, totalMatches)
       @pagination(page, totalMatches, callURI)
     </main>
   </body>

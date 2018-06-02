@@ -36,7 +36,7 @@
     <body>
         <main class="container">
             @searchBox("/js/search", query, insensitive, precise, sources)
-            @resultFrame("js", query, updated, packages, totalMatches)
+            @resultFrame("js", precise, query, updated, packages, totalMatches)
             @pagination(page, totalMatches, callURI)
         </main>
     </body>

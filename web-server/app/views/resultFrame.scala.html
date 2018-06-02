@@ -2,7 +2,7 @@
 @import codesearch.core.util.Helper
 @import scala.collection.mutable
 @import scala.math.max
-@(lang: String, query: String, updated: String, packages: Seq[PackageResult], totalMatches: Int)
+@(lang: String, precise: Boolean, query: String, updated: String, packages: Seq[PackageResult], totalMatches: Int)
 
 <section class="container">
     <span class="text-secondary">Index updated @updated</span> <br>
@@ -20,7 +20,13 @@
         @for(result <- pack.results) {
             <a href=@(Helper.linkByLang(lang, pack.packageLink, result.fileLink))>@result.fileLink</a>
             <pre data-start=@{result.firstLine + 1}><code class="@("language-" + lang + " line-numbers")">@{
-                val re = query.r
+                val re = {
+                    if (precise) {
+                        Helper.hideSymbols(query)
+                    } else {
+                        query
+                    }
+                }.r
                 val id = result.nLine - result.firstLine
                 val hLine = result.ctxt(id)
                 val matches = re.findAllMatchIn(hLine)
