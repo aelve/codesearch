@@ -2,6 +2,8 @@
 @import codesearch.core.util.Helper
 @import scala.collection.mutable
 @import scala.math.max
+@import scala.collection.mutable.ListBuffer
+@import scala.collection.immutable
 @(lang: String, precise: Boolean, query: String, updated: String, packages: Seq[PackageResult], totalMatches: Int)
 
 <section class="container">
@@ -32,27 +34,10 @@
                 val matches = re.findAllMatchIn(hLine)
                 var lastL = 0
                 var lastR = 0
-                val hRes = mutable.ListBuffer[Char]()
+//                val hRes = mutable.ListBuffer[Char]()
 
-                matches.map(m => (m.start, m.end)).foreach { case (l, r) =>
-                    if(lastR <= l) {
-                        if (lastR != 0) {
-                            hRes ++= "</mark>"
-                        }
-                        hRes ++= hLine.substring(lastR, l)
-                        hRes ++= "<mark>"
-                        hRes ++= hLine.substring(l, r)
-                        lastL = l
-                        lastR = r
-                    } else {
-                        hRes ++= hLine.substring(lastR, max(lastR, r))
-                        lastR = max(lastR, r)
-                    }
-                }
-                if (lastR != 0) {
-                    hRes ++= "</mark>"
-                }
-                hRes ++= hLine.substring(lastR)
+                val htmlBuilder: ListBuffer[Html] = mutable.ListBuffer.empty[Html]
+
                 val pref = result.ctxt.take(id).mkString("\n")
                 val pref2 = {
                     if (pref.nonEmpty) {
@@ -61,7 +46,31 @@
                         ""
                     }
                 }
-                Html(pref2 ++ hRes ++ "\n" ++ result.ctxt.drop(id + 1).mkString("\n"))
+                htmlBuilder.append(HtmlFormat.escape(pref2))
+
+                matches.map(m => (m.start, m.end)).foreach { case (l, r) =>
+                    if(lastR <= l) {
+                        if (lastR != 0) {
+                            htmlBuilder.append(Html("</mark>"))
+                        }
+                        htmlBuilder.append(HtmlFormat.escape(hLine.substring(lastR, l)))
+                        htmlBuilder.append(Html("<mark>"))
+                        htmlBuilder.append(HtmlFormat.escape(hLine.substring(l, r)))
+                        lastL = l
+                        lastR = r
+                    } else {
+                        htmlBuilder.append(HtmlFormat.escape(hLine.substring(lastR, max(lastR, r))))
+                        lastR = max(lastR, r)
+                    }
+                }
+                if (lastR != 0) {
+                    htmlBuilder.append(Html("</mark>"))
+                }
+                htmlBuilder.append(HtmlFormat.escape(hLine.substring(lastR)))
+
+                htmlBuilder.append(HtmlFormat.escape("\n" ++ result.ctxt.drop(id + 1).mkString("\n")))
+
+                HtmlFormat.fill(immutable.Seq(htmlBuilder: _*))
             }</code></pre>
         }
     }
