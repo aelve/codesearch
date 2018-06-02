@@ -18,8 +18,20 @@
                 <input type="checkbox" class="form-check-input" name="precise" id="precise-match" @(if (precise) "checked")>
                 <label class="form-check-label" for="precise-match">Precise match</label>
             </div>
+
+            <script>
+                    function changeSourcesOnly() {
+                        var v = document.getElementById("sources-only-hidden").value;
+                        if (v === "on") {
+                            document.getElementById("sources-only-hidden").value = "off"
+                        } else {
+                            document.getElementById("sources-only-hidden").value = "on"
+                        }
+                    }
+            </script>
+            <input type="hidden" name="sources" id="sources-only-hidden" value=@(if (sources) "on" else "off")>
             <div class="form-check form-check-inline">
-                <input type="checkbox" class="form-check-input" name="sources" id="sources-only" @(if (sources) "checked")>
+                <input type="checkbox" id="sources-only" onclick="changeSourcesOnly()" @(if (sources) "checked")>
                 <label class="form-check-label" for="sources-only">Sources only</label>
             </div>
         </form>
