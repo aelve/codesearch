@@ -112,7 +112,7 @@ trait Sources[VTable <: DefaultTable] {
       if (sources) {
         langExts
       } else {
-        "*"
+        ".*"
       }
     }
 
