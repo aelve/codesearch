@@ -96,5 +96,7 @@ object Main {
         logger.info(s"updated: $cntUpdated")
       }
     }
+
+    scala.sys.exit(0)
   }
 }
