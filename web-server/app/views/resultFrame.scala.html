@@ -47,7 +47,15 @@
                     hRes ++= "</mark>"
                 }
                 hRes ++= hLine.substring(lastR)
-                Html(result.ctxt.take(id).mkString("\n") ++ "\n" ++ hRes ++ "\n" ++ result.ctxt.drop(id + 1).mkString("\n"))
+                val pref = result.ctxt.take(id).mkString("\n")
+                val pref2 = {
+                    if (pref.nonEmpty) {
+                        pref ++ "\n"
+                    } else {
+                        ""
+                    }
+                }
+                Html(pref2 ++ hRes ++ "\n" ++ result.ctxt.drop(id + 1).mkString("\n"))
             }</code></pre>
         }
     }
