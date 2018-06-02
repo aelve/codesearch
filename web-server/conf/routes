@@ -1,4 +1,4 @@
-GET     /?                          codesearch.web.controllers.Application.index
+GET     /                           codesearch.web.controllers.Application.index
 
 GET     /haskell/?                  codesearch.web.controllers.Application.haskell
 GET     /haskell/search/?           codesearch.web.controllers.HackageSearcher.index(query: String ?= "", insensitive: String ?= "", precise: String ?= "", sources: String ?= "on", page: String ?= "1")
