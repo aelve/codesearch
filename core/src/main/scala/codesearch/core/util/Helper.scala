@@ -2,6 +2,7 @@ package codesearch.core.util
 
 import java.io.File
 
+import org.apache.commons.io.FilenameUtils
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable
@@ -54,5 +55,23 @@ object Helper {
       packageLink + "/source/" + fileLink
     case _ =>
       ""
+  }
+
+  def langByLink(fileLink: String, defaultLang: String): String = {
+    val langByExt = Map(
+      "hs" -> "haskell",
+      "md" -> "markdown",
+      "cpp" -> "cpp",
+      "c" -> "c",
+      "js" -> "javascript",
+      "css" -> "css",
+      "java" -> "java",
+      "rs" -> "rust",
+      "yml" -> "yaml",
+      "yaml" -> "yaml"
+      "json" -> "json"
+    )
+    val ext = FilenameUtils.getExtension(fileLink)
+    langByExt.getOrElse(ext, defaultLang)
   }
 }

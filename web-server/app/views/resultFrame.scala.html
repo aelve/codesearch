@@ -22,7 +22,8 @@
 
         @for(result <- pack.results) {
             <a href=@(Helper.linkByLang(lang, pack.packageLink, result.fileLink))>@result.fileLink</a>
-            <pre data-start=@{result.firstLine + 1}><code class="@("language-" + lang + " line-numbers")">@{
+            <pre data-start=@{result.firstLine + 1}><code class="@("language-" + Helper.langByLink(result.fileLink, lang) +
+                    " line-numbers")">@{
                 val re = {
                     if (precise) {
                         Helper.hideSymbols(query)
@@ -35,7 +36,6 @@
                 val matches = re.findAllMatchIn(hLine)
                 var lastL = 0
                 var lastR = 0
-//                val hRes = mutable.ListBuffer[Char]()
 
                 val htmlBuilder: ListBuffer[Html] = mutable.ListBuffer.empty[Html]
 
