@@ -68,7 +68,7 @@ object Helper {
       "java" -> "java",
       "rs" -> "rust",
       "yml" -> "yaml",
-      "yaml" -> "yaml"
+      "yaml" -> "yaml",
       "json" -> "json"
     )
     val ext = FilenameUtils.getExtension(fileLink)
