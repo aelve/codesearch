@@ -1,6 +1,6 @@
 .token.operator {
     /* fight weird background change in the default style */
-    background: inherit;
+    background: none;
 }
 
 .line-highlight {
