@@ -63,6 +63,8 @@ object Helper {
       "md" -> "markdown",
       "cpp" -> "cpp",
       "c" -> "c",
+      "h" -> "c",
+      "hpp" -> "cpp",
       "js" -> "javascript",
       "css" -> "css",
       "java" -> "java",
