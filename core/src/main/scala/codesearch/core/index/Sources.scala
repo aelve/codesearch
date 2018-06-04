@@ -62,9 +62,14 @@ trait Sources[VTable <: DefaultTable] {
     }
   }
 
+  lazy val defaultExtractor: (String, String) => Unit =
+    (src: String, dst: String) => Seq("tar", "-xvf", src, "-C", dst) !!
+
   def archiveDownloadAndExtract(name: String, ver: String, packageURL: String,
                                 packageFileGZ: Path,
-                                packageFileDir: Path, extensions: Option[Set[String]] = None): Future[Int] = {
+                                packageFileDir: Path,
+                                extensions: Option[Set[String]] = None,
+                                extractor: (String, String) => Unit = defaultExtractor): Future[Int] = {
 
     val archive = packageFileGZ.toIO
     val destination = packageFileDir.toIO
@@ -74,7 +79,7 @@ trait Sources[VTable <: DefaultTable] {
 
       Seq("curl", "-o", archive.getCanonicalPath, packageURL) !!
 
-      Seq("tar", "-xvf", archive.getCanonicalPath, "-C", destination.getCanonicalPath) !!
+      extractor(archive.getCanonicalPath, destination.getCanonicalPath)
 
       if (extensions.isDefined) {
         applyFilter(extensions.get, archive)

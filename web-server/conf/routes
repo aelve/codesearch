@@ -11,6 +11,9 @@ GET     /rust/search                codesearch.web.controllers.CratesSearcher.in
 GET     /js                         codesearch.web.controllers.Application.javascript
 GET     /js/search                  codesearch.web.controllers.NpmSearcher.index(query: String ?= "", insensitive: String ?= "", precise: String ?= "", sources: String ?= "on", page: String ?= "1")
 
+GET     /ruby                       codesearch.web.controllers.Application.ruby
+GET     /ruby/search                codesearch.web.controllers.GemSearcher.index(query: String ?= "", insensitive: String ?= "", precise: String ?= "", sources: String ?= "on", page: String ?= "1")
+
 GET     /versionedAssets/file       controllers.Assets.versioned(file)
 
 

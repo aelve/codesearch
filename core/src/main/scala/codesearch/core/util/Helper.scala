@@ -14,6 +14,24 @@ object Helper {
 
   private val SPECIAL_CHARS = "$^*+().?|"
 
+  val langByExt: Map[String, String] = Map(
+    "hs" -> "haskell",
+    "md" -> "markdown",
+    "cpp" -> "cpp",
+    "c" -> "c",
+    "h" -> "c",
+    "hpp" -> "cpp",
+    "js" -> "javascript",
+    "css" -> "css",
+    "java" -> "java",
+    "rs" -> "rust",
+    "yml" -> "yaml",
+    "yaml" -> "yaml",
+    "json" -> "json",
+    "rb" -> "ruby"
+  )
+
+
   def recursiveListFiles(cur: File): Array[File] = {
     val these = cur.listFiles
     these.filter(_.isFile) ++ these.filter(_.isDirectory).filter(_.getName != ".git").flatMap(recursiveListFiles)
@@ -58,21 +76,6 @@ object Helper {
   }
 
   def langByLink(fileLink: String, defaultLang: String): String = {
-    val langByExt = Map(
-      "hs" -> "haskell",
-      "md" -> "markdown",
-      "cpp" -> "cpp",
-      "c" -> "c",
-      "h" -> "c",
-      "hpp" -> "cpp",
-      "js" -> "javascript",
-      "css" -> "css",
-      "java" -> "java",
-      "rs" -> "rust",
-      "yml" -> "yaml",
-      "yaml" -> "yaml",
-      "json" -> "json"
-    )
     val ext = FilenameUtils.getExtension(fileLink)
     langByExt.getOrElse(ext, defaultLang)
   }

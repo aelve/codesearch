@@ -2,8 +2,8 @@ package codesearch.core
 
 import ammonite.ops.{FilePath, pwd}
 import codesearch.core.index._
-import codesearch.core.db.{CratesDB, DefaultDB, HackageDB, NpmDB}
-import codesearch.core.model.{CratesTable, DefaultTable, HackageTable, NpmTable}
+import codesearch.core.db._
+import codesearch.core.model._
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.{Await, Future}
@@ -47,7 +47,8 @@ object Main {
 
   private val langReps = Map(
     "hackage" -> LangRep[HackageTable](HackageDB, HackageIndex, HackageSources),
-    "crates" -> LangRep[CratesTable](CratesDB, CratesIndex, CratesSources),
+    "crates"  -> LangRep[CratesTable](CratesDB, CratesIndex, CratesSources),
+    "gem"     -> LangRep[GemTable](GemDB, GemIndex, GemSources)
 //    "npm" -> LangRep[NpmTable](NpmDB, NpmIndex, NpmSources)
   )
 
