@@ -24,7 +24,7 @@ object GemIndex extends Index with GemDB {
   override def updateIndex(): Unit = {
     Seq("curl", "-o", GEM_INDEX_ARCHIVE.toString, GEM_INDEX_URL) !!
 
-    Seq("ruby", DESERIALIZER_PATH.toString(),
+    Seq("/usr/bin/ruby", DESERIALIZER_PATH.toString(),
       GEM_INDEX_ARCHIVE.toString(), GEM_INDEX_JSON.toString()) !!
   }
 
