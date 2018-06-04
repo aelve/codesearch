@@ -1,6 +1,7 @@
 package codesearch.core.index
 
 import java.io.FileInputStream
+import java.net.URLDecoder
 
 import sys.process._
 import ammonite.ops.pwd
@@ -45,18 +46,19 @@ object GemIndex extends Index with GemDB {
       None
     } else {
       val fullPath = elems.head
-      val pathSeq: Seq[String] = elems.head.split('/').drop(8)
+      val pathSeq: Seq[String] = elems.head.split('/').drop(6)
       val nLine = elems.drop(1).head
       pathSeq.headOption match {
         case None =>
           println(s"bad uri: $uri")
           None
         case Some(name) =>
+          val decodedName = URLDecoder.decode(name, "UTF-8")
           val (firstLine, rows) = Helper.extractRows(fullPath, nLine.toInt)
 
           val remPath = pathSeq.drop(1).mkString("/")
 
-          Some((name, s"https://hackage.haskell.org/package/$name", Result(
+          Some((decodedName, s"https://www.npmjs.com/package/$decodedName", Result(
             remPath,
             firstLine,
             nLine.toInt - 1,
@@ -64,5 +66,6 @@ object GemIndex extends Index with GemDB {
           )))
       }
     }
+
   }
 }
