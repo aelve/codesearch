@@ -2,7 +2,7 @@ package codesearch.core.db
 
 import java.sql.Timestamp
 
-import codesearch.core.model.{CratesTable, DefaultTable, HackageTable, NpmTable}
+import codesearch.core.model._
 import slick.lifted.TableQuery
 import slick.jdbc.PostgresProfile.api._
 
@@ -51,7 +51,7 @@ trait DefaultDB[T <: DefaultTable] {
     db.run(act)
   }
 
-  def initDB() = {
+  def initDB(): Future[Unit] = {
     db.run(table.schema.create)
   }
 }
@@ -68,6 +68,11 @@ trait NpmDB extends DefaultDB[NpmTable] {
   val table = TableQuery[NpmTable]
 }
 
+trait GemDB extends DefaultDB[GemTable] {
+  val table = TableQuery[GemTable]
+}
+
 object HackageDB extends HackageDB
 object CratesDB extends CratesDB
 object NpmDB extends NpmDB
+object GemDB extends GemDB
