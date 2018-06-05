@@ -14,7 +14,7 @@ class GemSearcher @Inject() (
 
   def index(query: String, insensitive: String, precise: String, sources: String, page: String) =
     Action.async { implicit request =>
-      val callURI = s"/haskell/search?query=$query&insensitive=$insensitive&precise=$precise&sources=$sources"
+      val callURI = s"/ruby/search?query=$query&insensitive=$insensitive&precise=$precise&sources=$sources"
 
       GemDB.updated.map(updated =>
         GemSources.csearch(query, insensitive == "on", precise == "on", sources == "on", page.toInt) match {

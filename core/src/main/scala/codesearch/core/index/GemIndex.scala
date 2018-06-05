@@ -58,7 +58,7 @@ object GemIndex extends Index with GemDB {
 
           val remPath = pathSeq.drop(1).mkString("/")
 
-          Some((decodedName, s"https://www.npmjs.com/package/$decodedName", Result(
+          Some((decodedName, s"https://rubygems.org/gems/$decodedName", Result(
             remPath,
             firstLine,
             nLine.toInt - 1,
