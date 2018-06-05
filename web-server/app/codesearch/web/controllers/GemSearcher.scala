@@ -19,7 +19,7 @@ class GemSearcher @Inject() (
       GemDB.updated.map(updated =>
         GemSources.csearch(query, insensitive == "on", precise == "on", sources == "on", page.toInt) match {
           case (count, results) =>
-            Ok(views.html.search(
+            Ok(views.html.ruby_search(
               TimeAgo.using(updated.getTime),
               results,
               query,
