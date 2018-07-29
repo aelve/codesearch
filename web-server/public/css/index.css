@@ -1,6 +1,6 @@
 html {
     /* this is root font size; everything else (specified with "rem") depends on it */
-    font-size: 18px;
+    font-size: 16px;
 }
 
 .container {
