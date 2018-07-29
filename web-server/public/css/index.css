@@ -55,6 +55,17 @@ h2 {
 
     /* add some red for contrast */
     color: #f44336;
+    text-decoration-color: #f44336;
+
+    /* don't have any extra vertical space; we have padding already */
+    margin-top: 0;
+    line-height: 100%;
+}
+
+h2 a[href] {
+    /* links in subtitles should be red too */
+    color: inherit;
+    text-decoration-color: inherit;
 }
 
 .item {
@@ -77,18 +88,11 @@ h2 {
 .item:hover {
     /* highlight items on hover */
     background-color: #f0f0f0;
-    cursor: pointer;
 }
 
 .lang {
     /* set up the columns */
     width: 50%;
-}
-
-.lang h2 {
-    /* don't have any extra vertical space in headers; we have padding already */
-    margin-top: 0;
-    line-height: 100%;
 }
 
 .info {
