@@ -30,7 +30,7 @@
             </script>
             <input type="hidden" name="sources" id="sources-only-hidden" value=@(if (sources) "on" else "off")>
             <div class="form-check form-check-inline">
-                <input type="checkbox" id="sources-only" onclick="changeSourcesOnly()" @(if (sources) "checked")>
+                <input type="checkbox" class="form-check-input" id="sources-only" onclick="changeSourcesOnly()" @(if (sources) "checked")>
                 <label class="form-check-label" for="sources-only">Sources only</label>
             </div>
         </form>
