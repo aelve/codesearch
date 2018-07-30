@@ -50,6 +50,12 @@ header h1 {
     white-space: nowrap;
 }
 
+header h1 a[href] {
+    /* the header shouldn't look like a link */
+    color: inherit;
+    text-decoration: none;
+}
+
 header .subtitle {
     /* the main subtitle should be bigger */
     font-size: 2rem;

@@ -1,4 +1,4 @@
-@(title: String, headExtra: Html = Html(""))(content: Html)
+@(title: String, headExtra: Html = Html(""), headerLink: Boolean = true)(content: Html)
 
 <!doctype html>
 
@@ -18,7 +18,11 @@
     <body>
         <header>
             <div class="wrapper">
-                <h1>Aelve Codesearch</h1>
+                @if(headerLink) {
+                    <h1><a href="/">Aelve Codesearch</a></h1>
+                } else {
+                    <h1>Aelve Codesearch</h1>
+                }
                 <div class="subtitle">
                     grep over package repositories
                 </div>
