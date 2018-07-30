@@ -129,7 +129,7 @@ trait Sources[VTable <: DefaultTable] {
       }
     }
 
-    val args: mutable.ListBuffer[String] = mutable.ListBuffer("csearch", "-n")
+    val args: mutable.ListBuffer[String] = mutable.ListBuffer("codesearch-csearch", "-n")
     if (insensitive) {
       args.append("-i")
     }
