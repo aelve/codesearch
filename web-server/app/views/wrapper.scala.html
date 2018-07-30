@@ -1,0 +1,49 @@
+@(title: String, headExtra: Html = Html(""))(content: Html)
+
+<!doctype html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("lib/bootstrap/css/bootstrap.min.css")">
+
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/common.css")">
+
+        <title>@title</title>
+
+        @headExtra
+    </head>
+    <body>
+        <header>
+            <div class="wrapper">
+                <h1>Aelve Codesearch</h1>
+                <div class="subtitle">
+                    grep over package repositories
+                </div>
+            </div>
+        </header>
+
+        <main class="container">
+            @content
+        </main>
+
+        <footer>
+            <div class="container-fluid" style="margin-bottom: 1em;">
+                <div class="col" style="margin: 0 auto; width: 17em;">
+                    <div class="row-sm" style="margin-bottom: 0.3em">
+                        © 2018 Aelve
+                    </div>
+                    <div class="row-sm" style="margin-bottom: 0.3em">
+                        Created by <a href="https://artyom.me">Artyom</a>
+                        and <a href="https://github.com/vlad107">Vlad</a>
+                    </div>
+                    <div class="row-sm">
+                        <a href="https://github.com/aelve/codesearch">Source at GitHub</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </body>
+</html>

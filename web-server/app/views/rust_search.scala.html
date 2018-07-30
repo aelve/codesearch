@@ -1,33 +1,18 @@
 @import codesearch.core.index.PackageResult
+
 @(updated: String, packages: Seq[PackageResult], query: String, insensitive: Boolean, precise: Boolean, sources: Boolean, page: Int, totalMatches: Int, callURI: String)
 
-<!doctype html>
+@headExtra = {
+    <meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval' http://www.google.com">
 
-<html lang="en">
+    <script src="@routes.Assets.versioned("prismjs.js")"></script>
+    <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/prismjs.css")">
 
-    <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval' http://www.google.com">
+    <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/search.css")">
+}
 
-        <script src="@routes.Assets.versioned("prismjs.js")"></script>
-        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/prismjs.css")">
-
-        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("lib/bootstrap/css/bootstrap.min.css")">
-
-        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/common.css")">
-        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/search.css")">
-
-        <title>Codesearch</title>
-
-    </head>
-
-    <body>
-        <main class="container">
-            @searchBox("/rust/search", query, insensitive, precise, sources)
-            @resultFrame("rust", precise, query, updated, packages, totalMatches)
-            @pagination(page, totalMatches, callURI)
-        </main>
-        @footer()
-    </body>
-
-</html>
+@wrapper("Codesearch", headExtra){
+    @searchBox("/rust/search", query, insensitive, precise, sources)
+    @resultFrame("rust", precise, query, updated, packages, totalMatches)
+    @pagination(page, totalMatches, callURI)
+}

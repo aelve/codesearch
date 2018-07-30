@@ -1,82 +1,60 @@
 @import codesearch.web.controllers.LangInfo
 @(hackageInfo: LangInfo, cratesInfo: LangInfo, gemInfo: LangInfo, npmInfo: LangInfo)
 
-<!doctype html>
+@headExtra = {
+    <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/index.css")">
+}
 
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("lib/bootstrap/css/bootstrap.min.css")">
-
-        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/common.css")">
-        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/index.css")">
-
-        <title>Codesearch</title>
-    </head>
-    <body>
-        <div class="container">
-            <main>
-                <div class="header">
-                    <h1>Aelve Codesearch</h1>
-                    <div class="subtitle">
-                        grep over package repositories
-                    </div>
+@wrapper("Codesearch", headExtra){
+    <div class="list">
+        <div class="item">
+            <div class="lang">
+                <h2><a href="/haskell">Haskell</a></h2>
+                <div class="subtitle">
+                    <a href="https://hackage.haskell.org">hackage.haskell.org</a>
                 </div>
-                <div class="list">
-                    <div class="item">
-                        <div class="lang">
-                            <h2><a href="/haskell">Haskell</a></h2>
-                            <div class="subtitle">
-                                <a href="https://hackage.haskell.org">hackage.haskell.org</a>
-                            </div>
-                        </div>
-                        <div class="info">
-                            @{hackageInfo.totalPackages} packages<br>
-                            Last updated: @{hackageInfo.updatedAgo}
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="lang">
-                            <h2><a href="/rust">Rust</a></h2>
-                            <div class="subtitle">
-                                <a href="https://crates.io">crates.io</a>
-                            </div>
-                        </div>
-                        <div class="info">
-                            @{cratesInfo.totalPackages} packages<br>
-                            Last updated: @{cratesInfo.updatedAgo}
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="lang">
-                            <h2><a href="/ruby">Ruby</a></h2>
-                            <div class="subtitle">
-                                <a href="https://rubygems.org">rubygems.org</a>
-                            </div>
-                        </div>
-                        <div class="info">
-                            @{gemInfo.totalPackages} packages<br>
-                            Last updated: @{gemInfo.updatedAgo}
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="lang">
-                            <h2><a href="/js">JavaScript</a></h2>
-                            <span class="text-secondary">in progress</span>
-                            <div class="subtitle">
-                                <a href="https://npmjs.com">npmjs.com</a>
-                            </div>
-                        </div>
-                        <div class="info">
-                            @{npmInfo.totalPackages} packages<br>
-                            Last updated: @{npmInfo.updatedAgo}
-                        </div>
-                    </div>
-                </div>
-            <main>
+            </div>
+            <div class="info">
+                @{hackageInfo.totalPackages} packages<br>
+                Last updated: @{hackageInfo.updatedAgo}
+            </div>
         </div>
-        @footer()
-    </body>
-</html>
+        <div class="item">
+            <div class="lang">
+                <h2><a href="/rust">Rust</a></h2>
+                <div class="subtitle">
+                    <a href="https://crates.io">crates.io</a>
+                </div>
+            </div>
+            <div class="info">
+                @{cratesInfo.totalPackages} packages<br>
+                Last updated: @{cratesInfo.updatedAgo}
+            </div>
+        </div>
+        <div class="item">
+            <div class="lang">
+                <h2><a href="/ruby">Ruby</a></h2>
+                <div class="subtitle">
+                    <a href="https://rubygems.org">rubygems.org</a>
+                </div>
+            </div>
+            <div class="info">
+                @{gemInfo.totalPackages} packages<br>
+                Last updated: @{gemInfo.updatedAgo}
+            </div>
+        </div>
+        <div class="item">
+            <div class="lang">
+                <h2><a href="/js">JavaScript</a></h2>
+                <span class="text-secondary">in progress</span>
+                <div class="subtitle">
+                    <a href="https://npmjs.com">npmjs.com</a>
+                </div>
+            </div>
+            <div class="info">
+                @{npmInfo.totalPackages} packages<br>
+                Last updated: @{npmInfo.updatedAgo}
+            </div>
+        </div>
+    </div>
+}

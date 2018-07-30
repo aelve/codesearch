@@ -1,3 +1,13 @@
+html {
+    /* this is root font size; everything else (specified with "rem") depends on it */
+    font-size: 16px;
+}
+
+@media only screen and (max-width: 900px) {
+    /* for smaller screens, set font size based on screen size */
+    html { font-size: 2vw }
+}
+
 body {
     /* let's use nicer fonts */
     font-family: Roboto, sans-serif;
@@ -6,4 +16,48 @@ body {
     /* gray = "modern" */
     color: #333;
     background-color: #fafafa;
+}
+
+.subtitle {
+    /* italics for subtitles */
+    font-style: italic;
+}
+
+header {
+    /* give the header space */
+    margin-top: 4rem;
+    margin-bottom: 3rem;
+
+    /* center its contents */
+    display: flex;
+    justify-content: center;
+}
+
+header .wrapper {
+    /* make it as wide as the content (i.e. the h1 inside) */
+    display: inline-block;
+}
+
+header h1 {
+    /* bigger, thinner header */
+    font-size: 5rem;
+    font-weight: 500;
+
+    /* make the subtitle stick */
+    margin-bottom: 0;
+
+    /* never word-wrap */
+    white-space: nowrap;
+}
+
+header .subtitle {
+    /* the main subtitle should be bigger */
+    font-size: 2rem;
+
+    /* left-alignment everywhere is obnoxious */
+    text-align: right;
+}
+
+footer {
+    margin-top: 2rem;
 }

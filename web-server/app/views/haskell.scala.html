@@ -1,24 +1,10 @@
 @(updated: String)
 
-<!doctype html>
+@headExtra = {
+    <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/search.css")">
+}
 
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("lib/bootstrap/css/bootstrap.min.css")">
-
-        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/common.css")">
-        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/search.css")">
-
-        <title>Haskell</title>
-    </head>
-    <body>
-        <main class="container">
-            @searchBox("/haskell/search", "", insensitive = false, precise = false, sources = true)
-            @docFrame()
-            @footer()
-        </main>
-    </body>
-</html>
+@wrapper("Haskell", headExtra){
+    @searchBox("/haskell/search", "", insensitive = false, precise = false, sources = true)
+    @docFrame()
+}
