@@ -41,7 +41,7 @@
 
                 val pref = result.ctxt.take(id).mkString("\n")
                 val pref2 = {
-                    if (pref.nonEmpty) {
+                    if (id != 0) {
                         pref ++ "\n"
                     } else {
                         ""
