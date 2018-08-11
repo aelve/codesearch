@@ -13,6 +13,6 @@
 
 @wrapper("Codesearch", headExtra){
     @searchBox("/rust/search", query, insensitive, precise, sources)
-    @resultFrame("rust", precise, query, updated, packages, totalMatches)
+    @resultFrame("rust", insensitive, precise, query, updated, packages, totalMatches)
     @pagination(page, totalMatches, callURI)
 }

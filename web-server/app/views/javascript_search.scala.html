@@ -13,6 +13,6 @@
 
 @wrapper("Codesearch", headExtra){
     @searchBox("/js/search", query, insensitive, precise, sources)
-    @resultFrame("js", precise, query, updated, packages, totalMatches)
+    @resultFrame("js", insensitive, precise, query, updated, packages, totalMatches)
     @pagination(page, totalMatches, callURI)
 }

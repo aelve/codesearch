@@ -13,6 +13,6 @@
 
 @wrapper("Codesearch", headExtra){
     @searchBox("/ruby/search", query, insensitive, precise, sources)
-    @resultFrame("ruby", precise, query, updated, packages, totalMatches)
+    @resultFrame("ruby", insensitive, precise, query, updated, packages, totalMatches)
     @pagination(page, totalMatches, callURI)
 }

@@ -5,7 +5,7 @@
 @import scala.collection.mutable.ListBuffer
 @import scala.collection.immutable
 @import play.twirl.api._
-@(lang: String, precise: Boolean, query: String, updated: String, packages: Seq[PackageResult], totalMatches: Int)
+@(lang: String, insensitive: Boolean, precise: Boolean, query: String, updated: String, packages: Seq[PackageResult], totalMatches: Int)
 
 <section class="container">
     <span class="text-secondary">Index updated @updated</span> <br>
@@ -25,12 +25,20 @@
             <pre data-start=@{result.firstLine + 1}><code class="@("language-" + Helper.langByLink(result.fileLink, lang) +
                     " line-numbers")">@{
                 val re = {
-                    if (precise) {
-                        Helper.hideSymbols(query)
-                    } else {
-                        query
+                    val regex = mutable.StringBuilder.newBuilder
+                    if (insensitive) {
+                        regex.append("(?i)")
                     }
+                    regex.append {
+                        if (precise) {
+                            Helper.hideSymbols(query)
+                        } else {
+                            query
+                        }
+                    }
+                    regex.toString
                 }.r
+
                 val id = result.nLine - result.firstLine
                 val hLine = result.ctxt(id)
                 val matches = re.findAllMatchIn(hLine)
