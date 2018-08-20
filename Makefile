@@ -1,8 +1,15 @@
 .RECIPEPREFIX +=
 
-# Run Postgres and init the database (create tables)
+# Run Postgres
 db:
-  docker run --name codesearch-db -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres -N 1000
+  docker run --name codesearch-db \
+    -e POSTGRES_DB=sourcesdb \
+    -e POSTGRES_USER=postgres \
+    -e POSTGRES_PASSWORD=postgres \
+    -p 5432:5432 -d postgres -N 1000
+
+# Create tables
+tables:
   java -jar codesearch-core.jar -i
 
 # Destroy Postgres
