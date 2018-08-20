@@ -4,7 +4,8 @@
 
 ### codesearch
 
-Google's `codesearch` is the underlying search engine that we use. Install it from <https://github.com/google/codesearch>.
+Google's `codesearch` is the underlying search engine that we use. Install
+it from <https://github.com/google/codesearch>.
 
 ### Scala
 
@@ -14,20 +15,24 @@ The project is written in Scala. You need to install the following:
 * Scala >= 2.12.4
 * `sbt` >= 1.0.2
 
-### PostgreSQL
-
-Install PostgreSQL. Specify database name, user, and password in [application.conf](https://github.com/aelve/codesearch/blob/master/core/src/main/resources/application.conf).
-
 ### cargo-clone
 
-To fetch Rust packages we use `cargo-clone`. Install Cargo, Ruby, and `cmake`. Then you can use Cargo to install `cargo-clone`:
+To fetch Rust packages we use `cargo-clone`. Install Cargo, Ruby, and
+`cmake`. Then you can use Cargo to install `cargo-clone`:
 
     $ cargo install cargo-clone
 
 ### Running the project
 
-* `sbt web-server/assembly` from the root of the project should create `codesearch-server.jar` which could be run using `java -jar codesearch-server.jar` or added as a daemon.
+You can run Postgres by yourself, but it's better to use Docker. If you have
+Docker installed, you can do this:
 
-* `sbt web-server/run` from the root of the project should run server in the debug mode.
+    $ make build   # Build the project
+    $ make db      # Download and start Postgres (wait a bit after this step)
+    $ make tables  # Create tables
+    $ make server  # Run the server
 
-* `sbt core/assembly` from the root of the project will create `codesearch-core.jar` which can download index, update it, also it can add it to the `codesearch`'s index.
+If you head to <http://localhost:9000> now, you should see the project running.
+
+Note: if you get an error at the `make tables` stage, you probably haven't
+waited enough. Do `make db-kill` and start from `make db` again.
