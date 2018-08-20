@@ -48,8 +48,8 @@ object Main {
   private val langReps = Map(
     "hackage" -> LangRep[HackageTable](HackageDB, HackageIndex, HackageSources),
     "crates"  -> LangRep[CratesTable](CratesDB, CratesIndex, CratesSources),
-    "gem"     -> LangRep[GemTable](GemDB, GemIndex, GemSources)
-//    "npm" -> LangRep[NpmTable](NpmDB, NpmIndex, NpmSources)
+    "gem"     -> LangRep[GemTable](GemDB, GemIndex, GemSources),
+    "npm"     -> LangRep[NpmTable](NpmDB, NpmIndex, NpmSources)
   )
 
   def main(args: Array[String]): Unit = {
