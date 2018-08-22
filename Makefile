@@ -12,8 +12,9 @@ db:
 # Connect to Postgres
 .PHONY: psql
 psql:
-  docker run -it --rm --link codesearch-db:postgres postgres \
-    psql -h postgres -U postgres sourcesdb
+  docker run -it --rm --link codesearch-db:postgres \
+    -e PGPASSWORD=postgres \
+    postgres psql -h postgres -U postgres sourcesdb
 
 # Create tables
 .PHONY: tables
