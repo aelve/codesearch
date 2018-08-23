@@ -7,10 +7,10 @@ import codesearch.core.util.Helper
 import sys.process._
 import org.slf4j.{Logger, LoggerFactory}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-object GemSources extends Sources[GemTable] {
-  override val logger: Logger = LoggerFactory.getLogger(GemSources.getClass)
+class RubyIndex(val ec: ExecutionContext) extends LanguageIndex[GemTable] {
+  override val logger: Logger = LoggerFactory.getLogger(this.getClass)
   override val indexAPI: GemIndex.type = GemIndex
   override val indexFile: String = ".gem_csearch_index"
   override val langExts: String = ".*\\.(rb)$"
@@ -47,4 +47,6 @@ object GemSources extends Sources[GemTable] {
   def gemExtractor(src: String, dst: String): Unit = {
     Seq("gem", "unpack", s"--target=$dst", src) !!
   }
+
+  override implicit def executor: ExecutionContext = ec
 }

@@ -1,25 +1,16 @@
 package codesearch.core.index
 
-import java.io.File
-
 import ammonite.ops.pwd
 import codesearch.core.model.HackageTable
-
-import scala.collection.mutable
-import sys.process._
-import codesearch.core.util.Helper
-import org.rauschig.jarchivelib.{ArchiveFormat, ArchiverFactory, CompressionType}
 import org.slf4j.{Logger, LoggerFactory}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 case class Result(fileLink: String, firstLine: Int, nLine: Int, ctxt: Seq[String])
 case class PackageResult(name: String, packageLink: String, results: Seq[Result])
 
-object HackageSources extends Sources[HackageTable] {
-  override val logger: Logger = LoggerFactory.getLogger(HackageSources.getClass)
+class HaskellIndex(val ec: ExecutionContext) extends LanguageIndex[HackageTable] {
+  override val logger: Logger = LoggerFactory.getLogger(this.getClass)
   override val indexAPI: HackageIndex.type = HackageIndex
   override val indexFile: String = ".hackage_csearch_index"
   override val langExts: String = ".*\\.(hs|lhs|hsc|hs-boot|lhs-boot)$"
@@ -48,4 +39,6 @@ object HackageSources extends Sources[HackageTable] {
 
     archiveDownloadAndExtract(name, ver, packageURL, packageFileGZ, packageFileDir)
   }
+
+  override implicit def executor: ExecutionContext = ec
 }

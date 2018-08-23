@@ -4,16 +4,15 @@ import java.net.URLEncoder
 
 import ammonite.ops.{Path, pwd}
 import codesearch.core.db.DefaultDB
-import codesearch.core.index.HackageSources.{downloadFile, indexAPI, logger, runCsearch}
 
 import scala.sys.process._
 import codesearch.core.model.NpmTable
 import org.slf4j.{Logger, LoggerFactory}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-object NpmSources extends Sources[NpmTable] {
-  override val logger: Logger = LoggerFactory.getLogger(NpmSources.getClass)
+class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] {
+  override val logger: Logger = LoggerFactory.getLogger(this.getClass)
   private val SOURCES: Path = pwd / 'data / 'js / 'packages
 
   private val extensions: Set[String] = Set("js", "json", "xml", "yml", "coffee", "markdown", "md", "yaml", "txt")
@@ -59,4 +58,6 @@ object NpmSources extends Sources[NpmTable] {
       val result = archiveDownloadAndExtract(name, ver, packageURL, packageFileGZ, packageFileDir, Some(extensions))
       result
   }
+
+  override implicit def executor: ExecutionContext = ec
 }

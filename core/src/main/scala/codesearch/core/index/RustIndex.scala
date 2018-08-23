@@ -2,19 +2,17 @@ package codesearch.core.index
 
 import ammonite.ops.{Path, pwd}
 import codesearch.core.model.CratesTable
-import codesearch.core.util.Helper
 import org.slf4j.{Logger, LoggerFactory}
 
-import scala.collection.mutable
 import scala.sys.process._
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-object CratesSources extends Sources[CratesTable] {
+class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] {
   val SOURCES: Path = pwd / 'data / 'rust / 'packages
 
   private val CARGO_PATH = "./cargo"
 
-  override val logger: Logger = LoggerFactory.getLogger(CratesSources.getClass)
+  override val logger: Logger = LoggerFactory.getLogger(this.getClass)
   override val indexAPI: CratesIndex.type = CratesIndex
   override val indexFile: String = ".crates_csearch_index"
   override val langExts: String = ".*\\.(rs)$"
@@ -55,4 +53,6 @@ object CratesSources extends Sources[CratesTable] {
         }
     }
   }
+
+  override implicit def executor: ExecutionContext = ec
 }

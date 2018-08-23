@@ -1,17 +1,22 @@
 package codesearch.core
 
+import java.util.concurrent.Executors
+
 import ammonite.ops.{FilePath, pwd}
 import codesearch.core.index._
 import codesearch.core.db._
 import codesearch.core.model._
 import org.slf4j.{Logger, LoggerFactory}
 
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object Main {
+
   private val logger: Logger = LoggerFactory.getLogger(Main.getClass)
+  private val ec: ExecutionContext = ExecutionContext
+    .fromExecutorService(Executors.newFixedThreadPool(2 * Runtime.getRuntime.availableProcessors()))
 
   case class Config(updatePackages: Boolean = false,
                     downloadIndex: Boolean = false,
@@ -42,14 +47,14 @@ object Main {
 
   case class LangRep[T <: DefaultTable](db: DefaultDB[T],
                                         index: Index,
-                                        sources: Sources[T]
+                                        sources: LanguageIndex[T]
                                        )
 
   private val langReps = Map(
-    "hackage" -> LangRep[HackageTable](HackageDB, HackageIndex, HackageSources),
-    "crates"  -> LangRep[CratesTable](CratesDB, CratesIndex, CratesSources),
-    "gem"     -> LangRep[GemTable](GemDB, GemIndex, GemSources),
-    "npm"     -> LangRep[NpmTable](NpmDB, NpmIndex, NpmSources)
+    "haskell" -> LangRep[HackageTable](HackageDB, HackageIndex, new HaskellIndex(ec)),
+    "rust"  -> LangRep[CratesTable](CratesDB, CratesIndex, new RustIndex(ec)),
+    "ruby"     -> LangRep[GemTable](GemDB, GemIndex, new RubyIndex(ec)),
+    "javascript"     -> LangRep[NpmTable](NpmDB, NpmIndex, new JavaScriptIndex(ec))
   )
 
   def main(args: Array[String]): Unit = {

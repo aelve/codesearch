@@ -1,7 +1,7 @@
 package codesearch.web.controllers
 
 import codesearch.core.db.HackageDB
-import codesearch.core.index.HackageSources
+import codesearch.core.index.HaskellIndex
 import com.github.marlonlom.utilities.timeago.TimeAgo
 import javax.inject.Inject
 import play.api.mvc.InjectedController
@@ -16,7 +16,7 @@ class HackageSearcher @Inject() (
     val callURI = s"/haskell/search?query=$query&insensitive=$insensitive&precise=$precise&sources=$sources"
 
     HackageDB.updated.map(updated =>
-      HackageSources.csearch(query, insensitive == "on", precise == "on", sources == "on", page.toInt) match {
+      new HaskellIndex(executionContext).csearch(query, insensitive == "on", precise == "on", sources == "on", page.toInt) match {
         case (count, results) =>
           Ok(views.html.search(
             TimeAgo.using(updated.getTime),

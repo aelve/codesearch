@@ -1,7 +1,7 @@
 package codesearch.web.controllers
 
 import codesearch.core.db.CratesDB
-import codesearch.core.index.CratesSources
+import codesearch.core.index.RustIndex
 import com.github.marlonlom.utilities.timeago.TimeAgo
 import javax.inject.Inject
 import play.api.mvc.InjectedController
@@ -15,7 +15,7 @@ class CratesSearcher @Inject() (implicit val executionContext: ExecutionContext
     val callURI = s"/rust/search?query=$query&insensitive=$insensitive&precise=$precise&sources=$sources"
 
     CratesDB.updated
-      .zip(CratesSources.csearch(query, insensitive == "on", precise == "on", sources == "on", page.toInt))
+      .zip(new RustIndex(executionContext).csearch(query, insensitive == "on", precise == "on", sources == "on", page.toInt))
     .map { case (updated, (count, results)) =>
       Ok(views.html.rust_search(
         TimeAgo.using(updated.getTime),

@@ -14,7 +14,7 @@ import org.slf4j.Logger
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 
-trait Sources[VTable <: DefaultTable] {
+trait LanguageIndex[VTable <: DefaultTable] {
   protected val indexAPI: Index with DefaultDB[VTable]
   protected val logger: Logger
   protected val langExts: String
@@ -24,21 +24,7 @@ trait Sources[VTable <: DefaultTable] {
 
   def downloadSources(name: String, ver: String): Future[Int]
 
-  implicit val ec: ExecutionContext = new ExecutionContext {
-
-    import java.util.concurrent.Executors
-
-    private val threadPool = Executors.newFixedThreadPool(100)
-
-    override def execute(runnable: Runnable): Unit = {
-      threadPool.submit(runnable)
-    }
-
-    override def reportFailure(cause: Throwable): Unit = {
-      cause.printStackTrace()
-    }
-  }
-
+  implicit def executor: ExecutionContext
 
   def update(): Future[Int] = {
     val lastVersions = indexAPI.getLastVersions.mapValues(_.verString)
@@ -105,10 +91,6 @@ trait Sources[VTable <: DefaultTable] {
         curFile.delete
       }
     }
-  }
-
-  def downloadFile(srcURL: String, dstFile: File): Unit = {
-//    s"curl -o ${dstFile.getPath} $srcURL" !!
   }
 
   def runCsearch(searchQuery: String,
