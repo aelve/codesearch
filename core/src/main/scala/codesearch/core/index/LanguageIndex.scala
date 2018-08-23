@@ -6,7 +6,7 @@ import ammonite.ops.{Path, root}
 
 import sys.process._
 import codesearch.core.db.DefaultDB
-import codesearch.core.model.DefaultTable
+import codesearch.core.model.{DefaultTable, Version}
 import codesearch.core.util.Helper
 import org.apache.commons.io.FilenameUtils
 import org.slf4j.Logger
@@ -24,42 +24,45 @@ trait LanguageIndex[VTable <: DefaultTable] {
 
   def downloadMetaInformation(): Unit = indexAPI.updateIndex()
 
+  def getLastVersions: Map[String, Version] = indexAPI.getLastVersions
+
   def downloadSources(name: String, ver: String): Future[Int]
 
   implicit def executor: ExecutionContext
 
-  def update(): Future[Int] = {
-    val lastVersions = indexAPI.getLastVersions.mapValues(_.verString)
+  def updatePackages(): Future[Int] = {
+    Future
+      .successful(logger.debug("UPDATE PACKAGES"))
+      .map(_ => getLastVersions)
+      .map(_.mapValues(_.verString))
+      .flatMap { versions =>
+        indexAPI.verNames().flatMap { packages =>
+          val packagesMap = Map(packages: _*)
 
-    val futureAction = indexAPI.verNames().flatMap { packages =>
-      val packagesMap = Map(packages: _*)
-
-      Future.sequence(lastVersions.filter {
-        case (packageName, currentVersion) =>
-          !packagesMap.get(packageName).contains(currentVersion)
-      }.map {
-        case (packageName, currentVersion) =>
-          downloadSources(packageName, currentVersion)
-      })
-    }.map(_.sum)
-
-    Future {
-      logger.debug("UPDATE PACKAGES")
-    } flatMap { _ =>
-      futureAction
-    }
+          Future.sequence(versions.filter {
+            case (packageName, currentVersion) =>
+              !packagesMap.get(packageName).contains(currentVersion)
+          }.map {
+            case (packageName, currentVersion) =>
+              downloadSources(packageName, currentVersion)
+          })
+        }
+      }
+      .map(_.sum)
   }
 
   lazy val defaultExtractor: (String, String) => Unit =
     (src: String, dst: String) => Seq("tar", "-xvf", src, "-C", dst) !!
 
-  def archiveDownloadAndExtract(name: String, ver: String, packageURL: String,
+  def archiveDownloadAndExtract(name: String,
+                                ver: String,
+                                packageURL: String,
                                 packageFileGZ: Path,
                                 packageFileDir: Path,
                                 extensions: Option[Set[String]] = None,
                                 extractor: (String, String) => Unit = defaultExtractor): Future[Int] = {
 
-    val archive = packageFileGZ.toIO
+    val archive     = packageFileGZ.toIO
     val destination = packageFileDir.toIO
 
     try {
@@ -95,8 +98,7 @@ trait LanguageIndex[VTable <: DefaultTable] {
     }
   }
 
-  def runCsearch(searchQuery: String,
-                 insensitive: Boolean, precise: Boolean, sources: Boolean): Array[String] = {
+  def runCsearch(searchQuery: String, insensitive: Boolean, precise: Boolean, sources: Boolean): Array[String] = {
     val pathRegex = {
       if (sources) {
         langExts

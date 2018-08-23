@@ -91,10 +91,10 @@ object Main {
         val future = c.lang match {
           case "all" =>
             Future
-              .sequence(langReps.values.map(_.langIndex.update()))
+              .sequence(langReps.values.map(_.langIndex.updatePackages()))
               .map(_.sum)
           case lang =>
-            langReps(lang).langIndex.update()
+            langReps(lang).langIndex.updatePackages()
         }
         val cntUpdated = Await.result(future, Duration.Inf)
 
