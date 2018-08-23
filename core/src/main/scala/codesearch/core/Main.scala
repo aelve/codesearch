@@ -32,9 +32,9 @@ object Main {
       c.copy(updatePackages = true)
     } text "update package-sources"
 
-    opt[Unit]('d', "download-index") action { (_, c) =>
+    opt[Unit]('d', "download-meta") action { (_, c) =>
       c.copy(downloadIndex = true)
-    } text "update package-index"
+    } text "update package meta information"
 
     opt[Unit]('i', "init-database") action { (_, c) =>
       c.copy(initDB = true)
@@ -46,15 +46,14 @@ object Main {
   }
 
   case class LangRep[T <: DefaultTable](db: DefaultDB[T],
-                                        index: Index,
-                                        sources: LanguageIndex[T]
+                                        langIndex: LanguageIndex[T]
                                        )
 
   private val langReps = Map(
-    "haskell" -> LangRep[HackageTable](HackageDB, HackageIndex, new HaskellIndex(ec)),
-    "rust"  -> LangRep[CratesTable](CratesDB, CratesIndex, new RustIndex(ec)),
-    "ruby"     -> LangRep[GemTable](GemDB, GemIndex, new RubyIndex(ec)),
-    "javascript"     -> LangRep[NpmTable](NpmDB, NpmIndex, new JavaScriptIndex(ec))
+    "haskell" -> LangRep[HackageTable](HackageDB, new HaskellIndex(ec)),
+    "rust"  -> LangRep[CratesTable](CratesDB, new RustIndex(ec)),
+    "ruby"     -> LangRep[GemTable](GemDB, new RubyIndex(ec)),
+    "javascript"     -> LangRep[NpmTable](NpmDB, new JavaScriptIndex(ec))
   )
 
   def main(args: Array[String]): Unit = {
@@ -83,19 +82,19 @@ object Main {
 
       if (c.downloadIndex) { c.lang match {
         case "all" =>
-          langReps.values.foreach(_.index.updateIndex())
+          langReps.values.foreach(_.langIndex.downloadMetaInformation())
         case lang =>
-          langReps(lang).index.updateIndex()
+          langReps(lang).langIndex.downloadMetaInformation()
       } }
 
       if (c.updatePackages) {
         val future = c.lang match {
           case "all" =>
             Future
-              .sequence(langReps.values.map(_.sources.update()))
+              .sequence(langReps.values.map(_.langIndex.update()))
               .map(_.sum)
           case lang =>
-            langReps(lang).sources.update()
+            langReps(lang).langIndex.update()
         }
         val cntUpdated = Await.result(future, Duration.Inf)
 

@@ -22,6 +22,8 @@ trait LanguageIndex[VTable <: DefaultTable] {
   protected val indexFile: String
   protected lazy val indexPath: Path = root / 'root / 'aelve / 'data / indexFile // FIXME
 
+  def downloadMetaInformation(): Unit = indexAPI.updateIndex()
+
   def downloadSources(name: String, ver: String): Future[Int]
 
   implicit def executor: ExecutionContext
