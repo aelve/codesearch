@@ -44,7 +44,7 @@ object HackageSources extends Sources[HackageTable] {
       pwd / 'data / 'packages / name / ver / s"$ver.tar.gz"
 
     val packageFileDir =
-      pwd / 'data / 'packages / name / ver / ver
+      pwd / 'data / 'packages / name / ver
 
     archiveDownloadAndExtract(name, ver, packageURL, packageFileGZ, packageFileDir)
   }
