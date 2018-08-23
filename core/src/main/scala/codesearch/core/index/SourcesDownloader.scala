@@ -5,23 +5,35 @@ import ammonite.ops.pwd
 import sys.process._
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
-case class TargetPackage(
-    name: String,
-    version: String
-)
+case class NpmPackage(ts: TargetPackage)     extends AnyVal
 
-trait SourceDownloader {
+trait Download[T] {
+  def downloadSources: Future[File]
+}
+
+trait Extract[T <: TargetPackage] {
+  def extractSources: Future[File]
+}
+
+trait SourcesDownloader {
 
   val repoUrl: String
 
-  private def packageUrl: String = {}
+  private def packageUrl(target: TargetPackage): String = {}
 
   def download(target: TargetPackage): Future[Int] = {
     val archive     = packageFileGZ(target)
     val destination = packageFileDir(target)
     downloadAndExtract(archive, destination)
   }
+
+  def packageFileGZ(tp: TargetPackage): File =
+    (pwd / 'data / tp.repository / tp.name / tp.version / s"${tp.version}.tar.gz").toIO
+
+  def packageFileDir(tp: TargetPackage): File =
+    (pwd / 'data / tp.repository / tp.name / tp.version / tp.version).toIO
 
   private def downloadAndExtract(archive: File, destination: File) = Future {
     download(archive)
@@ -35,9 +47,4 @@ trait SourceDownloader {
     to.mkdirs()
     Seq("tar", "-xvf", from.getCanonicalPath, "-C", to.getCanonicalPath) !!
   }
-  private def packageFileGZ(tp: TargetPackage): File =
-    (pwd / 'data / tp.name / tp.version / s"${tp.version}.tar.gz").toIO
-
-  private def packageFileDir(tp: TargetPackage): File =
-    (pwd / 'data / tp.name / tp.version / tp.version).toIO
 }

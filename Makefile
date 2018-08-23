@@ -7,7 +7,8 @@ db:
     -e POSTGRES_DB=sourcesdb \
     -e POSTGRES_USER=postgres \
     -e POSTGRES_PASSWORD=postgres \
-    -p 5432:5432 -d postgres -N 1000
+    -p 5432:5432 -d postgres -N 1000 \
+    -v pg_data:/var/lib/postgresql/data
 
 # Connect to Postgres
 .PHONY: psql

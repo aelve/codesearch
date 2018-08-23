@@ -10,6 +10,7 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait DefaultDB[T <: DefaultTable] {
+
   val table: TableQuery[T]
   val db = Database.forConfig("mydb")
 
