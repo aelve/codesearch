@@ -45,14 +45,17 @@ object HackageIndex extends Index with HackageDB {
     lastVersions
   }
 
+  // Takes a line returned by csearch
+  //
+  // Returns package name (with version), link, and a search result snippet
   def contentByURI(uri: String): Option[(String, String, Result)] = {
     val elems: Seq[String] = uri.split(':')
     if (elems.length < 2) {
       println(s"bad uri: $uri")
       None
     } else {
-      val fullPath = elems.head
-      val pathSeq: Seq[String] = elems.head.split('/').drop(8)
+      val fullPath = Path(elems.head).relativeTo(pwd).toString
+      val pathSeq: Seq[String] = fullPath.split('/').drop(4)  // drop "data/packages/x/1.0/"
       val nLine = elems.drop(1).head
       pathSeq.headOption match {
         case None =>

@@ -30,9 +30,27 @@ Docker installed, you can do this:
     $ make build   # Build the project
     $ make db      # Download and start Postgres (wait a bit after this step)
     $ make tables  # Create tables
-    $ make server  # Run the server
+    $ make serve   # Run the server
 
 If you head to <http://localhost:9000> now, you should see the project running.
 
 Note: if you get an error at the `make tables` stage, you probably haven't
 waited enough. Do `make db-kill` and start from `make db` again.
+
+### Indexing packages
+
+After the previous step the project is running, but the indices are empty.
+To download some packages, do this:
+
+    $ make download-hackage
+
+At first it will download the Hackage index (taking about 30 seconds), then
+it will start downloading packages. You likely don't want to download the
+whole Hackage, so stop it after a minute or less.
+
+Next, index the packages:
+
+    $ make index-hackage
+
+After that you should be able to visit <http://localhost:9000/haskell> and
+play with some queries (e.g. `module` should bring up a lot of results).

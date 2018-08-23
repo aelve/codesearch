@@ -2,7 +2,7 @@ package codesearch.core.index
 
 import java.io.File
 
-import ammonite.ops.{Path, root}
+import ammonite.ops.{Path, pwd}
 
 import sys.process._
 import codesearch.core.db.DefaultDB
@@ -20,7 +20,7 @@ trait Sources[VTable <: DefaultTable] {
   protected val langExts: String
 
   protected val indexFile: String
-  protected lazy val indexPath: Path = root / 'root / 'aelve / 'data / indexFile // FIXME
+  protected lazy val indexPath: Path = pwd / 'data / indexFile
 
   def downloadSources(name: String, ver: String): Future[Int]
 
