@@ -47,6 +47,14 @@ case class GemPackage(
   }
 }
 
+case class CratesPackage(
+    name: String,
+    version: String
+) extends SourcePackage {
+  val fsPath: Path = Paths.get(new URI(s"./crates/$name/$version"))
+  val url: URI     = URI.create(s"https://crates.io/api/v1/crates/$name/$version/download")
+}
+
 case class NpmPackage(
     rawName: String,
     version: String
