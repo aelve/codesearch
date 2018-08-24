@@ -6,7 +6,7 @@ import ammonite.ops.{Path, pwd}
 
 import sys.process._
 import codesearch.core.db.DefaultDB
-import codesearch.core.model.DefaultTable
+import codesearch.core.model.{DefaultTable, Version}
 import codesearch.core.util.Helper
 import org.apache.commons.io.FilenameUtils
 import org.slf4j.Logger
@@ -14,7 +14,7 @@ import org.slf4j.Logger
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 
-trait Sources[VTable <: DefaultTable] {
+trait LanguageIndex[VTable <: DefaultTable] {
   protected val indexAPI: Index with DefaultDB[VTable]
   protected val logger: Logger
   protected val langExts: String
@@ -22,56 +22,66 @@ trait Sources[VTable <: DefaultTable] {
   protected val indexFile: String
   protected lazy val indexPath: Path = pwd / 'data / indexFile
 
+  /**
+    * Download meta information about packages from remote repository
+    * e.g. for Haskell is list of versions and cabal file for each version
+    */
+  def downloadMetaInformation(): Unit = indexAPI.updateIndex()
+
+  /**
+    * Collect last versions of packages in local folder
+    * Key for map is package name, value is last version
+    * @return last versions of packages
+    */
+  def getLastVersions: Map[String, Version] = indexAPI.getLastVersions
+
+  /**
+    * download source code from remote repository
+    * @param name of package
+    * @param ver of package
+    * @return count of downloaded files (source files)
+    */
   def downloadSources(name: String, ver: String): Future[Int]
 
-  implicit val ec: ExecutionContext = new ExecutionContext {
+  implicit def executor: ExecutionContext
 
-    import java.util.concurrent.Executors
+  /**
+    * download all latest packages version
+    * @return count of updated packages
+    */
+  def updatePackages(): Future[Int] = {
+    Future
+      .successful(logger.debug("UPDATE PACKAGES"))
+      .map(_ => getLastVersions)
+      .map(_.mapValues(_.verString))
+      .flatMap { versions =>
+        indexAPI.verNames().flatMap { packages =>
+          val packagesMap = Map(packages: _*)
 
-    private val threadPool = Executors.newFixedThreadPool(100)
-
-    override def execute(runnable: Runnable): Unit = {
-      threadPool.submit(runnable)
-    }
-
-    override def reportFailure(cause: Throwable): Unit = {
-      cause.printStackTrace()
-    }
-  }
-
-
-  def update(): Future[Int] = {
-    val lastVersions = indexAPI.getLastVersions.mapValues(_.verString)
-
-    val futureAction = indexAPI.verNames().flatMap { packages =>
-      val packagesMap = Map(packages: _*)
-
-      Future.sequence(lastVersions.filter {
-        case (packageName, currentVersion) =>
-          !packagesMap.get(packageName).contains(currentVersion)
-      }.map {
-        case (packageName, currentVersion) =>
-          downloadSources(packageName, currentVersion)
-      })
-    }.map(_.sum)
-
-    Future {
-      logger.debug("UPDATE PACKAGES")
-    } flatMap { _ =>
-      futureAction
-    }
+          Future.sequence(versions.filter {
+            case (packageName, currentVersion) =>
+              !packagesMap.get(packageName).contains(currentVersion)
+          }.map {
+            case (packageName, currentVersion) =>
+              downloadSources(packageName, currentVersion)
+          })
+        }
+      }
+      .map(_.sum)
   }
 
   lazy val defaultExtractor: (String, String) => Unit =
     (src: String, dst: String) => Seq("tar", "-xvf", src, "-C", dst) !!
 
-  def archiveDownloadAndExtract(name: String, ver: String, packageURL: String,
+  def archiveDownloadAndExtract(name: String,
+                                ver: String,
+                                packageURL: String,
                                 packageFileGZ: Path,
                                 packageFileDir: Path,
                                 extensions: Option[Set[String]] = None,
                                 extractor: (String, String) => Unit = defaultExtractor): Future[Int] = {
 
-    val archive = packageFileGZ.toIO
+    val archive     = packageFileGZ.toIO
     val destination = packageFileDir.toIO
 
     try {
@@ -107,12 +117,7 @@ trait Sources[VTable <: DefaultTable] {
     }
   }
 
-  def downloadFile(srcURL: String, dstFile: File): Unit = {
-//    s"curl -o ${dstFile.getPath} $srcURL" !!
-  }
-
-  def runCsearch(searchQuery: String,
-                 insensitive: Boolean, precise: Boolean, sources: Boolean): Array[String] = {
+  def runCsearch(searchQuery: String, insensitive: Boolean, precise: Boolean, sources: Boolean): Array[String] = {
     val pathRegex = {
       if (sources) {
         langExts
