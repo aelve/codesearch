@@ -1,4 +1,4 @@
-package codesearch.core.index
+package codesearch.core.index.repository
 
 import sys.process._
 import java.io.File
@@ -58,6 +58,6 @@ case class NpmPackage(
   override def extentions: Set[String] = Set("js", "json", "xml", "yml", "coffee", "markdown", "md", "yaml", "txt")
 }
 
-trait Downloader[A <: SourcePackage] {
-  def downloadSources(pack: A)
+trait Download[A <: SourcePackage] {
+  def downloadSources(pack: A): Future[Int]
 }
