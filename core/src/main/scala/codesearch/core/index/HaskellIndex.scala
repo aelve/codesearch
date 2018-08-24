@@ -10,19 +10,30 @@ case class Result(fileLink: String, firstLine: Int, nLine: Int, ctxt: Seq[String
 case class PackageResult(name: String, packageLink: String, results: Seq[Result])
 
 class HaskellIndex(val ec: ExecutionContext) extends LanguageIndex[HackageTable] {
-  override val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  override val logger: Logger              = LoggerFactory.getLogger(this.getClass)
   override val indexAPI: HackageIndex.type = HackageIndex
-  override val indexFile: String = ".hackage_csearch_index"
-  override val langExts: String = ".*\\.(hs|lhs|hsc|hs-boot|lhs-boot)$"
+  override val indexFile: String           = ".hackage_csearch_index"
+  override val langExts: String            = ".*\\.(hs|lhs|hsc|hs-boot|lhs-boot)$"
 
-  def csearch(searchQuery: String, insensitive: Boolean, precise: Boolean, sources: Boolean, page: Int): (Int, Seq[PackageResult]) = {
+  def csearch(searchQuery: String,
+              insensitive: Boolean,
+              precise: Boolean,
+              sources: Boolean,
+              page: Int): (Int, Seq[PackageResult]) = {
     val answers = runCsearch(searchQuery, insensitive, precise, sources)
-    (answers.length, answers
-      .slice(math.max(page - 1, 0) * 100, page * 100)
-      .flatMap(indexAPI.contentByURI).groupBy { x => (x._1, x._2) }.map {
-      case ((verName, packageLink), results) =>
-        PackageResult(verName, packageLink, results.map(_._3).toSeq)
-    }.toSeq.sortBy(_.name))
+    (answers.length,
+     answers
+       .slice(math.max(page - 1, 0) * 100, page * 100)
+       .flatMap(indexAPI.contentByURI)
+       .groupBy { x =>
+         (x._1, x._2)
+       }
+       .map {
+         case ((verName, packageLink), results) =>
+           PackageResult(verName, packageLink, results.map(_._3).toSeq)
+       }
+       .toSeq
+       .sortBy(_.name))
   }
 
   def downloadSources(name: String, ver: String): Future[Int] = {
@@ -41,4 +52,8 @@ class HaskellIndex(val ec: ExecutionContext) extends LanguageIndex[HackageTable]
   }
 
   override implicit def executor: ExecutionContext = ec
+}
+
+object HaskellIndex {
+  def apply()(implicit ec: ExecutionContext) = new HaskellIndex(ec)
 }

@@ -22,14 +22,33 @@ trait LanguageIndex[VTable <: DefaultTable] {
   protected val indexFile: String
   protected lazy val indexPath: Path = root / 'root / 'aelve / 'data / indexFile // FIXME
 
+  /**
+    * Download meta information about packages from remote repository
+    * e.g. for Haskell is list of versions and cabal file for each version
+    */
   def downloadMetaInformation(): Unit = indexAPI.updateIndex()
 
+  /**
+    * Collect last versions of packages in local folder
+    * Key for map is package name, value is last version
+    * @return last versions of packages
+    */
   def getLastVersions: Map[String, Version] = indexAPI.getLastVersions
 
+  /**
+    * download source code from remote repository
+    * @param name of package
+    * @param ver of package
+    * @return count of downloaded files (source files)
+    */
   def downloadSources(name: String, ver: String): Future[Int]
 
   implicit def executor: ExecutionContext
 
+  /**
+    * download all latest packages version
+    * @return count of updated packages
+    */
   def updatePackages(): Future[Int] = {
     Future
       .successful(logger.debug("UPDATE PACKAGES"))

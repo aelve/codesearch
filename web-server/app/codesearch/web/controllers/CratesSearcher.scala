@@ -15,7 +15,7 @@ class CratesSearcher @Inject() (implicit val executionContext: ExecutionContext
     val callURI = s"/rust/search?query=$query&insensitive=$insensitive&precise=$precise&sources=$sources"
 
     CratesDB.updated
-      .zip(new RustIndex(executionContext).csearch(query, insensitive == "on", precise == "on", sources == "on", page.toInt))
+      .zip(RustIndex().csearch(query, insensitive == "on", precise == "on", sources == "on", page.toInt))
     .map { case (updated, (count, results)) =>
       Ok(views.html.rust_search(
         TimeAgo.using(updated.getTime),

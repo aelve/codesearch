@@ -12,25 +12,32 @@ class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] {
 
   private val CARGO_PATH = "./cargo"
 
-  override val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  override val logger: Logger             = LoggerFactory.getLogger(this.getClass)
   override val indexAPI: CratesIndex.type = CratesIndex
-  override val indexFile: String = ".crates_csearch_index"
-  override val langExts: String = ".*\\.(rs)$"
+  override val indexFile: String          = ".crates_csearch_index"
+  override val langExts: String           = ".*\\.(rs)$"
 
-
-  def csearch(searchQuery: String, insensitive: Boolean, precise: Boolean, sources: Boolean, page: Int = 0): Future[(Int, Seq[PackageResult])] = {
+  def csearch(searchQuery: String,
+              insensitive: Boolean,
+              precise: Boolean,
+              sources: Boolean,
+              page: Int = 0): Future[(Int, Seq[PackageResult])] = {
     val answers = runCsearch(searchQuery, insensitive, precise, sources)
     indexAPI.verNames().map { verSeq =>
       val nameToVersion = Map(verSeq: _*)
-      (answers.length, answers
-        .slice(math.max(page - 1, 0) * 100, page * 100)
-        .flatMap(uri => indexAPI contentByURI(uri, nameToVersion)).groupBy(x => (x._1, x._2)).map {
-        case ((name, packageLink), results) =>
-          PackageResult(name, packageLink, results.map(_._3))
-      }.toSeq.sortBy(_.name))
+      (answers.length,
+       answers
+         .slice(math.max(page - 1, 0) * 100, page * 100)
+         .flatMap(uri => indexAPI contentByURI (uri, nameToVersion))
+         .groupBy(x => (x._1, x._2))
+         .map {
+           case ((name, packageLink), results) =>
+             PackageResult(name, packageLink, results.map(_._3))
+         }
+         .toSeq
+         .sortBy(_.name))
     }
   }
-
 
   def downloadSources(name: String, ver: String): Future[Int] = {
     SOURCES.toIO.mkdirs()
@@ -55,4 +62,8 @@ class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] {
   }
 
   override implicit def executor: ExecutionContext = ec
+}
+
+object RustIndex {
+  def apply()(implicit ec: ExecutionContext) = new RustIndex(ec)
 }

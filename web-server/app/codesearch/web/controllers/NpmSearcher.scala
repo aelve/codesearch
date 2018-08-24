@@ -16,7 +16,7 @@ class NpmSearcher @Inject() (
     val callURI = s"/js/search?query=$query&insensitive=$insensitive&precise=$precise&sources=$sources"
 
     NpmDB.updated.map(updated =>
-      new JavaScriptIndex(executionContext).csearch(query, insensitive == "on", precise == "on", sources == "on", page.toInt) match {
+      JavaScriptIndex().csearch(query, insensitive == "on", precise == "on", sources == "on", page.toInt) match {
         case (count, results) =>
           Ok(views.html.javascript_search(
             TimeAgo.using(updated.getTime),

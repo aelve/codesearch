@@ -17,7 +17,7 @@ class GemSearcher @Inject() (
       val callURI = s"/ruby/search?query=$query&insensitive=$insensitive&precise=$precise&sources=$sources"
 
       GemDB.updated.map(updated =>
-        new RubyIndex(executionContext).csearch(query, insensitive == "on", precise == "on", sources == "on", page.toInt) match {
+        RubyIndex().csearch(query, insensitive == "on", precise == "on", sources == "on", page.toInt) match {
           case (count, results) =>
             Ok(views.html.ruby_search(
               TimeAgo.using(updated.getTime),

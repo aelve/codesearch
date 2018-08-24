@@ -16,7 +16,7 @@ class HackageSearcher @Inject() (
     val callURI = s"/haskell/search?query=$query&insensitive=$insensitive&precise=$precise&sources=$sources"
 
     HackageDB.updated.map(updated =>
-      new HaskellIndex(executionContext).csearch(query, insensitive == "on", precise == "on", sources == "on", page.toInt) match {
+      HaskellIndex().csearch(query, insensitive == "on", precise == "on", sources == "on", page.toInt) match {
         case (count, results) =>
           Ok(views.html.search(
             TimeAgo.using(updated.getTime),
