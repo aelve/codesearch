@@ -1,8 +1,8 @@
+import play.sbt.PlayImport._
+import play.sbt.PlayScala
 import sbt.Keys._
 import sbt._
 import sbtassembly.AssemblyKeys.{assemblyMergeStrategy, _}
-import play.sbt.PlayImport._
-import play.sbt.PlayScala
 import sbtassembly.AssemblyPlugin.autoImport.{assemblyJarName, assemblyOutputPath}
 import sbtassembly._
 
@@ -43,7 +43,8 @@ object Builder {
       "javax.inject"      % "javax.inject"     % "1",
       "ch.qos.logback" % "logback-classic" % "1.2.3",
 
-      "com.typesafe.play" %% "play-json" % "2.6.9"
+      "com.typesafe.play" %% "play-json" % "2.6.9",
+      "com.github.pureconfig" %% "pureconfig" % "0.9.1"
     )
   )
 
