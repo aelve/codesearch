@@ -1,0 +1,39 @@
+# Taken from https://github.com/code-star/circleci-scala-sbt-git
+
+version: 2
+jobs:
+  build:
+    working_directory: ~/codesearch
+    docker:
+      - image: codestar/circleci-scala-sbt-git:scala-2.12.6-sbt-1.1.6
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - codesearch-{{ checksum "project/Builder.scala" }}-{{ checksum "build.sbt" }}
+            - codesearch
+
+      - run:
+          command:
+            sbt compile exit
+
+      - save_cache:
+          key: codesearch-{{ checksum "project/Builder.scala" }}-{{ checksum "build.sbt" }}
+          paths:
+            - target/resolution-cache
+            - target/streams
+            - project/target/resolution-cache
+            - project/target/streams
+            - ~/.sbt
+            - ~/.iv2/cache
+            - ~/.m2
+      - save_cache:
+          # Changing this to a different key is the only way to remove old
+          # dependencies from the cache and/or generate a more up-to-date
+          # cache
+          key: codesearch
+          paths:
+            - ~/.sbt
+            - ~/.iv2/cache
+            - ~/.m2
