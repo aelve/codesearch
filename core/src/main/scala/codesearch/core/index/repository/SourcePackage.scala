@@ -19,6 +19,8 @@ trait Extractor {
 }
 
 trait SourcePackage extends Extractor {
+  val name: String
+  val version: String
   def fsPath: Path
   def url: URI
   def extentions: Set[String] = Set.empty
@@ -64,8 +66,4 @@ case class NpmPackage(
   val fsPath: Path                     = Paths.get(new URI(s"./npm/$name/$version"))
   val url: URI                         = URI.create(s"https://registry.npmjs.org/$name/-/$name-$version.tgz")
   override def extentions: Set[String] = Set("js", "json", "xml", "yml", "coffee", "markdown", "md", "yaml", "txt")
-}
-
-trait Download[A <: SourcePackage] {
-  def downloadSources(pack: A): Future[Int]
 }
