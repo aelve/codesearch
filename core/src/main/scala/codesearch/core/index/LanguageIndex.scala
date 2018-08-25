@@ -53,6 +53,26 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
       .map(_.sum)
   }
 
+  def csearch(args: SearchArguments, page: Int): Future[(Int, Seq[PackageResult])] = {
+    runCsearch(args).map { answers =>
+      (answers.length,
+       answers
+         .slice(math.max(page - 1, 0) * 100, page * 100)
+         .flatMap(contentByURI)
+         .groupBy { x =>
+           (x._1, x._2)
+         }
+         .map {
+           case ((verName, packageLink), results) =>
+             PackageResult(verName, packageLink, results.map(_._3).toSeq)
+         }
+         .toSeq
+         .sortBy(_.name))
+    }
+  }
+
+  protected def contentByURI(uri: String): Option[(String, String, Result)]
+
   protected implicit def executor: ExecutionContext
 
   protected def archiveDownloadAndExtract(name: String,
@@ -88,7 +108,7 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
     }
   }
 
-  protected def runCsearch(arg: SearchArguments): Array[String] = {
+  protected def runCsearch(arg: SearchArguments): Future[Array[String]] = {
     val pathRegex = {
       if (arg.sourcesOnly) {
         langExts
@@ -113,12 +133,14 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
     args.append(query)
     logger.debug(indexPath.toString())
 
-    val answer = (Process(args, None, "CSEARCHINDEX" -> indexPath.toString()) #| Seq("head", "-1001")).!!
+    Future {
+      val answer = (Process(args, None, "CSEARCHINDEX" -> indexPath.toString()) #| Seq("head", "-1001")).!!
 
-    if (answer.nonEmpty) {
-      answer.split('\n')
-    } else {
-      Array()
+      if (answer.nonEmpty) {
+        answer.split('\n')
+      } else {
+        Array()
+      }
     }
   }
 

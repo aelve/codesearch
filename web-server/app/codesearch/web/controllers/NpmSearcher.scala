@@ -16,8 +16,8 @@ class NpmSearcher @Inject() (
   def index(query: String, insensitive: String, precise: String, sources: String, page: String) = Action.async { implicit request =>
     val callURI = s"/js/search?query=$query&insensitive=$insensitive&precise=$precise&sources=$sources"
 
-    NpmDB.updated.map(updated =>
-      JavaScriptIndex().csearch(SearchArguments(query, insensitive == "on", precise == "on", sources == "on"), page.toInt) match {
+    NpmDB.updated.flatMap(updated =>
+      JavaScriptIndex().csearch(SearchArguments(query, insensitive == "on", precise == "on", sources == "on"), page.toInt) map {
         case (count, results) =>
           Ok(views.html.javascript_search(
             TimeAgo.using(updated.getTime),

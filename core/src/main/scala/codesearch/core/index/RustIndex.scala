@@ -15,13 +15,13 @@ import scala.util.Try
 
 class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] with CratesDB {
 
-  override protected val logger: Logger             = LoggerFactory.getLogger(this.getClass)
-  override protected val indexFile: String          = ".crates_csearch_index"
-  override protected val langExts: String           = ".*\\.(rs)$"
+  override protected val logger: Logger    = LoggerFactory.getLogger(this.getClass)
+  override protected val indexFile: String = ".crates_csearch_index"
+  override protected val langExts: String  = ".*\\.(rs)$"
 
   private val SOURCES: Path = pwd / 'data / 'rust / 'packages
-  private val CARGO_PATH = "./cargo"
-  private val REPO_DIR = pwd / 'data / 'rust / "crates.io-index"
+  private val CARGO_PATH    = "./cargo"
+  private val REPO_DIR      = pwd / 'data / 'rust / "crates.io-index"
   private val IGNORE_FILES = Set(
     "test-max-version-example-crate",
     "version-length-checking-is-overrated",
@@ -29,21 +29,22 @@ class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] wit
     ".git"
   )
 
-  def csearch(args: SearchArguments, page: Int = 0): Future[(Int, Seq[PackageResult])] = {
-    val answers = runCsearch(args)
-    verNames().map { verSeq =>
-      val nameToVersion = Map(verSeq: _*)
-      (answers.length,
-       answers
-         .slice(math.max(page - 1, 0) * 100, page * 100)
-         .flatMap(uri => contentByURI (uri, nameToVersion))
-         .groupBy(x => (x._1, x._2))
-         .map {
-           case ((name, packageLink), results) =>
-             PackageResult(name, packageLink, results.map(_._3))
-         }
-         .toSeq
-         .sortBy(_.name))
+  override def csearch(args: SearchArguments, page: Int = 0): Future[(Int, Seq[PackageResult])] = {
+    runCsearch(args).flatMap { answers =>
+      verNames().map { verSeq =>
+        val nameToVersion = Map(verSeq: _*)
+        (answers.length,
+         answers
+           .slice(math.max(page - 1, 0) * 100, page * 100)
+           .flatMap(uri => contentByURI(uri, nameToVersion))
+           .groupBy(x => (x._1, x._2))
+           .map {
+             case ((name, packageLink), results) =>
+               PackageResult(name, packageLink, results.map(_._3))
+           }
+           .toSeq
+           .sortBy(_.name))
+      }
     }
   }
 
@@ -59,24 +60,30 @@ class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] wit
 
       s"$CARGO_PATH clone $name --vers $ver --prefix $SOURCES" !!
 
-    }.flatMap(_ => insertOrUpdate(name, ver)).transform( t => t.toEither match {
-      case Left(e) =>
-        logger.error(s"failed download package $name $ver", e)
-        Try(0)
-      case Right(v) => Try(v)
-    })
+    }.flatMap(_ => insertOrUpdate(name, ver))
+      .transform(t =>
+        t.toEither match {
+          case Left(e) =>
+            logger.error(s"failed download package $name $ver", e)
+            Try(0)
+          case Right(v) => Try(v)
+      })
   }
 
   override protected implicit def executor: ExecutionContext = ec
 
   override protected def getLastVersions: Map[String, Version] = {
-    val seq = Helper.recursiveListFiles(REPO_DIR.toIO).collect { case file if !(IGNORE_FILES contains file.getName) =>
-      val lastVersionJSON = scala.io.Source.fromFile(file).getLines().toSeq.last
-      val obj = Json.parse(lastVersionJSON)
-      val name = (obj \ "name").as[String]
-      val vers = (obj \ "vers").as[String]
-      (name, model.Version(vers))
-    }.toSeq
+    val seq = Helper
+      .recursiveListFiles(REPO_DIR.toIO)
+      .collect {
+        case file if !(IGNORE_FILES contains file.getName) =>
+          val lastVersionJSON = scala.io.Source.fromFile(file).getLines().toSeq.last
+          val obj             = Json.parse(lastVersionJSON)
+          val name            = (obj \ "name").as[String]
+          val vers            = (obj \ "vers").as[String]
+          (name, model.Version(vers))
+      }
+      .toSeq
     Map(seq: _*)
   }
 
@@ -86,28 +93,33 @@ class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] wit
       println(s"bad uri: $uri")
       None
     } else {
-      val fullPath = elems.head
+      val fullPath             = elems.head
       val pathSeq: Seq[String] = elems.head.split('/').drop(6)
-      val nLine = elems.drop(1).head
+      val nLine                = elems.drop(1).head
       pathSeq.headOption match {
         case None =>
           println(s"bad uri: $uri")
           None
-        case Some(packageName) => nameToVersion.get(packageName).map{ ver =>
-          val (firstLine, rows) = Helper.extractRows(fullPath, nLine.toInt)
+        case Some(packageName) =>
+          nameToVersion.get(packageName).map { ver =>
+            val (firstLine, rows) = Helper.extractRows(fullPath, nLine.toInt)
 
-          val remPath = pathSeq.drop(1).mkString("/")
+            val remPath = pathSeq.drop(1).mkString("/")
 
-          (packageName, s"https://docs.rs/crate/$packageName/$ver", Result(
-            remPath,
-            firstLine,
-            nLine.toInt - 1,
-            rows
-          ))
-        }
+            (packageName,
+             s"https://docs.rs/crate/$packageName/$ver",
+             Result(
+               remPath,
+               firstLine,
+               nLine.toInt - 1,
+               rows
+             ))
+          }
       }
     }
   }
+
+  override protected def contentByURI(uri: String): Option[(String, String, Result)] = Option.empty
 }
 
 object RustIndex {

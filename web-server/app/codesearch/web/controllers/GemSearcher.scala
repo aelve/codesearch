@@ -17,8 +17,8 @@ class GemSearcher @Inject() (
     Action.async { implicit request =>
       val callURI = s"/ruby/search?query=$query&insensitive=$insensitive&precise=$precise&sources=$sources"
 
-      GemDB.updated.map(updated =>
-        RubyIndex().csearch(SearchArguments(query, insensitive == "on", precise == "on", sources == "on"), page.toInt) match {
+      GemDB.updated.flatMap(updated =>
+        RubyIndex().csearch(SearchArguments(query, insensitive == "on", precise == "on", sources == "on"), page.toInt) map {
           case (count, results) =>
             Ok(views.html.ruby_search(
               TimeAgo.using(updated.getTime),
