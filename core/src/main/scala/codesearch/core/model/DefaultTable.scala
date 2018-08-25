@@ -2,7 +2,6 @@ package codesearch.core.model
 
 import java.sql.Timestamp
 import slick.jdbc.PostgresProfile.api._
-import slick.sql.SqlProfile.ColumnOption.SqlType
 
 // TODO: TIMESTAMP ON UPDATE NOW()
 // TODO: UTC

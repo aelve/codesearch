@@ -1,23 +1,27 @@
 package codesearch.core.index
 
-import java.net.URLEncoder
+import java.io.FileInputStream
+import java.net.{URLDecoder, URLEncoder}
 
 import ammonite.ops.{Path, pwd}
-import codesearch.core.db.DefaultDB
+import codesearch.core.db.NpmDB
 
 import scala.sys.process._
-import codesearch.core.model.NpmTable
+import codesearch.core.model.{NpmTable, Version}
+import codesearch.core.util.Helper
 import org.slf4j.{Logger, LoggerFactory}
+import play.api.libs.json.Json
 
+import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 
-class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] {
+class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] with NpmDB {
   override val logger: Logger = LoggerFactory.getLogger(this.getClass)
   private val SOURCES: Path   = pwd / 'data / 'js / 'packages
-
+  private val NPM_INDEX_JSON = pwd / 'data / 'js / "nameVersions.json"
+  private val NPM_UPDATER_SCRIPT = pwd / 'codesearch / 'scripts / "update_npm_index.js"
   private val extensions: Set[String] = Set("js", "json", "xml", "yml", "coffee", "markdown", "md", "yaml", "txt")
 
-  override protected val indexAPI: Index with DefaultDB[NpmTable] = NpmIndex
   override val indexFile: String                                  = ".npm_csearch_index"
 
   override val langExts: String = ".*\\.(js|json)$"
@@ -33,7 +37,7 @@ class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] 
     (answers.length,
      answers
        .slice(math.max(page - 1, 0) * 100, page * 100)
-       .flatMap(NpmIndex.contentByURI)
+       .flatMap(contentByURI)
        .groupBy { x =>
          (x._1, x._2)
        }
@@ -45,7 +49,9 @@ class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] 
        .sortBy(_.name))
   }
 
-  override def downloadSources(name: String, ver: String): Future[Int] = {
+  override def downloadMetaInformation(): Unit = Seq("node", NPM_UPDATER_SCRIPT.toString) !!
+
+  override protected def downloadSources(name: String, ver: String): Future[Int] = {
     counter += 1
     if (counter == 100) {
       counter = 0
@@ -70,7 +76,45 @@ class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] 
     result
   }
 
-  override implicit def executor: ExecutionContext = ec
+  override protected implicit def executor: ExecutionContext = ec
+
+  override protected def getLastVersions: Map[String, Version] = {
+    val obj = Json.parse(new FileInputStream(NPM_INDEX_JSON.toIO)).as[Seq[Map[String, String]]]
+    val result = mutable.Map.empty[String, Version]
+    obj.foreach { map =>
+      result.update(map.getOrElse("name", ""), Version(map.getOrElse("version", "")))
+    }
+    result.toMap
+  }
+
+  private def contentByURI(uri: String): Option[(String, String, Result)] = {
+    val elems: Seq[String] = uri.split(':')
+    if (elems.length < 2) {
+      println(s"bad uri: $uri")
+      None
+    } else {
+      val fullPath = elems.head
+      val pathSeq: Seq[String] = elems.head.split('/').drop(6)
+      val nLine = elems.drop(1).head
+      pathSeq.headOption match {
+        case None =>
+          println(s"bad uri: $uri")
+          None
+        case Some(name) =>
+          val decodedName = URLDecoder.decode(name, "UTF-8")
+          val (firstLine, rows) = Helper.extractRows(fullPath, nLine.toInt)
+
+          val remPath = pathSeq.drop(1).mkString("/")
+
+          Some((decodedName, s"https://www.npmjs.com/package/$decodedName", Result(
+            remPath,
+            firstLine,
+            nLine.toInt - 1,
+            rows
+          )))
+      }
+    }
+  }
 }
 
 object JavaScriptIndex {

@@ -1,17 +1,29 @@
 package codesearch.core.index
 
+import java.io.FileInputStream
+import java.net.URLDecoder
+
 import ammonite.ops.pwd
-import codesearch.core.model.GemTable
+import codesearch.core.db.GemDB
+import codesearch.core.model.{GemTable, Version}
 import codesearch.core.util.Helper
 
 import sys.process._
 import org.slf4j.{Logger, LoggerFactory}
+import play.api.libs.json.Json
 
+import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 
-class RubyIndex(val ec: ExecutionContext) extends LanguageIndex[GemTable] {
+class RubyIndex(val ec: ExecutionContext) extends LanguageIndex[GemTable] with GemDB {
+
+  private val GEM_INDEX_URL = "http://rubygems.org/latest_specs.4.8.gz"
+  private val GEM_INDEX_ARCHIVE = pwd / 'data / 'ruby / "ruby_index.gz"
+  private val GEM_INDEX_JSON = pwd / 'data / 'ruby / "ruby_index.json"
+
+  private val DESERIALIZER_PATH = pwd / 'codesearch / 'scripts / "update_index.rb"
+
   override val logger: Logger          = LoggerFactory.getLogger(this.getClass)
-  override val indexAPI: GemIndex.type = GemIndex
   override val indexFile: String       = ".gem_csearch_index"
   override val langExts: String        = ".*\\.(rb)$"
 
@@ -25,7 +37,7 @@ class RubyIndex(val ec: ExecutionContext) extends LanguageIndex[GemTable] {
     (answers.length,
      answers
        .slice(math.max(page - 1, 0) * 100, page * 100)
-       .flatMap(indexAPI.contentByURI)
+       .flatMap(contentByURI)
        .groupBy { x =>
          (x._1, x._2)
        }
@@ -37,7 +49,7 @@ class RubyIndex(val ec: ExecutionContext) extends LanguageIndex[GemTable] {
        .sortBy(_.name))
   }
 
-  def downloadSources(name: String, ver: String): Future[Int] = {
+  override protected def downloadSources(name: String, ver: String): Future[Int] = {
     logger.info(s"downloading package $name")
 
     val packageURL =
@@ -58,11 +70,58 @@ class RubyIndex(val ec: ExecutionContext) extends LanguageIndex[GemTable] {
                               extractor = gemExtractor)
   }
 
+  override def downloadMetaInformation(): Unit = {
+    Seq("curl", "-o", GEM_INDEX_ARCHIVE.toString, GEM_INDEX_URL) !!
+
+    Seq("/usr/bin/ruby", DESERIALIZER_PATH.toString(),
+      GEM_INDEX_ARCHIVE.toString(), GEM_INDEX_JSON.toString()) !!
+  }
+
   def gemExtractor(src: String, dst: String): Unit = {
     Seq("gem", "unpack", s"--target=$dst", src) !!
   }
 
-  override implicit def executor: ExecutionContext = ec
+  override protected implicit def executor: ExecutionContext = ec
+
+  override protected def getLastVersions: Map[String, Version] = {
+    val obj = Json.parse(new FileInputStream(GEM_INDEX_JSON.toIO)).as[Seq[Seq[String]]]
+    val result = mutable.Map.empty[String, Version]
+    obj.foreach {
+      case Seq(name, ver, _) =>
+        result.update(name, Version(ver))
+    }
+    result.toMap
+  }
+
+  private def contentByURI(uri: String): Option[(String, String, Result)] = {
+    val elems: Seq[String] = uri.split(':')
+    if (elems.length < 2) {
+      println(s"bad uri: $uri")
+      None
+    } else {
+      val fullPath = elems.head
+      val pathSeq: Seq[String] = elems.head.split('/').drop(6)
+      val nLine = elems.drop(1).head
+      pathSeq.headOption match {
+        case None =>
+          println(s"bad uri: $uri")
+          None
+        case Some(name) =>
+          val decodedName = URLDecoder.decode(name, "UTF-8")
+          val (firstLine, rows) = Helper.extractRows(fullPath, nLine.toInt)
+
+          val remPath = pathSeq.drop(1).mkString("/")
+
+          Some((decodedName, s"https://rubygems.org/gems/$decodedName", Result(
+            remPath,
+            firstLine,
+            nLine.toInt - 1,
+            rows
+          )))
+      }
+    }
+
+  }
 }
 
 object RubyIndex {
