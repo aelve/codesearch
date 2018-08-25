@@ -15,12 +15,6 @@ trait DefaultDB[T <: DefaultTable] {
   val table: TableQuery[T]
   val db = Database.forConfig("mydb")
 
-  def insertOrUpdate(packageName: String, lastVersion: String): Future[Int] = {
-    val insOrUpdate = table
-      .insertOrUpdate((packageName, lastVersion, new Timestamp(System.currentTimeMillis())))
-    db.run(insOrUpdate)
-  }
-
   def insertOrUpdate[A <: SourcePackage](pack: A): Future[Int] = {
     val insOrUpdate = table
         .insertOrUpdate((pack.name, pack.version, new Timestamp(System.currentTimeMillis())))

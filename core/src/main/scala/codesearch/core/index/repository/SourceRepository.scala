@@ -14,24 +14,21 @@ object SourceRepository {
   implicit def packageDownloader[A <: SourcePackage]: Download[A] =
     (pack: A) => {
       for {
-        archive   <- download(pack.url, pack.fsPath)
-        directory <- pack.extract(archive, )
-        _         <- deleteExcessFiles(archive, pack.extentions)
-        _         <- deleteExcessFiles(directory, pack.extentions)
+        parentDir   <- download(pack.url, pack.fsArchivePath)
+        directory <- pack.extract(parentDir, pack.fsUnzippedPath)
+        _         <- deleteExcessFiles(parentDir, pack.extensions)
       } yield directory
     }
 
   private def download(from: URI, to: Path): Future[File] = {
     Future {
-      Seq("curl", "-O", to.toString, from.toString) !!;
-      to
+      val toFile = to.toFile
+      toFile.mkdirs()
+      Seq("curl", "-O", toFile.getCanonicalPath, from.getPath) !!;
+      toFile
     }
-    ???
   }
 
-  private def unzip(file: File): Future[File] = {
-    ???
-  }
 
   private def deleteExcessFiles(directory: File, allowedExtentions: Set[String]): Future[Int] = Future {
     def filterFiles(all: List[File], excess: List[File] = Nil): List[File] = all match {
