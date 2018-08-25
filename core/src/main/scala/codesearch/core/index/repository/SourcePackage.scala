@@ -20,9 +20,7 @@ trait Extractor {
       extractedDir
         .listFiles()
         .filter(_.isFile)
-        .foreach(file => {
-          unzippingMethod(archive.getCanonicalPath, file.getCanonicalPath)
-        })
+        .foreach(file => unzippingMethod(archive.getCanonicalPath, file.getCanonicalPath))
       extractedDir
     }
 }
