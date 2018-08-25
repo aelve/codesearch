@@ -12,20 +12,19 @@ import sys.process._
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json.Json
 
-import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 
 class RubyIndex(val ec: ExecutionContext) extends LanguageIndex[GemTable] with GemDB {
+
+  override protected val logger: Logger          = LoggerFactory.getLogger(this.getClass)
+  override protected val indexFile: String       = ".gem_csearch_index"
+  override protected val langExts: String        = ".*\\.(rb)$"
 
   private val GEM_INDEX_URL = "http://rubygems.org/latest_specs.4.8.gz"
   private val GEM_INDEX_ARCHIVE = pwd / 'data / 'ruby / "ruby_index.gz"
   private val GEM_INDEX_JSON = pwd / 'data / 'ruby / "ruby_index.json"
 
   private val DESERIALIZER_PATH = pwd / 'codesearch / 'scripts / "update_index.rb"
-
-  override val logger: Logger          = LoggerFactory.getLogger(this.getClass)
-  override val indexFile: String       = ".gem_csearch_index"
-  override val langExts: String        = ".*\\.(rb)$"
 
   def csearch(searchQuery: String,
               insensitive: Boolean,
@@ -84,19 +83,16 @@ class RubyIndex(val ec: ExecutionContext) extends LanguageIndex[GemTable] with G
   override protected implicit def executor: ExecutionContext = ec
 
   override protected def getLastVersions: Map[String, Version] = {
-    val obj = Json.parse(new FileInputStream(GEM_INDEX_JSON.toIO)).as[Seq[Seq[String]]]
-    val result = mutable.Map.empty[String, Version]
-    obj.foreach {
-      case Seq(name, ver, _) =>
-        result.update(name, Version(ver))
-    }
-    result.toMap
+    val stream = new FileInputStream(GEM_INDEX_JSON.toIO)
+    val obj = Json.parse(stream).as[Seq[Seq[String]]]
+    stream.close()
+    obj.map { case Seq(name, ver, _) => (name, Version(ver)) }.toMap
   }
 
   private def contentByURI(uri: String): Option[(String, String, Result)] = {
     val elems: Seq[String] = uri.split(':')
     if (elems.length < 2) {
-      println(s"bad uri: $uri")
+      logger.warn(s"bad uri: $uri")
       None
     } else {
       val fullPath = elems.head
@@ -104,7 +100,7 @@ class RubyIndex(val ec: ExecutionContext) extends LanguageIndex[GemTable] with G
       val nLine = elems.drop(1).head
       pathSeq.headOption match {
         case None =>
-          println(s"bad uri: $uri")
+          logger.warn(s"bad uri: $uri")
           None
         case Some(name) =>
           val decodedName = URLDecoder.decode(name, "UTF-8")

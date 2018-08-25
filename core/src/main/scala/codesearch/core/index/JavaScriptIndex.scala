@@ -12,19 +12,18 @@ import codesearch.core.util.Helper
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json.Json
 
-import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 
 class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] with NpmDB {
-  override val logger: Logger = LoggerFactory.getLogger(this.getClass)
+
+  override protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  override protected val indexFile: String                                  = ".npm_csearch_index"
+  override protected val langExts: String = ".*\\.(js|json)$"
+
   private val SOURCES: Path   = pwd / 'data / 'js / 'packages
   private val NPM_INDEX_JSON = pwd / 'data / 'js / "nameVersions.json"
   private val NPM_UPDATER_SCRIPT = pwd / 'codesearch / 'scripts / "update_npm_index.js"
   private val extensions: Set[String] = Set("js", "json", "xml", "yml", "coffee", "markdown", "md", "yaml", "txt")
-
-  override val indexFile: String                                  = ".npm_csearch_index"
-
-  override val langExts: String = ".*\\.(js|json)$"
 
   private var counter: Int = 0
 
@@ -79,12 +78,12 @@ class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] 
   override protected implicit def executor: ExecutionContext = ec
 
   override protected def getLastVersions: Map[String, Version] = {
-    val obj = Json.parse(new FileInputStream(NPM_INDEX_JSON.toIO)).as[Seq[Map[String, String]]]
-    val result = mutable.Map.empty[String, Version]
-    obj.foreach { map =>
-      result.update(map.getOrElse("name", ""), Version(map.getOrElse("version", "")))
-    }
-    result.toMap
+    val stream = new FileInputStream(NPM_INDEX_JSON.toIO)
+    val obj = Json.parse(stream).as[Seq[Map[String, String]]]
+    stream.close()
+
+    obj.map(map => (map.getOrElse("name", ""), Version(map.getOrElse("version", ""))))
+      .toMap
   }
 
   private def contentByURI(uri: String): Option[(String, String, Result)] = {

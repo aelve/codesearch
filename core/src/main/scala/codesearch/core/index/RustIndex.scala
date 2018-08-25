@@ -10,23 +10,23 @@ import play.api.libs.json.Json
 
 import scala.sys.process._
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] with CratesDB {
-  val SOURCES: Path = pwd / 'data / 'rust / 'packages
 
+  override protected val logger: Logger             = LoggerFactory.getLogger(this.getClass)
+  override protected val indexFile: String          = ".crates_csearch_index"
+  override protected val langExts: String           = ".*\\.(rs)$"
+
+  private val SOURCES: Path = pwd / 'data / 'rust / 'packages
   private val CARGO_PATH = "./cargo"
   private val REPO_DIR = pwd / 'data / 'rust / "crates.io-index"
-
   private val IGNORE_FILES = Set(
     "test-max-version-example-crate",
     "version-length-checking-is-overrated",
     "config.json",
     ".git"
   )
-
-  override val logger: Logger             = LoggerFactory.getLogger(this.getClass)
-  override val indexFile: String          = ".crates_csearch_index"
-  override val langExts: String           = ".*\\.(rs)$"
 
   def csearch(searchQuery: String,
               insensitive: Boolean,
@@ -56,24 +56,18 @@ class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] wit
 
   override protected def downloadSources(name: String, ver: String): Future[Int] = {
     SOURCES.toIO.mkdirs()
-
-    try {
+    logger.info(s"downloading package $name $ver")
+    Future {
       s"rm -rf ${SOURCES / name}" !!
 
       s"$CARGO_PATH clone $name --vers $ver --prefix $SOURCES" !!
 
-      logger.info("package cloned")
-
-      val future = insertOrUpdate(name, ver)
-      logger.info("DB updated")
-      future
-    } catch {
-      case e: Exception =>
-        Future[Int] {
-          logger.info(e.getMessage)
-          0
-        }
-    }
+    }.flatMap(_ => insertOrUpdate(name, ver)).transform( t => t.toEither match {
+      case Left(e) =>
+        logger.error(s"failed download package $name $ver", e)
+        Try(0)
+      case Right(v) => Try(v)
+    })
   }
 
   override protected implicit def executor: ExecutionContext = ec
