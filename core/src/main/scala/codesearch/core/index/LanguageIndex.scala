@@ -14,8 +14,7 @@ import org.slf4j.Logger
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 
-trait LanguageIndex[VTable <: DefaultTable] {
-  protected val indexAPI: Index with DefaultDB[VTable]
+trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
   protected val logger: Logger
   protected val langExts: String
 
@@ -26,24 +25,7 @@ trait LanguageIndex[VTable <: DefaultTable] {
     * Download meta information about packages from remote repository
     * e.g. for Haskell is list of versions and cabal file for each version
     */
-  def downloadMetaInformation(): Unit = indexAPI.updateIndex()
-
-  /**
-    * Collect last versions of packages in local folder
-    * Key for map is package name, value is last version
-    * @return last versions of packages
-    */
-  def getLastVersions: Map[String, Version] = indexAPI.getLastVersions
-
-  /**
-    * download source code from remote repository
-    * @param name of package
-    * @param ver of package
-    * @return count of downloaded files (source files)
-    */
-  def downloadSources(name: String, ver: String): Future[Int]
-
-  implicit def executor: ExecutionContext
+  def downloadMetaInformation(): Unit
 
   /**
     * download all latest packages version
@@ -55,7 +37,7 @@ trait LanguageIndex[VTable <: DefaultTable] {
       .map(_ => getLastVersions)
       .map(_.mapValues(_.verString))
       .flatMap { versions =>
-        indexAPI.verNames().flatMap { packages =>
+        verNames().flatMap { packages =>
           val packagesMap = Map(packages: _*)
 
           Future.sequence(versions.filter {
@@ -70,10 +52,9 @@ trait LanguageIndex[VTable <: DefaultTable] {
       .map(_.sum)
   }
 
-  lazy val defaultExtractor: (String, String) => Unit =
-    (src: String, dst: String) => Seq("tar", "-xvf", src, "-C", dst) !!
+  protected implicit def executor: ExecutionContext
 
-  def archiveDownloadAndExtract(name: String,
+  protected def archiveDownloadAndExtract(name: String,
                                 ver: String,
                                 packageURL: String,
                                 packageFileGZ: Path,
@@ -96,7 +77,7 @@ trait LanguageIndex[VTable <: DefaultTable] {
         applyFilter(extensions.get, destination)
       }
 
-      indexAPI.insertOrUpdate(name, ver)
+      insertOrUpdate(name, ver)
     } catch {
       case e: Exception =>
         logger.debug(e.getLocalizedMessage)
@@ -106,18 +87,7 @@ trait LanguageIndex[VTable <: DefaultTable] {
     }
   }
 
-  def applyFilter(extensions: Set[String], curFile: File): Unit = {
-    if (curFile.isDirectory) {
-      curFile.listFiles.foreach(applyFilter(extensions, _))
-    } else {
-      val ext = FilenameUtils.getExtension(curFile.getName)
-      if (curFile.exists() && !(extensions contains ext)) {
-        curFile.delete
-      }
-    }
-  }
-
-  def runCsearch(searchQuery: String, insensitive: Boolean, precise: Boolean, sources: Boolean): Array[String] = {
+  protected def runCsearch(searchQuery: String, insensitive: Boolean, precise: Boolean, sources: Boolean): Array[String] = {
     val pathRegex = {
       if (sources) {
         langExts
@@ -150,4 +120,33 @@ trait LanguageIndex[VTable <: DefaultTable] {
       Array()
     }
   }
+
+  /**
+    * Collect last versions of packages in local folder
+    * Key for map is package name, value is last version
+    * @return last versions of packages
+    */
+  protected def getLastVersions: Map[String, Version]
+
+  /**
+    * download source code from remote repository
+    * @param name of package
+    * @param ver of package
+    * @return count of downloaded files (source files)
+    */
+  protected def downloadSources(name: String, ver: String): Future[Int]
+
+  protected def applyFilter(extensions: Set[String], curFile: File): Unit = {
+    if (curFile.isDirectory) {
+      curFile.listFiles.foreach(applyFilter(extensions, _))
+    } else {
+      val ext = FilenameUtils.getExtension(curFile.getName)
+      if (curFile.exists() && !(extensions contains ext)) {
+        curFile.delete
+      }
+    }
+  }
+
+  private lazy val defaultExtractor: (String, String) => Unit =
+    (src: String, dst: String) => Seq("tar", "-xvf", src, "-C", dst) !!
 }
