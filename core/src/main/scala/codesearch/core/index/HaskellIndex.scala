@@ -4,6 +4,7 @@ import java.net.URL
 
 import ammonite.ops.{Path, pwd}
 import codesearch.core.db.HackageDB
+import codesearch.core.index.LanguageIndex.SearchArguments
 
 import sys.process._
 import codesearch.core.model.{HackageTable, Version}
@@ -26,12 +27,8 @@ class HaskellIndex(val ec: ExecutionContext) extends LanguageIndex[HackageTable]
   private val INDEX_SOURCE_GZ: Path = pwd / 'data / "index.tar.gz"
   private val INDEX_SOURCE_DIR: Path = pwd / 'data / 'index / "index"
 
-  def csearch(searchQuery: String,
-              insensitive: Boolean,
-              precise: Boolean,
-              sources: Boolean,
-              page: Int): (Int, Seq[PackageResult]) = {
-    val answers = runCsearch(searchQuery, insensitive, precise, sources)
+  def csearch(args: SearchArguments, page: Int): (Int, Seq[PackageResult]) = {
+    val answers = runCsearch(args)
     (answers.length,
      answers
        .slice(math.max(page - 1, 0) * 100, page * 100)

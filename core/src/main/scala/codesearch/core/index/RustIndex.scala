@@ -2,6 +2,7 @@ package codesearch.core.index
 
 import ammonite.ops.{Path, pwd}
 import codesearch.core.db.CratesDB
+import codesearch.core.index.LanguageIndex.SearchArguments
 import codesearch.core.model
 import codesearch.core.model.{CratesTable, Version}
 import codesearch.core.util.Helper
@@ -28,12 +29,8 @@ class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] wit
     ".git"
   )
 
-  def csearch(searchQuery: String,
-              insensitive: Boolean,
-              precise: Boolean,
-              sources: Boolean,
-              page: Int = 0): Future[(Int, Seq[PackageResult])] = {
-    val answers = runCsearch(searchQuery, insensitive, precise, sources)
+  def csearch(args: SearchArguments, page: Int = 0): Future[(Int, Seq[PackageResult])] = {
+    val answers = runCsearch(args)
     verNames().map { verSeq =>
       val nameToVersion = Map(verSeq: _*)
       (answers.length,

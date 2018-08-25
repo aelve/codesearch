@@ -5,6 +5,7 @@ import java.net.URLDecoder
 
 import ammonite.ops.pwd
 import codesearch.core.db.GemDB
+import codesearch.core.index.LanguageIndex.SearchArguments
 import codesearch.core.model.{GemTable, Version}
 import codesearch.core.util.Helper
 
@@ -26,12 +27,8 @@ class RubyIndex(val ec: ExecutionContext) extends LanguageIndex[GemTable] with G
 
   private val DESERIALIZER_PATH = pwd / 'codesearch / 'scripts / "update_index.rb"
 
-  def csearch(searchQuery: String,
-              insensitive: Boolean,
-              precise: Boolean,
-              sources: Boolean,
-              page: Int): (Int, Seq[PackageResult]) = {
-    val answers = runCsearch(searchQuery, insensitive, precise, sources)
+  def csearch(args: SearchArguments, page: Int): (Int, Seq[PackageResult]) = {
+    val answers = runCsearch(args)
 
     (answers.length,
      answers

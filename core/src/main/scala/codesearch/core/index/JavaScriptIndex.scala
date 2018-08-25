@@ -5,6 +5,7 @@ import java.net.{URLDecoder, URLEncoder}
 
 import ammonite.ops.{Path, pwd}
 import codesearch.core.db.NpmDB
+import codesearch.core.index.LanguageIndex.SearchArguments
 
 import scala.sys.process._
 import codesearch.core.model.{NpmTable, Version}
@@ -27,12 +28,8 @@ class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] 
 
   private var counter: Int = 0
 
-  def csearch(searchQuery: String,
-              insensitive: Boolean,
-              precise: Boolean,
-              sources: Boolean,
-              page: Int): (Int, Seq[PackageResult]) = {
-    val answers = runCsearch(searchQuery, insensitive, precise, sources)
+  def csearch(args: SearchArguments, page: Int): (Int, Seq[PackageResult]) = {
+    val answers = runCsearch(args)
     (answers.length,
      answers
        .slice(math.max(page - 1, 0) * 100, page * 100)

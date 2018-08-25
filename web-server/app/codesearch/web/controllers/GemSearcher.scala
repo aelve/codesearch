@@ -1,6 +1,7 @@
 package codesearch.web.controllers
 
 import codesearch.core.db.GemDB
+import codesearch.core.index.LanguageIndex.SearchArguments
 import codesearch.core.index.RubyIndex
 import com.github.marlonlom.utilities.timeago.TimeAgo
 import javax.inject.Inject
@@ -17,7 +18,7 @@ class GemSearcher @Inject() (
       val callURI = s"/ruby/search?query=$query&insensitive=$insensitive&precise=$precise&sources=$sources"
 
       GemDB.updated.map(updated =>
-        RubyIndex().csearch(query, insensitive == "on", precise == "on", sources == "on", page.toInt) match {
+        RubyIndex().csearch(SearchArguments(query, insensitive == "on", precise == "on", sources == "on"), page.toInt) match {
           case (count, results) =>
             Ok(views.html.ruby_search(
               TimeAgo.using(updated.getTime),

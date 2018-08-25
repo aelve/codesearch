@@ -6,6 +6,7 @@ import ammonite.ops.{Path, pwd}
 
 import sys.process._
 import codesearch.core.db.DefaultDB
+import codesearch.core.index.LanguageIndex.SearchArguments
 import codesearch.core.model.{DefaultTable, Version}
 import codesearch.core.util.Helper
 import org.apache.commons.io.FilenameUtils
@@ -55,12 +56,12 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
   protected implicit def executor: ExecutionContext
 
   protected def archiveDownloadAndExtract(name: String,
-                                ver: String,
-                                packageURL: String,
-                                packageFileGZ: Path,
-                                packageFileDir: Path,
-                                extensions: Option[Set[String]] = None,
-                                extractor: (String, String) => Unit = defaultExtractor): Future[Int] = {
+                                          ver: String,
+                                          packageURL: String,
+                                          packageFileGZ: Path,
+                                          packageFileDir: Path,
+                                          extensions: Option[Set[String]] = None,
+                                          extractor: (String, String) => Unit = defaultExtractor): Future[Int] = {
 
     val archive     = packageFileGZ.toIO
     val destination = packageFileDir.toIO
@@ -87,9 +88,9 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
     }
   }
 
-  protected def runCsearch(searchQuery: String, insensitive: Boolean, precise: Boolean, sources: Boolean): Array[String] = {
+  protected def runCsearch(arg: SearchArguments): Array[String] = {
     val pathRegex = {
-      if (sources) {
+      if (arg.sourcesOnly) {
         langExts
       } else {
         ".*"
@@ -97,15 +98,15 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
     }
 
     val query: String = {
-      if (precise) {
-        Helper.hideSymbols(searchQuery)
+      if (arg.preciseMatch) {
+        Helper.hideSymbols(arg.query)
       } else {
-        searchQuery
+        arg.query
       }
     }
 
     val args: mutable.ListBuffer[String] = mutable.ListBuffer("csearch", "-n")
-    if (insensitive) {
+    if (arg.insensitive) {
       args.append("-i")
     }
     args.append("-f", pathRegex)
@@ -149,4 +150,8 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
 
   private lazy val defaultExtractor: (String, String) => Unit =
     (src: String, dst: String) => Seq("tar", "-xvf", src, "-C", dst) !!
+}
+
+object LanguageIndex {
+  final case class SearchArguments(query: String, insensitive: Boolean, preciseMatch: Boolean, sourcesOnly: Boolean)
 }
