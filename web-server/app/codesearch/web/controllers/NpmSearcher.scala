@@ -2,7 +2,7 @@ package codesearch.web.controllers
 
 import codesearch.core.db.NpmDB
 import codesearch.core.index.JavaScriptIndex
-import codesearch.core.index.LanguageIndex.SearchArguments
+import codesearch.core.index.LanguageIndex.{CSearchPage, SearchArguments}
 import com.github.marlonlom.utilities.timeago.TimeAgo
 import javax.inject.Inject
 import play.api.mvc.InjectedController
@@ -18,7 +18,7 @@ class NpmSearcher @Inject() (
 
     NpmDB.updated.flatMap(updated =>
       JavaScriptIndex().csearch(SearchArguments(query, insensitive == "on", precise == "on", sources == "on"), page.toInt) map {
-        case (count, results) =>
+        case CSearchPage(results, count) =>
           Ok(views.html.javascript_search(
             TimeAgo.using(updated.getTime),
             results,

@@ -1,7 +1,7 @@
 package codesearch.web.controllers
 
 import codesearch.core.db.GemDB
-import codesearch.core.index.LanguageIndex.SearchArguments
+import codesearch.core.index.LanguageIndex.{CSearchPage, SearchArguments}
 import codesearch.core.index.RubyIndex
 import com.github.marlonlom.utilities.timeago.TimeAgo
 import javax.inject.Inject
@@ -19,7 +19,7 @@ class GemSearcher @Inject() (
 
       GemDB.updated.flatMap(updated =>
         RubyIndex().csearch(SearchArguments(query, insensitive == "on", precise == "on", sources == "on"), page.toInt) map {
-          case (count, results) =>
+          case CSearchPage(results, count) =>
             Ok(views.html.ruby_search(
               TimeAgo.using(updated.getTime),
               results,

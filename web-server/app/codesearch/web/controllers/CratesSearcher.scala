@@ -1,7 +1,7 @@
 package codesearch.web.controllers
 
 import codesearch.core.db.CratesDB
-import codesearch.core.index.LanguageIndex.SearchArguments
+import codesearch.core.index.LanguageIndex.{CSearchPage, SearchArguments}
 import codesearch.core.index.RustIndex
 import com.github.marlonlom.utilities.timeago.TimeAgo
 import javax.inject.Inject
@@ -15,9 +15,9 @@ class CratesSearcher @Inject() (implicit val executionContext: ExecutionContext
   def index(query: String, insensitive: String, precise: String, sources: String, page: String) = Action.async { implicit request =>
     val callURI = s"/rust/search?query=$query&insensitive=$insensitive&precise=$precise&sources=$sources"
 
-    CratesDB.updated
-      .zip(RustIndex().csearch(SearchArguments(query, insensitive == "on", precise == "on", sources == "on"), page.toInt))
-    .map { case (updated, (count, results)) =>
+    CratesDB.updated.flatMap(updated =>
+      RustIndex().csearch(SearchArguments(query, insensitive == "on", precise == "on", sources == "on"), page.toInt)
+    .map { case CSearchPage(results, count) =>
       Ok(views.html.rust_search(
         TimeAgo.using(updated.getTime),
         results,
@@ -30,5 +30,6 @@ class CratesSearcher @Inject() (implicit val executionContext: ExecutionContext
         callURI
       ))
     }
+    )
   }
 }
