@@ -6,7 +6,7 @@ import ammonite.ops.{Path, pwd}
 
 import sys.process._
 import codesearch.core.db.DefaultDB
-import codesearch.core.index.LanguageIndex.SearchArguments
+import codesearch.core.index.LanguageIndex.{ContentByURI, PackageResult, SearchArguments}
 import codesearch.core.model.{DefaultTable, Version}
 import codesearch.core.util.Helper
 import org.apache.commons.io.FilenameUtils
@@ -60,18 +60,18 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
          .slice(math.max(page - 1, 0) * 100, page * 100)
          .flatMap(contentByURI)
          .groupBy { x =>
-           (x._1, x._2)
+           (x.name, x.url)
          }
          .map {
            case ((verName, packageLink), results) =>
-             PackageResult(verName, packageLink, results.map(_._3).toSeq)
+             PackageResult(verName, packageLink, results.map(_.result).toSeq)
          }
          .toSeq
          .sortBy(_.name))
     }
   }
 
-  protected def contentByURI(uri: String): Option[(String, String, Result)]
+  protected def contentByURI(uri: String): Option[ContentByURI]
 
   protected implicit def executor: ExecutionContext
 
@@ -175,5 +175,8 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
 }
 
 object LanguageIndex {
+  case class Result(fileLink: String, firstLine: Int, nLine: Int, ctxt: Seq[String])
+  case class PackageResult(name: String, packageLink: String, results: Seq[Result])
   final case class SearchArguments(query: String, insensitive: Boolean, preciseMatch: Boolean, sourcesOnly: Boolean)
+  final case class ContentByURI(name: String, url: String, result: Result)
 }

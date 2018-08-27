@@ -4,6 +4,7 @@ import java.net.URL
 
 import ammonite.ops.{Path, pwd}
 import codesearch.core.db.HackageDB
+import codesearch.core.index.LanguageIndex.{ContentByURI, Result}
 
 import sys.process._
 import codesearch.core.model.{HackageTable, Version}
@@ -12,9 +13,6 @@ import org.rauschig.jarchivelib.{ArchiveFormat, ArchiverFactory, CompressionType
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.{ExecutionContext, Future}
-
-case class Result(fileLink: String, firstLine: Int, nLine: Int, ctxt: Seq[String])
-case class PackageResult(name: String, packageLink: String, results: Seq[Result])
 
 class HaskellIndex(val ec: ExecutionContext) extends LanguageIndex[HackageTable] with HackageDB {
 
@@ -70,7 +68,7 @@ class HaskellIndex(val ec: ExecutionContext) extends LanguageIndex[HackageTable]
     lastVersions
   }
 
-  override protected def contentByURI(uri: String): Option[(String, String, Result)] = {
+  override protected def contentByURI(uri: String): Option[ContentByURI] = {
     val elems: Seq[String] = uri.split(':')
     if (elems.length < 2) {
       logger.warn(s"bad uri: $uri")
@@ -89,14 +87,14 @@ class HaskellIndex(val ec: ExecutionContext) extends LanguageIndex[HackageTable]
           val remPath = pathSeq.drop(1).mkString("/")
 
           Some(
-            (name,
-             s"https://hackage.haskell.org/package/$name",
-             Result(
-               remPath,
-               firstLine,
-               nLine.toInt - 1,
-               rows
-             )))
+            ContentByURI(name,
+                         s"https://hackage.haskell.org/package/$name",
+                         Result(
+                           remPath,
+                           firstLine,
+                           nLine.toInt - 1,
+                           rows
+                         )))
       }
     }
   }

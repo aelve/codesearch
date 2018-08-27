@@ -2,7 +2,7 @@ package codesearch.core.index
 
 import ammonite.ops.{Path, pwd}
 import codesearch.core.db.CratesDB
-import codesearch.core.index.LanguageIndex.SearchArguments
+import codesearch.core.index.LanguageIndex.{ContentByURI, PackageResult, Result, SearchArguments}
 import codesearch.core.model
 import codesearch.core.model.{CratesTable, Version}
 import codesearch.core.util.Helper
@@ -37,10 +37,10 @@ class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] wit
          answers
            .slice(math.max(page - 1, 0) * 100, page * 100)
            .flatMap(uri => contentByURI(uri, nameToVersion))
-           .groupBy(x => (x._1, x._2))
+           .groupBy(x => (x.name, x.url))
            .map {
              case ((name, packageLink), results) =>
-               PackageResult(name, packageLink, results.map(_._3))
+               PackageResult(name, packageLink, results.map(_.result))
            }
            .toSeq
            .sortBy(_.name))
@@ -87,7 +87,7 @@ class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] wit
     Map(seq: _*)
   }
 
-  private def contentByURI(uri: String, nameToVersion: Map[String, String]): Option[(String, String, Result)] = {
+  private def contentByURI(uri: String, nameToVersion: Map[String, String]): Option[ContentByURI] = {
     val elems: Seq[String] = uri.split(':')
     if (elems.length < 2) {
       println(s"bad uri: $uri")
@@ -106,20 +106,20 @@ class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] wit
 
             val remPath = pathSeq.drop(1).mkString("/")
 
-            (packageName,
-             s"https://docs.rs/crate/$packageName/$ver",
-             Result(
-               remPath,
-               firstLine,
-               nLine.toInt - 1,
-               rows
-             ))
+            ContentByURI(packageName,
+                         s"https://docs.rs/crate/$packageName/$ver",
+                         Result(
+                           remPath,
+                           firstLine,
+                           nLine.toInt - 1,
+                           rows
+                         ))
           }
       }
     }
   }
 
-  override protected def contentByURI(uri: String): Option[(String, String, Result)] = Option.empty
+  override protected def contentByURI(uri: String): Option[ContentByURI] = Option.empty
 }
 
 object RustIndex {
