@@ -134,13 +134,7 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
     logger.debug(indexPath.toString())
 
     Future {
-      val answer = (Process(args, None, "CSEARCHINDEX" -> indexPath.toString()) #| Seq("head", "-1001")).!!
-
-      if (answer.nonEmpty) {
-        answer.split('\n')
-      } else {
-        Array()
-      }
+      (Process(args, None, "CSEARCHINDEX" -> indexPath.toString()) #| Seq("head", "-1001")).!!.split('\n')
     }
   }
 
