@@ -18,12 +18,12 @@ case class PackageResult(name: String, packageLink: String, results: Seq[Result]
 
 class HaskellIndex(val ec: ExecutionContext) extends LanguageIndex[HackageTable] with HackageDB {
 
-  override protected val logger: Logger              = LoggerFactory.getLogger(this.getClass)
-  override protected val indexFile: String           = ".hackage_csearch_index"
-  override protected val langExts: String            = ".*\\.(hs|lhs|hsc|hs-boot|lhs-boot)$"
+  override protected val logger: Logger    = LoggerFactory.getLogger(this.getClass)
+  override protected val indexFile: String = ".hackage_csearch_index"
+  override protected val langExts: String  = ".*\\.(hs|lhs|hsc|hs-boot|lhs-boot)$"
 
-  private val INDEX_LINK: String = "http://hackage.haskell.org/packages/index.tar.gz"
-  private val INDEX_SOURCE_GZ: Path = pwd / 'data / "index.tar.gz"
+  private val INDEX_LINK: String     = "http://hackage.haskell.org/packages/index.tar.gz"
+  private val INDEX_SOURCE_GZ: Path  = pwd / 'data / "index.tar.gz"
   private val INDEX_SOURCE_DIR: Path = pwd / 'data / 'index / "index"
 
   def csearch(searchQuery: String,
@@ -65,7 +65,7 @@ class HaskellIndex(val ec: ExecutionContext) extends LanguageIndex[HackageTable]
   override def downloadMetaInformation(): Unit = {
     logger.info("update index")
 
-    val archive = INDEX_SOURCE_GZ.toIO
+    val archive     = INDEX_SOURCE_GZ.toIO
     val destination = INDEX_SOURCE_DIR.toIO
 
     archive.getParentFile.mkdirs()
@@ -78,12 +78,12 @@ class HaskellIndex(val ec: ExecutionContext) extends LanguageIndex[HackageTable]
   }
 
   override protected def getLastVersions: Map[String, Version] = {
-    val indexDir = INDEX_SOURCE_DIR.toIO
+    val indexDir     = INDEX_SOURCE_DIR.toIO
     val packageNames = indexDir.listFiles.filter(_.isDirectory)
     val allVersions = packageNames.flatMap { packagePath =>
-      packagePath.listFiles.filter(_.isDirectory).map(versionPath =>
-        (packagePath.getName, Version(versionPath.getName))
-      )
+      packagePath.listFiles
+        .filter(_.isDirectory)
+        .map(versionPath => (packagePath.getName, Version(versionPath.getName)))
     }
     val lastVersions = allVersions.groupBy { case (name, _) => name }
       .mapValues(_.map { case (_, version) => version }.max)
@@ -97,9 +97,9 @@ class HaskellIndex(val ec: ExecutionContext) extends LanguageIndex[HackageTable]
       logger.warn(s"bad uri: $uri")
       None
     } else {
-      val fullPath = Path(elems.head).relativeTo(pwd).toString
-      val pathSeq: Seq[String] = fullPath.split('/').drop(4)  // drop "data/packages/x/1.0/"
-      val nLine = elems.drop(1).head
+      val fullPath             = Path(elems.head).relativeTo(pwd).toString
+      val pathSeq: Seq[String] = fullPath.split('/').drop(4) // drop "data/packages/x/1.0/"
+      val nLine                = elems.drop(1).head
       pathSeq.headOption match {
         case None =>
           logger.warn(s"bad uri: $uri")
@@ -109,12 +109,15 @@ class HaskellIndex(val ec: ExecutionContext) extends LanguageIndex[HackageTable]
 
           val remPath = pathSeq.drop(1).mkString("/")
 
-          Some((name, s"https://hackage.haskell.org/package/$name", Result(
-            remPath,
-            firstLine,
-            nLine.toInt - 1,
-            rows
-          )))
+          Some(
+            (name,
+             s"https://hackage.haskell.org/package/$name",
+             Result(
+               remPath,
+               firstLine,
+               nLine.toInt - 1,
+               rows
+             )))
       }
     }
   }

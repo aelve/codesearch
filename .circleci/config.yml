@@ -16,7 +16,7 @@ jobs:
 
       - run:
           command:
-            sbt compile exit
+            sbt scalafmtCheck compile exit
 
       - save_cache:
           key: codesearch-{{ checksum "project/Builder.scala" }}-{{ checksum "build.sbt" }}

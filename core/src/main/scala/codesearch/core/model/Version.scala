@@ -11,4 +11,3 @@ case class Version(verString: String) extends Ordered[Version] {
 object Version {
   def less(ver1: String, ver2: String): Boolean = Version(ver1) < Version(ver2)
 }
-

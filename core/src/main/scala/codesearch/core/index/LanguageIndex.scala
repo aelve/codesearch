@@ -55,12 +55,12 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
   protected implicit def executor: ExecutionContext
 
   protected def archiveDownloadAndExtract(name: String,
-                                ver: String,
-                                packageURL: String,
-                                packageFileGZ: Path,
-                                packageFileDir: Path,
-                                extensions: Option[Set[String]] = None,
-                                extractor: (String, String) => Unit = defaultExtractor): Future[Int] = {
+                                          ver: String,
+                                          packageURL: String,
+                                          packageFileGZ: Path,
+                                          packageFileDir: Path,
+                                          extensions: Option[Set[String]] = None,
+                                          extractor: (String, String) => Unit = defaultExtractor): Future[Int] = {
 
     val archive     = packageFileGZ.toIO
     val destination = packageFileDir.toIO
@@ -87,7 +87,10 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
     }
   }
 
-  protected def runCsearch(searchQuery: String, insensitive: Boolean, precise: Boolean, sources: Boolean): Array[String] = {
+  protected def runCsearch(searchQuery: String,
+                           insensitive: Boolean,
+                           precise: Boolean,
+                           sources: Boolean): Array[String] = {
     val pathRegex = {
       if (sources) {
         langExts

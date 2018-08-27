@@ -16,13 +16,13 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] with NpmDB {
 
-  override protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
-  override protected val indexFile: String                                  = ".npm_csearch_index"
-  override protected val langExts: String = ".*\\.(js|json)$"
+  override protected val logger: Logger    = LoggerFactory.getLogger(this.getClass)
+  override protected val indexFile: String = ".npm_csearch_index"
+  override protected val langExts: String  = ".*\\.(js|json)$"
 
-  private val SOURCES: Path   = pwd / 'data / 'js / 'packages
-  private val NPM_INDEX_JSON = pwd / 'data / 'js / "nameVersions.json"
-  private val NPM_UPDATER_SCRIPT = pwd / 'codesearch / 'scripts / "update_npm_index.js"
+  private val SOURCES: Path           = pwd / 'data / 'js / 'packages
+  private val NPM_INDEX_JSON          = pwd / 'data / 'js / "nameVersions.json"
+  private val NPM_UPDATER_SCRIPT      = pwd / 'codesearch / 'scripts / "update_npm_index.js"
   private val extensions: Set[String] = Set("js", "json", "xml", "yml", "coffee", "markdown", "md", "yaml", "txt")
 
   private var counter: Int = 0
@@ -79,11 +79,10 @@ class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] 
 
   override protected def getLastVersions: Map[String, Version] = {
     val stream = new FileInputStream(NPM_INDEX_JSON.toIO)
-    val obj = Json.parse(stream).as[Seq[Map[String, String]]]
+    val obj    = Json.parse(stream).as[Seq[Map[String, String]]]
     stream.close()
 
-    obj.map(map => (map.getOrElse("name", ""), Version(map.getOrElse("version", ""))))
-      .toMap
+    obj.map(map => (map.getOrElse("name", ""), Version(map.getOrElse("version", "")))).toMap
   }
 
   private def contentByURI(uri: String): Option[(String, String, Result)] = {
@@ -92,25 +91,28 @@ class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] 
       println(s"bad uri: $uri")
       None
     } else {
-      val fullPath = elems.head
+      val fullPath             = elems.head
       val pathSeq: Seq[String] = elems.head.split('/').drop(6)
-      val nLine = elems.drop(1).head
+      val nLine                = elems.drop(1).head
       pathSeq.headOption match {
         case None =>
           println(s"bad uri: $uri")
           None
         case Some(name) =>
-          val decodedName = URLDecoder.decode(name, "UTF-8")
+          val decodedName       = URLDecoder.decode(name, "UTF-8")
           val (firstLine, rows) = Helper.extractRows(fullPath, nLine.toInt)
 
           val remPath = pathSeq.drop(1).mkString("/")
 
-          Some((decodedName, s"https://www.npmjs.com/package/$decodedName", Result(
-            remPath,
-            firstLine,
-            nLine.toInt - 1,
-            rows
-          )))
+          Some(
+            (decodedName,
+             s"https://www.npmjs.com/package/$decodedName",
+             Result(
+               remPath,
+               firstLine,
+               nLine.toInt - 1,
+               rows
+             )))
       }
     }
   }
