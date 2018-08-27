@@ -33,16 +33,16 @@ class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] wit
     runCsearch(args).flatMap { answers =>
       verNames().map { verSeq =>
         val nameToVersion = Map(verSeq: _*)
-         answers
-           .slice(math.max(page - 1, 0) * 100, page * 100)
-           .flatMap(uri => contentByURI(uri, nameToVersion))
-           .groupBy(x => (x.name, x.url))
-           .map {
-             case ((name, packageLink), results) =>
-               PackageResult(name, packageLink, results.map(_.result))
-           }
-           .toSeq
-           .sortBy(_.name)
+        answers
+          .slice(math.max(page - 1, 0) * 100, page * 100)
+          .flatMap(uri => contentByURI(uri, nameToVersion))
+          .groupBy(x => (x.name, x.url))
+          .map {
+            case ((name, packageLink), results) =>
+              PackageResult(name, packageLink, results.map(_.result))
+          }
+          .toSeq
+          .sortBy(_.name)
       }.map(CSearchPage(_, answers.length))
     }
   }

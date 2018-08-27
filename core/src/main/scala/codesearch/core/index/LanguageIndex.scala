@@ -56,17 +56,17 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
   def csearch(args: SearchArguments, page: Int): Future[CSearchPage] = {
     runCsearch(args).map { answers =>
       val data = answers
-         .slice(math.max(page - 1, 0) * 100, page * 100)
-         .flatMap(contentByURI)
-         .groupBy { x =>
-           (x.name, x.url)
-         }
-         .map {
-           case ((verName, packageLink), results) =>
-             PackageResult(verName, packageLink, results.map(_.result).toSeq)
-         }
-         .toSeq
-         .sortBy(_.name)
+        .slice(math.max(page - 1, 0) * 100, page * 100)
+        .flatMap(contentByURI)
+        .groupBy { x =>
+          (x.name, x.url)
+        }
+        .map {
+          case ((verName, packageLink), results) =>
+            PackageResult(verName, packageLink, results.map(_.result).toSeq)
+        }
+        .toSeq
+        .sortBy(_.name)
       CSearchPage(data, answers.length)
     }
   }
