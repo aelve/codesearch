@@ -34,7 +34,7 @@ class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] wit
       verNames().map { verSeq =>
         val nameToVersion = Map(verSeq: _*)
         answers
-          .slice(math.max(page - 1, 0) * 100, page * 100)
+          .slice(math.max(page - 1, 0) * LanguageIndex.PAGE_SIZE, page * LanguageIndex.PAGE_SIZE)
           .flatMap(uri => contentByURI(uri, nameToVersion))
           .groupBy(x => (x.name, x.url))
           .map {

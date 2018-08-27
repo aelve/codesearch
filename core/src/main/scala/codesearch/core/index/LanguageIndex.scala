@@ -56,7 +56,7 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
   def csearch(args: SearchArguments, page: Int): Future[CSearchPage] = {
     runCsearch(args).map { answers =>
       val data = answers
-        .slice(math.max(page - 1, 0) * 100, page * 100)
+        .slice(math.max(page - 1, 0) * LanguageIndex.PAGE_SIZE, page * LanguageIndex.PAGE_SIZE)
         .flatMap(contentByURI)
         .groupBy { x =>
           (x.name, x.url)
@@ -174,4 +174,6 @@ object LanguageIndex {
   case class PackageResult(name: String, packageLink: String, results: Seq[Result])
   final case class SearchArguments(query: String, insensitive: Boolean, preciseMatch: Boolean, sourcesOnly: Boolean)
   final case class ContentByURI(name: String, url: String, result: Result)
+
+  val PAGE_SIZE = 100
 }
