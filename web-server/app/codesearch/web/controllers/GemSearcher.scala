@@ -8,9 +8,9 @@ import play.api.mvc.InjectedController
 
 import scala.concurrent.ExecutionContext
 
-class GemSearcher @Inject() (
-                                  implicit val executionContext: ExecutionContext
-                                ) extends InjectedController {
+class GemSearcher @Inject()(
+    implicit val executionContext: ExecutionContext
+) extends InjectedController {
 
   def index(query: String, insensitive: String, precise: String, sources: String, page: String) =
     Action.async { implicit request =>
@@ -19,18 +19,18 @@ class GemSearcher @Inject() (
       GemDB.updated.map(updated =>
         RubyIndex().csearch(query, insensitive == "on", precise == "on", sources == "on", page.toInt) match {
           case (count, results) =>
-            Ok(views.html.ruby_search(
-              TimeAgo.using(updated.getTime),
-              results,
-              query,
-              insensitive == "on",
-              precise == "on",
-              sources == "on",
-              page = page.toInt,
-              count,
-              callURI
-            ))
-        }
-      )
+            Ok(
+              views.html.ruby_search(
+                TimeAgo.using(updated.getTime),
+                results,
+                query,
+                insensitive == "on",
+                precise == "on",
+                sources == "on",
+                page = page.toInt,
+                count,
+                callURI
+              ))
+      })
     }
 }

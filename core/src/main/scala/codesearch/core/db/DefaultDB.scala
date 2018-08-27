@@ -29,9 +29,7 @@ trait DefaultDB[T <: DefaultTable] {
   }
 
   def getSize: Future[Int] = {
-    val act = table
-      .size
-      .result
+    val act = table.size.result
     db.run(act)
   }
 
@@ -73,6 +71,6 @@ trait GemDB extends DefaultDB[GemTable] {
 }
 
 object HackageDB extends HackageDB
-object CratesDB extends CratesDB
-object NpmDB extends NpmDB
-object GemDB extends GemDB
+object CratesDB  extends CratesDB
+object NpmDB     extends NpmDB
+object GemDB     extends GemDB
