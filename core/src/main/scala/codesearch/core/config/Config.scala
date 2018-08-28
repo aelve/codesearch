@@ -7,7 +7,7 @@ import pureconfig.loadConfig
 final case class Config(dataSourceClass: String, numThreads:Int, properties: DatabaseConfig)
 
 object Config {
-  private[config] final case class DatabaseConfig(port: Int, name: String, user: String, password: String)
+  private[config] final case class DatabaseConfig(portNumber: Int, name: String, user: String, password: String)
 
   def load(): Either[ConfigReaderFailures, Config] = loadConfig[Config]
 
