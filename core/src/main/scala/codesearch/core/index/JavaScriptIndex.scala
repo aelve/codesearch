@@ -5,7 +5,7 @@ import java.net.{URLDecoder, URLEncoder}
 
 import ammonite.ops.{Path, pwd}
 import codesearch.core.db.NpmDB
-import codesearch.core.index.LanguageIndex.{ContentByURI, Result}
+import codesearch.core.index.LanguageIndex.{CSearchResult, CodeSnippet}
 
 import scala.sys.process._
 import codesearch.core.model.{NpmTable, Version}
@@ -65,7 +65,7 @@ class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] 
     obj.map(map => (map.getOrElse("name", ""), Version(map.getOrElse("version", "")))).toMap
   }
 
-  override protected def contentByURI(uri: String): Option[ContentByURI] = {
+  override protected def mapCSearchOutput(uri: String): Option[CSearchResult] = {
     val elems: Seq[String] = uri.split(':')
     if (elems.length < 2) {
       println(s"bad uri: $uri")
@@ -85,9 +85,9 @@ class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] 
           val remPath = pathSeq.drop(1).mkString("/")
 
           Some(
-            ContentByURI(decodedName,
+            CSearchResult(decodedName,
                          s"https://www.npmjs.com/package/$decodedName",
-                         Result(
+                         CodeSnippet(
                            remPath,
                            firstLine,
                            nLine.toInt - 1,

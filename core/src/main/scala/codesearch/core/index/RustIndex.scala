@@ -35,7 +35,7 @@ class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] wit
         val nameToVersion = Map(verSeq: _*)
         answers
           .slice(math.max(page - 1, 0) * LanguageIndex.PAGE_SIZE, page * LanguageIndex.PAGE_SIZE)
-          .flatMap(uri => contentByURI(uri, nameToVersion))
+          .flatMap(uri => mapCSearchOutput(uri, nameToVersion))
           .groupBy(x => (x.name, x.url))
           .map {
             case ((name, packageLink), results) =>
@@ -86,7 +86,7 @@ class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] wit
     Map(seq: _*)
   }
 
-  private def contentByURI(uri: String, nameToVersion: Map[String, String]): Option[ContentByURI] = {
+  private def mapCSearchOutput(uri: String, nameToVersion: Map[String, String]): Option[CSearchResult] = {
     val elems: Seq[String] = uri.split(':')
     if (elems.length < 2) {
       println(s"bad uri: $uri")
@@ -105,9 +105,9 @@ class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] wit
 
             val remPath = pathSeq.drop(1).mkString("/")
 
-            ContentByURI(packageName,
+            CSearchResult(packageName,
                          s"https://docs.rs/crate/$packageName/$ver",
-                         Result(
+                         CodeSnippet(
                            remPath,
                            firstLine,
                            nLine.toInt - 1,
@@ -118,7 +118,7 @@ class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] wit
     }
   }
 
-  override protected def contentByURI(uri: String): Option[ContentByURI] = Option.empty
+  override protected def mapCSearchOutput(uri: String): Option[CSearchResult] = Option.empty
 }
 
 object RustIndex {

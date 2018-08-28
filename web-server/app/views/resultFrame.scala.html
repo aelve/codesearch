@@ -22,7 +22,7 @@
 
         @for(result <- pack.results) {
             <a href=@(Helper.linkByLang(lang, pack.packageLink, result.fileLink))>@result.fileLink</a>
-            <pre data-start=@{result.firstLine + 1}><code class="@("language-" + Helper.langByLink(result.fileLink, lang) +
+            <pre data-start=@{result.numberOfFirstLine + 1}><code class="@("language-" + Helper.langByLink(result.fileLink, lang) +
                     " line-numbers")">@{
                 val re = {
                     val regex = mutable.StringBuilder.newBuilder
@@ -39,7 +39,7 @@
                     regex.toString
                 }.r
 
-                val id = result.nLine - result.firstLine
+                val id = result.matchedLine - result.numberOfFirstLine
                 val hLine = result.ctxt(id)
                 val matches = re.findAllMatchIn(hLine)
                 var lastL = 0

@@ -5,7 +5,7 @@ import java.net.URLDecoder
 
 import ammonite.ops.pwd
 import codesearch.core.db.GemDB
-import codesearch.core.index.LanguageIndex.{ContentByURI, Result}
+import codesearch.core.index.LanguageIndex.{CSearchResult, CodeSnippet}
 import codesearch.core.model.{GemTable, Version}
 import codesearch.core.util.Helper
 
@@ -67,7 +67,7 @@ class RubyIndex(val ec: ExecutionContext) extends LanguageIndex[GemTable] with G
     obj.map { case Seq(name, ver, _) => (name, Version(ver)) }.toMap
   }
 
-  override protected def contentByURI(uri: String): Option[ContentByURI] = {
+  override protected def mapCSearchOutput(uri: String): Option[CSearchResult] = {
     val elems: Seq[String] = uri.split(':')
     if (elems.length < 2) {
       logger.warn(s"bad uri: $uri")
@@ -87,9 +87,9 @@ class RubyIndex(val ec: ExecutionContext) extends LanguageIndex[GemTable] with G
           val remPath = pathSeq.drop(1).mkString("/")
 
           Some(
-            ContentByURI(decodedName,
+            CSearchResult(decodedName,
                          s"https://rubygems.org/gems/$decodedName",
-                         Result(
+                         CodeSnippet(
                            remPath,
                            firstLine,
                            nLine.toInt - 1,

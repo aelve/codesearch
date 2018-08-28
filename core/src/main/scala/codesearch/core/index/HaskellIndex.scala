@@ -4,7 +4,7 @@ import java.net.URL
 
 import ammonite.ops.{Path, pwd}
 import codesearch.core.db.HackageDB
-import codesearch.core.index.LanguageIndex.{ContentByURI, Result}
+import codesearch.core.index.LanguageIndex.{CSearchResult, CodeSnippet}
 
 import sys.process._
 import codesearch.core.model.{HackageTable, Version}
@@ -68,7 +68,7 @@ class HaskellIndex(val ec: ExecutionContext) extends LanguageIndex[HackageTable]
     lastVersions
   }
 
-  override protected def contentByURI(uri: String): Option[ContentByURI] = {
+  override protected def mapCSearchOutput(uri: String): Option[CSearchResult] = {
     val elems: Seq[String] = uri.split(':')
     if (elems.length < 2) {
       logger.warn(s"bad uri: $uri")
@@ -87,9 +87,9 @@ class HaskellIndex(val ec: ExecutionContext) extends LanguageIndex[HackageTable]
           val remPath = pathSeq.drop(1).mkString("/")
 
           Some(
-            ContentByURI(name,
+            CSearchResult(name,
                          s"https://hackage.haskell.org/package/$name",
-                         Result(
+                         CodeSnippet(
                            remPath,
                            firstLine,
                            nLine.toInt - 1,
