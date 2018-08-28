@@ -88,13 +88,13 @@ class HaskellIndex(val ec: ExecutionContext) extends LanguageIndex[HackageTable]
 
           Some(
             CSearchResult(name,
-                         s"https://hackage.haskell.org/package/$name",
-                         CodeSnippet(
-                           remPath,
-                           firstLine,
-                           nLine.toInt - 1,
-                           rows
-                         )))
+                          s"https://hackage.haskell.org/package/$name",
+                          CodeSnippet(
+                            remPath,
+                            firstLine,
+                            nLine.toInt - 1,
+                            rows
+                          )))
       }
     }
   }

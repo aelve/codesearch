@@ -88,13 +88,13 @@ class RubyIndex(val ec: ExecutionContext) extends LanguageIndex[GemTable] with G
 
           Some(
             CSearchResult(decodedName,
-                         s"https://rubygems.org/gems/$decodedName",
-                         CodeSnippet(
-                           remPath,
-                           firstLine,
-                           nLine.toInt - 1,
-                           rows
-                         )))
+                          s"https://rubygems.org/gems/$decodedName",
+                          CodeSnippet(
+                            remPath,
+                            firstLine,
+                            nLine.toInt - 1,
+                            rows
+                          )))
       }
     }
 

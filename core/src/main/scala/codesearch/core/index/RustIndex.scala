@@ -106,13 +106,13 @@ class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] wit
             val remPath = pathSeq.drop(1).mkString("/")
 
             CSearchResult(packageName,
-                         s"https://docs.rs/crate/$packageName/$ver",
-                         CodeSnippet(
-                           remPath,
-                           firstLine,
-                           nLine.toInt - 1,
-                           rows
-                         ))
+                          s"https://docs.rs/crate/$packageName/$ver",
+                          CodeSnippet(
+                            remPath,
+                            firstLine,
+                            nLine.toInt - 1,
+                            rows
+                          ))
           }
       }
     }

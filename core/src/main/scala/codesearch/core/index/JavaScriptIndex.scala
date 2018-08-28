@@ -86,13 +86,13 @@ class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] 
 
           Some(
             CSearchResult(decodedName,
-                         s"https://www.npmjs.com/package/$decodedName",
-                         CodeSnippet(
-                           remPath,
-                           firstLine,
-                           nLine.toInt - 1,
-                           rows
-                         )))
+                          s"https://www.npmjs.com/package/$decodedName",
+                          CodeSnippet(
+                            remPath,
+                            firstLine,
+                            nLine.toInt - 1,
+                            rows
+                          )))
       }
     }
   }
