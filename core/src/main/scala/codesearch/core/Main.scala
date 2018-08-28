@@ -1,24 +1,25 @@
 package codesearch.core
 
-import ammonite.ops.{FilePath, pwd}
+import java.util.concurrent.Executors
+
 import codesearch.core.index._
 import codesearch.core.db._
 import codesearch.core.model._
 import org.slf4j.{Logger, LoggerFactory}
 
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.Duration
-import scala.concurrent.ExecutionContext.Implicits.global
 
 object Main {
+
   private val logger: Logger = LoggerFactory.getLogger(Main.getClass)
+  private implicit val ec: ExecutionContext = ExecutionContext
+    .fromExecutorService(Executors.newFixedThreadPool(2 * Runtime.getRuntime.availableProcessors()))
 
   case class Config(updatePackages: Boolean = false,
-                    downloadIndex: Boolean = false,
-                    sourcesDir: FilePath = pwd / 'sources,
+                    downloadMeta: Boolean = false,
                     initDB: Boolean = false,
-                    lang: String = "all"
-                   )
+                    lang: String = "all")
 
   private val parser = new scopt.OptionParser[Config]("main") {
     head("\nCodesearch command line interface\n\n")
@@ -27,9 +28,9 @@ object Main {
       c.copy(updatePackages = true)
     } text "update package-sources"
 
-    opt[Unit]('d', "download-index") action { (_, c) =>
-      c.copy(downloadIndex = true)
-    } text "update package-index"
+    opt[Unit]('d', "download-meta") action { (_, c) =>
+      c.copy(downloadMeta = true)
+    } text "update package meta information"
 
     opt[Unit]('i', "init-database") action { (_, c) =>
       c.copy(initDB = true)
@@ -40,22 +41,18 @@ object Main {
     }
   }
 
-  case class LangRep[T <: DefaultTable](db: DefaultDB[T],
-                                        index: Index,
-                                        sources: Sources[T]
-                                       )
+  case class LangRep[T <: DefaultTable](db: DefaultDB[T], langIndex: LanguageIndex[T])
 
   private val langReps = Map(
-    "hackage" -> LangRep[HackageTable](HackageDB, HackageIndex, HackageSources),
-    "crates"  -> LangRep[CratesTable](CratesDB, CratesIndex, CratesSources),
-    "gem"     -> LangRep[GemTable](GemDB, GemIndex, GemSources),
-    "npm"     -> LangRep[NpmTable](NpmDB, NpmIndex, NpmSources)
+    "haskell"    -> LangRep[HackageTable](HackageDB, HaskellIndex()),
+    "rust"       -> LangRep[CratesTable](CratesDB, RustIndex()),
+    "ruby"       -> LangRep[GemTable](GemDB, RubyIndex()),
+    "javascript" -> LangRep[NpmTable](NpmDB, JavaScriptIndex())
   )
 
   def main(args: Array[String]): Unit = {
 
     parser.parse(args, Config()) foreach { c =>
-
       if (c.lang != "all" && !(langReps.keySet contains c.lang)) {
         throw new IllegalArgumentException(s"Unsupported lanuages\n Available languages: ${langReps.keys}")
       }
@@ -76,21 +73,23 @@ object Main {
         Await.result(future, Duration.Inf)
       }
 
-      if (c.downloadIndex) { c.lang match {
-        case "all" =>
-          langReps.values.foreach(_.index.updateIndex())
-        case lang =>
-          langReps(lang).index.updateIndex()
-      } }
+      if (c.downloadMeta) {
+        c.lang match {
+          case "all" =>
+            langReps.values.foreach(_.langIndex.downloadMetaInformation())
+          case lang =>
+            langReps(lang).langIndex.downloadMetaInformation()
+        }
+      }
 
       if (c.updatePackages) {
         val future = c.lang match {
           case "all" =>
             Future
-              .sequence(langReps.values.map(_.sources.update()))
+              .sequence(langReps.values.map(_.langIndex.updatePackages()))
               .map(_.sum)
           case lang =>
-            langReps(lang).sources.update()
+            langReps(lang).langIndex.updatePackages()
         }
         val cntUpdated = Await.result(future, Duration.Inf)
 
