@@ -5,6 +5,7 @@ import java.net.{URLDecoder, URLEncoder}
 
 import ammonite.ops.{Path, pwd}
 import codesearch.core.db.NpmDB
+import codesearch.core.index.LanguageIndex.{CSearchResult, CodeSnippet}
 
 import scala.sys.process._
 import codesearch.core.model.{NpmTable, Version}
@@ -26,27 +27,6 @@ class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] 
   private val extensions: Set[String] = Set("js", "json", "xml", "yml", "coffee", "markdown", "md", "yaml", "txt")
 
   private var counter: Int = 0
-
-  def csearch(searchQuery: String,
-              insensitive: Boolean,
-              precise: Boolean,
-              sources: Boolean,
-              page: Int): (Int, Seq[PackageResult]) = {
-    val answers = runCsearch(searchQuery, insensitive, precise, sources)
-    (answers.length,
-     answers
-       .slice(math.max(page - 1, 0) * 100, page * 100)
-       .flatMap(contentByURI)
-       .groupBy { x =>
-         (x._1, x._2)
-       }
-       .map {
-         case ((verName, packageLink), results) =>
-           PackageResult(verName, packageLink, results.map(_._3).toSeq)
-       }
-       .toSeq
-       .sortBy(_.name))
-  }
 
   override def downloadMetaInformation(): Unit = Seq("node", NPM_UPDATER_SCRIPT.toString) !!
 
@@ -85,7 +65,7 @@ class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] 
     obj.map(map => (map.getOrElse("name", ""), Version(map.getOrElse("version", "")))).toMap
   }
 
-  private def contentByURI(uri: String): Option[(String, String, Result)] = {
+  override protected def mapCSearchOutput(uri: String): Option[CSearchResult] = {
     val elems: Seq[String] = uri.split(':')
     if (elems.length < 2) {
       println(s"bad uri: $uri")
@@ -105,14 +85,14 @@ class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] 
           val remPath = pathSeq.drop(1).mkString("/")
 
           Some(
-            (decodedName,
-             s"https://www.npmjs.com/package/$decodedName",
-             Result(
-               remPath,
-               firstLine,
-               nLine.toInt - 1,
-               rows
-             )))
+            CSearchResult(decodedName,
+                          s"https://www.npmjs.com/package/$decodedName",
+                          CodeSnippet(
+                            remPath,
+                            firstLine,
+                            nLine.toInt - 1,
+                            rows
+                          )))
       }
     }
   }

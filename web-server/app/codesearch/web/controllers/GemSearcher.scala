@@ -1,6 +1,7 @@
 package codesearch.web.controllers
 
 import codesearch.core.db.GemDB
+import codesearch.core.index.LanguageIndex.{CSearchPage, SearchArguments}
 import codesearch.core.index.RubyIndex
 import com.github.marlonlom.utilities.timeago.TimeAgo
 import javax.inject.Inject
@@ -16,21 +17,27 @@ class GemSearcher @Inject()(
     Action.async { implicit request =>
       val callURI = s"/ruby/search?query=$query&insensitive=$insensitive&precise=$precise&sources=$sources"
 
-      GemDB.updated.map(updated =>
-        RubyIndex().csearch(query, insensitive == "on", precise == "on", sources == "on", page.toInt) match {
-          case (count, results) =>
-            Ok(
-              views.html.ruby_search(
-                TimeAgo.using(updated.getTime),
-                results,
-                query,
-                insensitive == "on",
-                precise == "on",
-                sources == "on",
-                page = page.toInt,
-                count,
-                callURI
-              ))
-      })
+      GemDB.updated.flatMap(
+        updated =>
+          RubyIndex()
+            .csearch(SearchArguments(query = query,
+                                     insensitive = insensitive == "on",
+                                     preciseMatch = precise == "on",
+                                     sourcesOnly = sources == "on"),
+                     page.toInt) map {
+            case CSearchPage(results, total) =>
+              Ok(
+                views.html.ruby_search(
+                  updated = TimeAgo.using(updated.getTime),
+                  packages = results,
+                  query = query,
+                  insensitive = insensitive == "on",
+                  precise = precise == "on",
+                  sources = sources == "on",
+                  page = page.toInt,
+                  totalMatches = total,
+                  callURI = callURI
+                ))
+        })
     }
 }

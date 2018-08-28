@@ -4,6 +4,7 @@ import java.net.URL
 
 import ammonite.ops.{Path, pwd}
 import codesearch.core.db.HackageDB
+import codesearch.core.index.LanguageIndex.{CSearchResult, CodeSnippet}
 
 import sys.process._
 import codesearch.core.model.{HackageTable, Version}
@@ -12,9 +13,6 @@ import org.rauschig.jarchivelib.{ArchiveFormat, ArchiverFactory, CompressionType
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.{ExecutionContext, Future}
-
-case class Result(fileLink: String, firstLine: Int, nLine: Int, ctxt: Seq[String])
-case class PackageResult(name: String, packageLink: String, results: Seq[Result])
 
 class HaskellIndex(val ec: ExecutionContext) extends LanguageIndex[HackageTable] with HackageDB {
 
@@ -25,27 +23,6 @@ class HaskellIndex(val ec: ExecutionContext) extends LanguageIndex[HackageTable]
   private val INDEX_LINK: String     = "http://hackage.haskell.org/packages/index.tar.gz"
   private val INDEX_SOURCE_GZ: Path  = pwd / 'data / "index.tar.gz"
   private val INDEX_SOURCE_DIR: Path = pwd / 'data / 'index / "index"
-
-  def csearch(searchQuery: String,
-              insensitive: Boolean,
-              precise: Boolean,
-              sources: Boolean,
-              page: Int): (Int, Seq[PackageResult]) = {
-    val answers = runCsearch(searchQuery, insensitive, precise, sources)
-    (answers.length,
-     answers
-       .slice(math.max(page - 1, 0) * 100, page * 100)
-       .flatMap(contentByURI)
-       .groupBy { x =>
-         (x._1, x._2)
-       }
-       .map {
-         case ((verName, packageLink), results) =>
-           PackageResult(verName, packageLink, results.map(_._3).toSeq)
-       }
-       .toSeq
-       .sortBy(_.name))
-  }
 
   override protected def downloadSources(name: String, ver: String): Future[Int] = {
     logger.info(s"downloading package $name")
@@ -91,7 +68,7 @@ class HaskellIndex(val ec: ExecutionContext) extends LanguageIndex[HackageTable]
     lastVersions
   }
 
-  private def contentByURI(uri: String): Option[(String, String, Result)] = {
+  override protected def mapCSearchOutput(uri: String): Option[CSearchResult] = {
     val elems: Seq[String] = uri.split(':')
     if (elems.length < 2) {
       logger.warn(s"bad uri: $uri")
@@ -110,14 +87,14 @@ class HaskellIndex(val ec: ExecutionContext) extends LanguageIndex[HackageTable]
           val remPath = pathSeq.drop(1).mkString("/")
 
           Some(
-            (name,
-             s"https://hackage.haskell.org/package/$name",
-             Result(
-               remPath,
-               firstLine,
-               nLine.toInt - 1,
-               rows
-             )))
+            CSearchResult(name,
+                          s"https://hackage.haskell.org/package/$name",
+                          CodeSnippet(
+                            remPath,
+                            firstLine,
+                            nLine.toInt - 1,
+                            rows
+                          )))
       }
     }
   }

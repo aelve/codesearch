@@ -2,6 +2,7 @@ package codesearch.core.index
 
 import ammonite.ops.{Path, pwd}
 import codesearch.core.db.CratesDB
+import codesearch.core.index.LanguageIndex._
 import codesearch.core.model
 import codesearch.core.model.{CratesTable, Version}
 import codesearch.core.util.Helper
@@ -28,25 +29,21 @@ class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] wit
     ".git"
   )
 
-  def csearch(searchQuery: String,
-              insensitive: Boolean,
-              precise: Boolean,
-              sources: Boolean,
-              page: Int = 0): Future[(Int, Seq[PackageResult])] = {
-    val answers = runCsearch(searchQuery, insensitive, precise, sources)
-    verNames().map { verSeq =>
-      val nameToVersion = Map(verSeq: _*)
-      (answers.length,
-       answers
-         .slice(math.max(page - 1, 0) * 100, page * 100)
-         .flatMap(uri => contentByURI(uri, nameToVersion))
-         .groupBy(x => (x._1, x._2))
-         .map {
-           case ((name, packageLink), results) =>
-             PackageResult(name, packageLink, results.map(_._3))
-         }
-         .toSeq
-         .sortBy(_.name))
+  override def csearch(args: SearchArguments, page: Int = 0): Future[CSearchPage] = {
+    runCsearch(args).flatMap { answers =>
+      verNames().map { verSeq =>
+        val nameToVersion = Map(verSeq: _*)
+        answers
+          .slice(math.max(page - 1, 0) * LanguageIndex.PAGE_SIZE, page * LanguageIndex.PAGE_SIZE)
+          .flatMap(uri => mapCSearchOutput(uri, nameToVersion))
+          .groupBy(x => (x.name, x.url))
+          .map {
+            case ((name, packageLink), results) =>
+              PackageResult(name, packageLink, results.map(_.result))
+          }
+          .toSeq
+          .sortBy(_.name)
+      }.map(CSearchPage(_, answers.length))
     }
   }
 
@@ -89,7 +86,7 @@ class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] wit
     Map(seq: _*)
   }
 
-  private def contentByURI(uri: String, nameToVersion: Map[String, String]): Option[(String, String, Result)] = {
+  private def mapCSearchOutput(uri: String, nameToVersion: Map[String, String]): Option[CSearchResult] = {
     val elems: Seq[String] = uri.split(':')
     if (elems.length < 2) {
       println(s"bad uri: $uri")
@@ -108,18 +105,20 @@ class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] wit
 
             val remPath = pathSeq.drop(1).mkString("/")
 
-            (packageName,
-             s"https://docs.rs/crate/$packageName/$ver",
-             Result(
-               remPath,
-               firstLine,
-               nLine.toInt - 1,
-               rows
-             ))
+            CSearchResult(packageName,
+                          s"https://docs.rs/crate/$packageName/$ver",
+                          CodeSnippet(
+                            remPath,
+                            firstLine,
+                            nLine.toInt - 1,
+                            rows
+                          ))
           }
       }
     }
   }
+
+  override protected def mapCSearchOutput(uri: String): Option[CSearchResult] = Option.empty
 }
 
 object RustIndex {

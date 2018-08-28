@@ -6,6 +6,7 @@ import ammonite.ops.{Path, pwd}
 
 import sys.process._
 import codesearch.core.db.DefaultDB
+import codesearch.core.index.LanguageIndex.{CSearchPage, CSearchResult, PackageResult, SearchArguments}
 import codesearch.core.model.{DefaultTable, Version}
 import codesearch.core.util.Helper
 import org.apache.commons.io.FilenameUtils
@@ -52,6 +53,26 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
       .map(_.sum)
   }
 
+  def csearch(args: SearchArguments, page: Int): Future[CSearchPage] = {
+    runCsearch(args).map { answers =>
+      val data = answers
+        .slice(math.max(page - 1, 0) * LanguageIndex.PAGE_SIZE, page * LanguageIndex.PAGE_SIZE)
+        .flatMap(mapCSearchOutput)
+        .groupBy { x =>
+          (x.name, x.url)
+        }
+        .map {
+          case ((verName, packageLink), results) =>
+            PackageResult(verName, packageLink, results.map(_.result).toSeq)
+        }
+        .toSeq
+        .sortBy(_.name)
+      CSearchPage(data, answers.length)
+    }
+  }
+
+  protected def mapCSearchOutput(out: String): Option[CSearchResult]
+
   protected implicit def executor: ExecutionContext
 
   protected def archiveDownloadAndExtract(name: String,
@@ -87,12 +108,9 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
     }
   }
 
-  protected def runCsearch(searchQuery: String,
-                           insensitive: Boolean,
-                           precise: Boolean,
-                           sources: Boolean): Array[String] = {
+  protected def runCsearch(arg: SearchArguments): Future[Array[String]] = {
     val pathRegex = {
-      if (sources) {
+      if (arg.sourcesOnly) {
         langExts
       } else {
         ".*"
@@ -100,27 +118,23 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
     }
 
     val query: String = {
-      if (precise) {
-        Helper.hideSymbols(searchQuery)
+      if (arg.preciseMatch) {
+        Helper.hideSymbols(arg.query)
       } else {
-        searchQuery
+        arg.query
       }
     }
 
     val args: mutable.ListBuffer[String] = mutable.ListBuffer("csearch", "-n")
-    if (insensitive) {
+    if (arg.insensitive) {
       args.append("-i")
     }
     args.append("-f", pathRegex)
     args.append(query)
     logger.debug(indexPath.toString())
 
-    val answer = (Process(args, None, "CSEARCHINDEX" -> indexPath.toString()) #| Seq("head", "-1001")).!!
-
-    if (answer.nonEmpty) {
-      answer.split('\n')
-    } else {
-      Array()
+    Future {
+      (Process(args, None, "CSEARCHINDEX" -> indexPath.toString()) #| Seq("head", "-1001")).!!.split('\n')
     }
   }
 
@@ -152,4 +166,49 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
 
   private lazy val defaultExtractor: (String, String) => Unit =
     (src: String, dst: String) => Seq("tar", "-xvf", src, "-C", dst) !!
+}
+
+object LanguageIndex {
+
+  /**
+    * result of searching
+    * @param data code snippets grouped by package
+    * @param total number of total matches
+    */
+  final case class CSearchPage(data: Seq[PackageResult], total: Int)
+
+  /**
+    *
+    * @param fileLink link to file with source code (relative)
+    * @param numberOfFirstLine number of first line in snippet from source file
+    * @param matchedLine number of matched line in snippet from source file
+    * @param ctxt lines of snippet
+    */
+  final case class CodeSnippet(fileLink: String, numberOfFirstLine: Int, matchedLine: Int, ctxt: Seq[String])
+
+  /**
+    * Grouped code snippets by package
+    * @param name name of package
+    * @param packageLink link to package source
+    * @param results code snippets
+    */
+  final case class PackageResult(name: String, packageLink: String, results: Seq[CodeSnippet])
+
+  /**
+    * @param query input regular expression
+    * @param insensitive insensitive flag
+    * @param preciseMatch precise match flag
+    * @param sourcesOnly sources only flag
+    */
+  final case class SearchArguments(query: String, insensitive: Boolean, preciseMatch: Boolean, sourcesOnly: Boolean)
+
+  private[index] val PAGE_SIZE = 100
+
+  /**
+    *
+    * @param name name of package
+    * @param url link to package source
+    * @param result matched code snippet
+    */
+  private[index] final case class CSearchResult(name: String, url: String, result: CodeSnippet)
 }

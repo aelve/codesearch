@@ -5,6 +5,7 @@ import java.net.URLDecoder
 
 import ammonite.ops.pwd
 import codesearch.core.db.GemDB
+import codesearch.core.index.LanguageIndex.{CSearchResult, CodeSnippet}
 import codesearch.core.model.{GemTable, Version}
 import codesearch.core.util.Helper
 
@@ -25,28 +26,6 @@ class RubyIndex(val ec: ExecutionContext) extends LanguageIndex[GemTable] with G
   private val GEM_INDEX_JSON    = pwd / 'data / 'ruby / "ruby_index.json"
 
   private val DESERIALIZER_PATH = pwd / 'codesearch / 'scripts / "update_index.rb"
-
-  def csearch(searchQuery: String,
-              insensitive: Boolean,
-              precise: Boolean,
-              sources: Boolean,
-              page: Int): (Int, Seq[PackageResult]) = {
-    val answers = runCsearch(searchQuery, insensitive, precise, sources)
-
-    (answers.length,
-     answers
-       .slice(math.max(page - 1, 0) * 100, page * 100)
-       .flatMap(contentByURI)
-       .groupBy { x =>
-         (x._1, x._2)
-       }
-       .map {
-         case ((verName, packageLink), results) =>
-           PackageResult(verName, packageLink, results.map(_._3).toSeq)
-       }
-       .toSeq
-       .sortBy(_.name))
-  }
 
   override protected def downloadSources(name: String, ver: String): Future[Int] = {
     logger.info(s"downloading package $name")
@@ -88,7 +67,7 @@ class RubyIndex(val ec: ExecutionContext) extends LanguageIndex[GemTable] with G
     obj.map { case Seq(name, ver, _) => (name, Version(ver)) }.toMap
   }
 
-  private def contentByURI(uri: String): Option[(String, String, Result)] = {
+  override protected def mapCSearchOutput(uri: String): Option[CSearchResult] = {
     val elems: Seq[String] = uri.split(':')
     if (elems.length < 2) {
       logger.warn(s"bad uri: $uri")
@@ -108,14 +87,14 @@ class RubyIndex(val ec: ExecutionContext) extends LanguageIndex[GemTable] with G
           val remPath = pathSeq.drop(1).mkString("/")
 
           Some(
-            (decodedName,
-             s"https://rubygems.org/gems/$decodedName",
-             Result(
-               remPath,
-               firstLine,
-               nLine.toInt - 1,
-               rows
-             )))
+            CSearchResult(decodedName,
+                          s"https://rubygems.org/gems/$decodedName",
+                          CodeSnippet(
+                            remPath,
+                            firstLine,
+                            nLine.toInt - 1,
+                            rows
+                          )))
       }
     }
 
