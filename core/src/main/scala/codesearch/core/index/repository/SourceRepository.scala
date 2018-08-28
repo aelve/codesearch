@@ -2,8 +2,10 @@ package codesearch.core.index.repository
 import java.io.File
 import java.nio.file.Path
 
+import codesearch.core.index.directory.Directory
 import com.softwaremill.sttp.Uri
 import org.apache.commons.io.FilenameUtils.getExtension
+import codesearch.core.index.directory.PackageDirectory._
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -15,11 +17,11 @@ object SourceRepository {
       message: String
   ) extends Throwable(message)
 
-  implicit def packageDownloader[A <: SourcePackage](implicit E: Extension[A]): Download[A] =
+  implicit def packageDownloader[A <: SourcePackage: Directory](implicit E: Extension[A]): Download[A] =
     (pack: A) => {
       for {
-        zipped    <- download(pack.url, pack.fsArchivePath)
-        directory <- pack.extract(zipped, pack.fsUnzippedPath)
+        zipped    <- download(pack.url, pack.archive)
+        directory <- pack.extract(zipped, pack.unarchived)
         _         <- deleteExcessFiles(directory, E.extensions)
       } yield directory
     }

@@ -2,7 +2,7 @@ package codesearch.core.index.repository
 
 import java.io.File
 import java.net.URLEncoder
-import java.nio.file.{Path, Paths}
+import java.nio.file.{Path}
 
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.Uri
@@ -28,8 +28,6 @@ trait Extractor {
 trait SourcePackage extends Extractor {
   val name: String
   val version: String
-  def fsArchivePath: Path
-  def fsUnzippedPath: Path = Paths.get(s"${fsArchivePath.getParent.toFile.getCanonicalPath}/$name-$version")
   def url: Uri
 }
 
@@ -37,16 +35,14 @@ case class HackagePackage(
     name: String,
     version: String
 ) extends SourcePackage with Haskell {
-  val fsArchivePath: Path = Paths.get(s"./data/hackage/$name/$version/$name-$version.tgz")
-  val url: Uri            = uri"https://hackage.haskell.org/package/$name-$version/$name-$version.tar.gz"
+  val url: Uri = uri"https://hackage.haskell.org/package/$name-$version/$name-$version.tar.gz"
 }
 
 case class GemPackage(
     name: String,
     version: String
 ) extends SourcePackage with Ruby {
-  val fsArchivePath: Path = Paths.get(s"./data/gem/$name/$version/$name-$version.gem")
-  val url: Uri            = uri"https://rubygems.org/downloads/$name-$version.gem"
+  val url: Uri = uri"https://rubygems.org/downloads/$name-$version.gem"
   override def unzippingMethod(from: File, to: File): Unit =
     ArchiverFactory.createArchiver(TAR).extract(from, to)
 }
@@ -55,8 +51,7 @@ case class CratesPackage(
     name: String,
     version: String
 ) extends SourcePackage with Rust {
-  val fsArchivePath: Path = Paths.get(s"./data/crates/$name/$version/$name-$version.tgz")
-  val url: Uri            = uri"https://crates.io/api/v1/crates/$name/$version/download"
+  val url: Uri = uri"https://crates.io/api/v1/crates/$name/$version/download"
 }
 
 case class NpmPackage(
@@ -64,7 +59,6 @@ case class NpmPackage(
     version: String
 ) extends SourcePackage with JavaScript {
   //Because package name can look like: react>>=native@@router!!v2.1.123(refactored:-))
-  val name: String        = URLEncoder.encode(rawName, "UTF-8")
-  val fsArchivePath: Path = Paths.get(s"./data/npm/$name/$version/$name-$version.tgz")
-  val url: Uri            = uri"https://registry.npmjs.org/$name/-/$name-$version.tgz"
+  val name: String = URLEncoder.encode(rawName, "UTF-8")
+  val url: Uri     = uri"https://registry.npmjs.org/$name/-/$name-$version.tgz"
 }
