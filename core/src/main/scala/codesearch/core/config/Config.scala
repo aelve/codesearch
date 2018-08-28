@@ -18,3 +18,4 @@ object Config {
   def empty(): Config =
     new Config("",0, DatabaseConfig(0, "", "", ""))
 }
+
