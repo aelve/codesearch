@@ -54,3 +54,10 @@ Next, index the packages:
 
 After that you should be able to visit <http://localhost:9000/haskell> and
 play with some queries (e.g. `module` should bring up a lot of results).
+
+### Build on MacOS
+MacOS has `make` version 3.81 by default. In order to avoid error on running
+`make` you have to install version 3.82 or above.
+
+For `brew` just run `brew install homebrew/core/make` ([source](https://apple.stackexchange.com/questions/261918/how-to-upgrade-gnu-make-in-os-x-el-capitan)).
+Last `make` will be installed as `gmake`, so use `gmake whatever` further. 
