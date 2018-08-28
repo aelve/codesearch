@@ -5,7 +5,6 @@ import java.net.URLEncoder
 import java.nio.file.{Path, Paths}
 
 import com.softwaremill.sttp._
-import codesearch.core.util.Helper
 import com.softwaremill.sttp.Uri
 import org.rauschig.jarchivelib.ArchiveFormat.TAR
 import org.rauschig.jarchivelib.CompressionType.GZIP
@@ -26,26 +25,18 @@ trait Extractor {
     }
 }
 
-trait PackageDirectory {
-  val root: Path = Paths.get("./data")
-  def fsArchivePath(lang: String): Path = Paths.get(
-    s"${root.toFile.getCanonicalPath}/$lang/"
-  )
-}
-
 trait SourcePackage extends Extractor {
   val name: String
   val version: String
   def fsArchivePath: Path
   def fsUnzippedPath: Path = Paths.get(s"${fsArchivePath.getParent.toFile.getCanonicalPath}/$name-$version")
   def url: Uri
-  def extensions: Set[String] = Set.empty
 }
 
 case class HackagePackage(
     name: String,
     version: String
-) extends SourcePackage {
+) extends SourcePackage with Haskell {
   val fsArchivePath: Path = Paths.get(s"./data/hackage/$name/$version/$name-$version.tgz")
   val url: Uri            = uri"https://hackage.haskell.org/package/$name-$version/$name-$version.tar.gz"
 }
@@ -53,10 +44,9 @@ case class HackagePackage(
 case class GemPackage(
     name: String,
     version: String
-) extends SourcePackage {
-  val fsArchivePath: Path              = Paths.get(s"./data/gem/$name/$version/$name-$version.gem")
-  val url: Uri                         = uri"https://rubygems.org/downloads/$name-$version.gem"
-  override def extensions: Set[String] = Helper.langByExt.keySet
+) extends SourcePackage with Ruby {
+  val fsArchivePath: Path = Paths.get(s"./data/gem/$name/$version/$name-$version.gem")
+  val url: Uri            = uri"https://rubygems.org/downloads/$name-$version.gem"
   override def unzippingMethod(from: File, to: File): Unit =
     ArchiverFactory.createArchiver(TAR).extract(from, to)
 }
@@ -64,7 +54,7 @@ case class GemPackage(
 case class CratesPackage(
     name: String,
     version: String
-) extends SourcePackage {
+) extends SourcePackage with Rust {
   val fsArchivePath: Path = Paths.get(s"./data/crates/$name/$version/$name-$version.tgz")
   val url: Uri            = uri"https://crates.io/api/v1/crates/$name/$version/download"
 }
@@ -72,10 +62,9 @@ case class CratesPackage(
 case class NpmPackage(
     rawName: String,
     version: String
-) extends SourcePackage {
+) extends SourcePackage with JavaScript {
   //Because package name can look like: react>>=native@@router!!v2.1.123(refactored:-))
-  val name: String                     = URLEncoder.encode(rawName, "UTF-8")
-  val fsArchivePath: Path              = Paths.get(s"./data/npm/$name/$version/$name-$version.tgz")
-  val url: Uri                         = uri"https://registry.npmjs.org/$name/-/$name-$version.tgz"
-  override def extensions: Set[String] = Set("js", "json", "xml", "yml", "coffee", "markdown", "md", "yaml", "txt")
+  val name: String        = URLEncoder.encode(rawName, "UTF-8")
+  val fsArchivePath: Path = Paths.get(s"./data/npm/$name/$version/$name-$version.tgz")
+  val url: Uri            = uri"https://registry.npmjs.org/$name/-/$name-$version.tgz"
 }

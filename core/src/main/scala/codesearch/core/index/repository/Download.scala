@@ -1,6 +1,5 @@
 package codesearch.core.index.repository
 import java.io.File
-
 import scala.concurrent.Future
 
 trait Download[A <: SourcePackage] {

@@ -12,15 +12,15 @@ import com.softwaremill.sttp._
 object SourceRepository {
 
   final case class DownloadException(
-      private val message: String
+      message: String
   ) extends Throwable(message)
 
-  implicit def packageDownloader[A <: SourcePackage]: Download[A] =
+  implicit def packageDownloader[A <: SourcePackage](implicit E: Extension[A]): Download[A] =
     (pack: A) => {
       for {
         zipped    <- download(pack.url, pack.fsArchivePath)
         directory <- pack.extract(zipped, pack.fsUnzippedPath)
-//        _         <- deleteExcessFiles(directory, pack.extensions)
+        _         <- deleteExcessFiles(directory, E.extensions)
       } yield directory
     }
 
@@ -34,8 +34,8 @@ object SourceRepository {
         .body
     }.flatMap(
       _.fold(
-        error   => Future.failed(DownloadException(error)),
-        result  => Future.successful(result)
+        error => Future.failed(DownloadException(error)),
+        result => Future.successful(result)
       ))
   }
 
