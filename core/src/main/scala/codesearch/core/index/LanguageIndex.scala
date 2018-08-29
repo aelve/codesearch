@@ -1,8 +1,6 @@
 package codesearch.core.index
 
 import ammonite.ops.{Path, pwd}
-
-import sys.process._
 import codesearch.core.db.DefaultDB
 import codesearch.core.index.LanguageIndex.{CSearchPage, CSearchResult, PackageResult, SearchArguments}
 import codesearch.core.index.directory.Directory
@@ -13,6 +11,7 @@ import org.slf4j.Logger
 
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
+import scala.sys.process._
 
 trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
   protected val logger: Logger
@@ -83,7 +82,7 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
   }
 
   protected def runCsearch(arg: SearchArguments): Future[Array[String]] = {
-    val pathRegex = if (arg.sourcesOnly) langExts else ".*"
+    val pathRegex     = if (arg.sourcesOnly) langExts else ".*"
     val query: String = if (arg.preciseMatch) Helper.hideSymbols(arg.query) else arg.query
 
     val args: mutable.ListBuffer[String] = mutable.ListBuffer("csearch", "-n")

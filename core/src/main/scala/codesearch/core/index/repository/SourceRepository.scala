@@ -3,13 +3,13 @@ import java.io.File
 import java.nio.file.Path
 
 import codesearch.core.index.directory.Directory
-import com.softwaremill.sttp.Uri
-import org.apache.commons.io.FilenameUtils.getExtension
 import codesearch.core.index.directory.PackageDirectory._
+import codesearch.core.index.repository.Extensions.Extension
+import com.softwaremill.sttp.{Uri, _}
+import org.apache.commons.io.FilenameUtils.getExtension
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-import com.softwaremill.sttp._
+import scala.concurrent.Future
 
 object SourceRepository {
 
@@ -17,12 +17,12 @@ object SourceRepository {
       message: String
   ) extends Throwable(message)
 
-  implicit def packageDownloader[A <: SourcePackage: Directory](implicit E: Extension[A]): Download[A] =
+  implicit def packageDownloader[A <: SourcePackage: Extension: Directory]: Download[A] =
     (pack: A) => {
       for {
         zipped    <- download(pack.url, pack.archive)
         directory <- pack.extract(zipped, pack.unarchived)
-        _         <- deleteExcessFiles(directory, E.extensions)
+        _         <- deleteExcessFiles(directory, Extension[A].extensions)
       } yield directory
     }
 
