@@ -1,15 +1,14 @@
 package codesearch.core.index
 
-import java.io.File
-
 import ammonite.ops.{Path, pwd}
 
 import sys.process._
 import codesearch.core.db.DefaultDB
 import codesearch.core.index.LanguageIndex.{CSearchPage, CSearchResult, PackageResult, SearchArguments}
+import codesearch.core.index.directory.Directory
+import codesearch.core.index.repository.{Download, Extension, SourcePackage}
 import codesearch.core.model.{DefaultTable, Version}
 import codesearch.core.util.Helper
-import org.apache.commons.io.FilenameUtils
 import org.slf4j.Logger
 
 import scala.collection.mutable
@@ -30,6 +29,7 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
 
   /**
     * download all latest packages version
+    *
     * @return count of updated packages
     */
   def updatePackages(): Future[Int] = {
@@ -46,7 +46,7 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
               !packagesMap.get(packageName).contains(currentVersion)
           }.map {
             case (packageName, currentVersion) =>
-              downloadSources(packageName, currentVersion)
+              updateSources(packageName, currentVersion)
           })
         }
       }
@@ -58,8 +58,7 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
       val data = answers
         .slice(math.max(page - 1, 0) * LanguageIndex.PAGE_SIZE, page * LanguageIndex.PAGE_SIZE)
         .flatMap(mapCSearchOutput)
-        .groupBy { x =>
-          (x.name, x.url)
+        .groupBy { x => (x.name, x.url)
         }
         .map {
           case ((verName, packageLink), results) =>
@@ -75,55 +74,17 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
 
   protected implicit def executor: ExecutionContext
 
-  protected def archiveDownloadAndExtract(name: String,
-                                          ver: String,
-                                          packageURL: String,
-                                          packageFileGZ: Path,
-                                          packageFileDir: Path,
-                                          extensions: Option[Set[String]] = None,
-                                          extractor: (String, String) => Unit = defaultExtractor): Future[Int] = {
-
-    val archive     = packageFileGZ.toIO
-    val destination = packageFileDir.toIO
-
-    try {
-      destination.mkdirs()
-
-      Seq("curl", "-o", archive.getCanonicalPath, packageURL) !!
-
-      extractor(archive.getCanonicalPath, destination.getCanonicalPath)
-
-      if (extensions.isDefined) {
-        applyFilter(extensions.get, archive)
-        applyFilter(extensions.get, destination)
-      }
-
-      insertOrUpdate(name, ver)
-    } catch {
-      case e: Exception =>
-        logger.debug(e.getLocalizedMessage)
-        Future {
-          0
-        }
-    }
+  protected def archiveDownloadAndExtract[A <: SourcePackage: Extension: Directory](pack: A): Future[Int] = {
+    import codesearch.core.index.repository.SourceRepository._
+    Download[A]
+      .downloadSources(pack)
+      .flatMap(_ => insertOrUpdate(pack))
+      .recover { case _ => 0 }
   }
 
   protected def runCsearch(arg: SearchArguments): Future[Array[String]] = {
-    val pathRegex = {
-      if (arg.sourcesOnly) {
-        langExts
-      } else {
-        ".*"
-      }
-    }
-
-    val query: String = {
-      if (arg.preciseMatch) {
-        Helper.hideSymbols(arg.query)
-      } else {
-        arg.query
-      }
-    }
+    val pathRegex = if (arg.sourcesOnly) langExts else ".*"
+    val query: String = if (arg.preciseMatch) Helper.hideSymbols(arg.query) else arg.query
 
     val args: mutable.ListBuffer[String] = mutable.ListBuffer("csearch", "-n")
     if (arg.insensitive) {
@@ -141,37 +102,27 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
   /**
     * Collect last versions of packages in local folder
     * Key for map is package name, value is last version
+    *
     * @return last versions of packages
     */
   protected def getLastVersions: Map[String, Version]
 
   /**
-    * download source code from remote repository
+    * Update source code from remote repository
+    *
+    * @see [[https://github.com/aelve/codesearch/wiki/%D0%A1odesearch-developer-Wiki#updating-packages]]
     * @param name of package
-    * @param ver of package
+    * @param version of package
     * @return count of downloaded files (source files)
     */
-  protected def downloadSources(name: String, ver: String): Future[Int]
-
-  protected def applyFilter(extensions: Set[String], curFile: File): Unit = {
-    if (curFile.isDirectory) {
-      curFile.listFiles.foreach(applyFilter(extensions, _))
-    } else {
-      val ext = FilenameUtils.getExtension(curFile.getName)
-      if (curFile.exists() && !(extensions contains ext)) {
-        curFile.delete
-      }
-    }
-  }
-
-  private lazy val defaultExtractor: (String, String) => Unit =
-    (src: String, dst: String) => Seq("tar", "-xvf", src, "-C", dst) !!
+  protected def updateSources(name: String, version: String): Future[Int]
 }
 
 object LanguageIndex {
 
   /**
     * result of searching
+    *
     * @param data code snippets grouped by package
     * @param total number of total matches
     */
@@ -188,6 +139,7 @@ object LanguageIndex {
 
   /**
     * Grouped code snippets by package
+    *
     * @param name name of package
     * @param packageLink link to package source
     * @param results code snippets

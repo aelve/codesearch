@@ -5,6 +5,9 @@ import java.net.URL
 import ammonite.ops.{Path, pwd}
 import codesearch.core.db.HackageDB
 import codesearch.core.index.LanguageIndex.{CSearchResult, CodeSnippet}
+import codesearch.core.index.repository.HackagePackage
+import repository.Extensions._
+import codesearch.core.index.directory.PackageDirectory._
 
 import sys.process._
 import codesearch.core.model.{HackageTable, Version}
@@ -24,19 +27,9 @@ class HaskellIndex(val ec: ExecutionContext) extends LanguageIndex[HackageTable]
   private val INDEX_SOURCE_GZ: Path  = pwd / 'data / "index.tar.gz"
   private val INDEX_SOURCE_DIR: Path = pwd / 'data / 'index / "index"
 
-  override protected def downloadSources(name: String, ver: String): Future[Int] = {
+  override protected def updateSources(name: String, version: String): Future[Int] = {
     logger.info(s"downloading package $name")
-
-    val packageURL =
-      s"https://hackage.haskell.org/package/$name-$ver/$name-$ver.tar.gz"
-
-    val packageFileGZ =
-      pwd / 'data / 'packages / name / ver / s"$ver.tar.gz"
-
-    val packageFileDir =
-      pwd / 'data / 'packages / name / ver
-
-    archiveDownloadAndExtract(name, ver, packageURL, packageFileGZ, packageFileDir)
+    archiveDownloadAndExtract(HackagePackage(name, version))
   }
 
   override def downloadMetaInformation(): Unit = {

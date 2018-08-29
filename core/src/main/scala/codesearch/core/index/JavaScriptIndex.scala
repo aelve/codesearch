@@ -1,11 +1,14 @@
 package codesearch.core.index
 
 import java.io.FileInputStream
-import java.net.{URLDecoder, URLEncoder}
+import java.net.URLDecoder
 
 import ammonite.ops.{Path, pwd}
 import codesearch.core.db.NpmDB
 import codesearch.core.index.LanguageIndex.{CSearchResult, CodeSnippet}
+import codesearch.core.index.repository.NpmPackage
+import repository.Extensions._
+import codesearch.core.index.directory.PackageDirectory._
 
 import scala.sys.process._
 import codesearch.core.model.{NpmTable, Version}
@@ -30,29 +33,13 @@ class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] 
 
   override def downloadMetaInformation(): Unit = Seq("node", NPM_UPDATER_SCRIPT.toString) !!
 
-  override protected def downloadSources(name: String, ver: String): Future[Int] = {
+  override protected def updateSources(name: String, version: String): Future[Int] = {
     counter += 1
     if (counter == 100) {
       counter = 0
       Thread.sleep(10000)
     }
-    val encodedName = URLEncoder.encode(name, "UTF-8")
-    SOURCES.toIO.mkdirs()
-
-    s"rm -rf ${SOURCES / encodedName}" !!
-
-    val packageURL =
-      s"https://registry.npmjs.org/$name/-/$name-$ver.tgz"
-
-    val packageFileGZ =
-      pwd / 'data / 'js / 'packages / encodedName / s"$ver.tar.gz"
-
-    val packageFileDir =
-      pwd / 'data / 'js / 'packages / encodedName / ver
-
-    logger.info(s"EXTRACTING $name-$ver (dir: $encodedName)")
-    val result = archiveDownloadAndExtract(name, ver, packageURL, packageFileGZ, packageFileDir, Some(extensions))
-    result
+    archiveDownloadAndExtract(NpmPackage(name, version))
   }
 
   override protected implicit def executor: ExecutionContext = ec

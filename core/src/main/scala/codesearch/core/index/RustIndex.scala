@@ -3,6 +3,9 @@ package codesearch.core.index
 import ammonite.ops.{Path, pwd}
 import codesearch.core.db.CratesDB
 import codesearch.core.index.LanguageIndex._
+import codesearch.core.index.repository.CratesPackage
+import repository.Extensions._
+import codesearch.core.index.directory.PackageDirectory._
 import codesearch.core.model
 import codesearch.core.model.{CratesTable, Version}
 import codesearch.core.util.Helper
@@ -11,7 +14,6 @@ import play.api.libs.json.Json
 
 import scala.sys.process._
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
 class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] with CratesDB {
 
@@ -51,22 +53,8 @@ class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] wit
     s"git -C $REPO_DIR pull" !!
   }
 
-  override protected def downloadSources(name: String, ver: String): Future[Int] = {
-    SOURCES.toIO.mkdirs()
-    logger.info(s"downloading package $name $ver")
-    Future {
-      s"rm -rf ${SOURCES / name}" !!
-
-      s"$CARGO_PATH clone $name --vers $ver --prefix $SOURCES" !!
-
-    }.flatMap(_ => insertOrUpdate(name, ver))
-      .transform(t =>
-        t.toEither match {
-          case Left(e) =>
-            logger.error(s"failed download package $name $ver", e)
-            Try(0)
-          case Right(v) => Try(v)
-      })
+  override protected def updateSources(name: String, version: String): Future[Int] = {
+    archiveDownloadAndExtract(CratesPackage(name, version))
   }
 
   override protected implicit def executor: ExecutionContext = ec
