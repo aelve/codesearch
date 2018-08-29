@@ -41,6 +41,13 @@ object SourceRepository {
       ))
   }
 
+  /**
+    * Function removes all extension files that are not contained in the set of allowed extensions
+    *
+    * @param directory is root directory of specific package
+    * @param allowedExtentions is extensions defined for each language
+    * @return count removed files
+    */
   private def deleteExcessFiles(directory: File, allowedExtentions: Set[String]): Future[Int] = Future {
     def filterFiles(all: List[File], excess: List[File] = Nil): List[File] = all match {
       case Nil                                => excess
