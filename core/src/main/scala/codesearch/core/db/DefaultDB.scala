@@ -3,19 +3,16 @@ package codesearch.core.db
 import java.sql.Timestamp
 
 import codesearch.core.model._
-import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery
+import slick.jdbc.PostgresProfile.api._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-
-object DefaultDB {
-  val db = Database.forConfig("mydb")
-}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 trait DefaultDB[T <: DefaultTable] {
-  lazy val db = DefaultDB.db
   val table: TableQuery[T]
+  val db = Database.forConfig("mydb")
+
   def insertOrUpdate(packageName: String, lastVersion: String): Future[Int] = {
     val insOrUpdate = table
       .insertOrUpdate((packageName, lastVersion, new Timestamp(System.currentTimeMillis())))
