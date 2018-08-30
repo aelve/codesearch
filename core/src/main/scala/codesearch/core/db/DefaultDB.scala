@@ -9,9 +9,13 @@ import slick.jdbc.PostgresProfile.api._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
+object DefaultDB {
+  val db = Database.forConfig("mydb")
+}
+
 trait DefaultDB[T <: DefaultTable] {
   val table: TableQuery[T]
-  val db = Database.forConfig("mydb")
+  lazy val db = DefaultDB.db
 
   def insertOrUpdate(packageName: String, lastVersion: String): Future[Int] = {
     val insOrUpdate = table
