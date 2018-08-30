@@ -7,11 +7,15 @@ import codesearch.core.index.directory.PackageDirectory._
 import codesearch.core.index.repository.Extensions.Extension
 import com.softwaremill.sttp.{Uri, _}
 import org.apache.commons.io.FilenameUtils.getExtension
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.Failure
 
 object SourceRepository {
+
+  private val logger: Logger = LoggerFactory.getLogger(SourceRepository.getClass)
 
   final case class DownloadException(
       message: String
@@ -20,11 +24,11 @@ object SourceRepository {
   implicit def packageDownloader[A <: SourcePackage: Extension: Directory]: Download[A] =
     (pack: A) => {
       for {
-        zipped    <- download(pack.url, pack.archive)
-        directory <- pack.extract(zipped, pack.unarchived)
+        archive   <- download(pack.url, pack.archive)
+        directory <- pack.extract(archive, pack.unarchived)
         _         <- deleteExcessFiles(directory, Extension[A].extensions)
       } yield directory
-    }
+    }.andThen { case Failure(ex) => logger.error(ex.getMessage) }
 
   private def download(from: Uri, toPath: Path): Future[File] = {
     implicit val sttpBackend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend()
@@ -50,8 +54,11 @@ object SourceRepository {
     */
   private def deleteExcessFiles(directory: File, allowedExtentions: Set[String]): Future[Int] = Future {
     def filterFiles(all: List[File], excess: List[File] = Nil): List[File] = all match {
-      case Nil                                => excess
-      case file :: others if file.isDirectory => filterFiles(others ++ file.listFiles(), excess)
+      case Nil => excess
+      case file :: others if file.isDirectory =>
+        if (file.listFiles().length > 0)
+          filterFiles(others ++ file.listFiles(), excess)
+        else filterFiles(others, file :: excess)
       case file :: others =>
         if (allowedExtentions.contains(getExtension(file.getName)))
           filterFiles(others, excess)
