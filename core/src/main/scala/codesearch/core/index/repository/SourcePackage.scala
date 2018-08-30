@@ -4,11 +4,11 @@ import java.io.File
 import java.net.URLEncoder
 import java.nio.file.Path
 
-import com.softwaremill.sttp._
-import com.softwaremill.sttp.Uri
+import com.softwaremill.sttp.{Uri, _}
+import org.apache.commons.io.FileUtils.{moveDirectoryToDirectory, moveFileToDirectory}
 import org.rauschig.jarchivelib.ArchiveFormat.TAR
-import org.rauschig.jarchivelib.CompressionType.GZIP
 import org.rauschig.jarchivelib.ArchiverFactory
+import org.rauschig.jarchivelib.CompressionType.GZIP
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -16,13 +16,19 @@ import scala.concurrent.Future
 trait Extractor {
   def unzippingMethod(from: File, to: File): Unit =
     ArchiverFactory.createArchiver(TAR, GZIP).extract(from, to)
-  def extract(archive: File, directory: Path): Future[File] =
-    Future {
-      val extractedDir = directory.toFile
-      extractedDir.mkdirs()
-      unzippingMethod(archive, extractedDir)
-      extractedDir
-    }
+  def extract(archive: File, directory: Path): Future[File] = Future {
+    val unarchived = directory.toFile
+    unzippingMethod(archive, unarchived)
+    unarchived
+      .listFiles()
+      .filter(_.isDirectory)
+      .foreach(
+        _.listFiles()
+          .foreach(file =>
+            if (file.isDirectory) moveDirectoryToDirectory(file, unarchived, false)
+            else moveFileToDirectory(file, unarchived, false)))
+    unarchived.getParentFile
+  }
 }
 
 trait SourcePackage extends Extractor {

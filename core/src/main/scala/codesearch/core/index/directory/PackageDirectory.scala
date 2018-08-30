@@ -2,7 +2,7 @@ package codesearch.core.index.directory
 
 import java.nio.file.{Path, Paths}
 
-import PathOps._
+import codesearch.core.index.directory.PathOps._
 import codesearch.core.index.repository._
 
 object PathOps {
@@ -16,7 +16,7 @@ trait Directory[A <: SourcePackage] {
   def root: Path        = Paths.get(s"./data")
   def extension: String = "tgz"
   def archive(pack: A): Path
-  def unarchived(pack: A): Path = archive(pack).getParent / s"${pack.name}-${pack.version}}"
+  def unarchived(pack: A): Path = archive(pack).getParent
 }
 
 object PackageDirectory {
