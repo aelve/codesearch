@@ -6,6 +6,7 @@ import codesearch.core.index.directory.Directory
 import codesearch.core.index.directory.PackageDirectory._
 import codesearch.core.index.repository.Extensions.Extension
 import com.softwaremill.sttp.{Uri, _}
+import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils.getExtension
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -30,19 +31,18 @@ object SourceRepository {
       } yield directory
     }.andThen { case Failure(ex) => logger.error(ex.getMessage) }
 
-  private def download(from: Uri, toPath: Path): Future[File] = {
+  private def download(from: Uri, path: Path): Future[File] = {
     implicit val sttpBackend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend()
     Future {
-      sttp
-        .get(from)
-        .response(asFile(toPath.toFile))
-        .send()
-        .body
-    }.flatMap(
-      _.fold(
-        error => Future.failed(DownloadException(error)),
-        result => Future.successful(result)
-      ))
+      sttp.get(from).response(asByteArray).send().body
+    }.flatMap(_.fold(
+      error   => Future.failed(DownloadException(error)),
+      result  => {
+        val archive = path.toFile
+        FileUtils.writeByteArrayToFile(archive, result)
+        Future.successful(archive)
+      }
+    ))
   }
 
   /**

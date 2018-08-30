@@ -2,34 +2,11 @@ package codesearch.core.index.repository
 
 import java.io.File
 import java.net.URLEncoder
-import java.nio.file.Path
 
+import codesearch.core.index.directory.Extractor
 import com.softwaremill.sttp.{Uri, _}
-import org.apache.commons.io.FileUtils.{moveDirectoryToDirectory, moveFileToDirectory}
 import org.rauschig.jarchivelib.ArchiveFormat.TAR
 import org.rauschig.jarchivelib.ArchiverFactory
-import org.rauschig.jarchivelib.CompressionType.GZIP
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-
-trait Extractor {
-  def unzippingMethod(from: File, to: File): Unit =
-    ArchiverFactory.createArchiver(TAR, GZIP).extract(from, to)
-  def extract(archive: File, directory: Path): Future[File] = Future {
-    val unarchived = directory.toFile
-    unzippingMethod(archive, unarchived)
-    unarchived
-      .listFiles()
-      .filter(_.isDirectory)
-      .foreach(
-        _.listFiles()
-          .foreach(file =>
-            if (file.isDirectory) moveDirectoryToDirectory(file, unarchived, false)
-            else moveFileToDirectory(file, unarchived, false)))
-    unarchived.getParentFile
-  }
-}
 
 trait SourcePackage extends Extractor {
   val name: String
@@ -37,14 +14,14 @@ trait SourcePackage extends Extractor {
   def url: Uri
 }
 
-case class HackagePackage(
+final case class HackagePackage(
     name: String,
     version: String
 ) extends SourcePackage with Haskell {
   val url: Uri = uri"https://hackage.haskell.org/package/$name-$version/$name-$version.tar.gz"
 }
 
-case class GemPackage(
+final case class GemPackage(
     name: String,
     version: String
 ) extends SourcePackage with Ruby {
@@ -53,14 +30,14 @@ case class GemPackage(
     ArchiverFactory.createArchiver(TAR).extract(from, to)
 }
 
-case class CratesPackage(
+final case class CratesPackage(
     name: String,
     version: String
 ) extends SourcePackage with Rust {
   val url: Uri = uri"https://crates.io/api/v1/crates/$name/$version/download"
 }
 
-case class NpmPackage(
+final case class NpmPackage(
     rawName: String,
     version: String
 ) extends SourcePackage with JavaScript {

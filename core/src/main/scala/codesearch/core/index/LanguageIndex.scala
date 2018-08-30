@@ -39,7 +39,6 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
       .flatMap { versions =>
         verNames().flatMap { packages =>
           val packagesMap = Map(packages: _*)
-
           Future.sequence(versions.filter {
             case (packageName, currentVersion) =>
               !packagesMap.get(packageName).contains(currentVersion)
@@ -134,7 +133,12 @@ object LanguageIndex {
     * @param matchedLine number of matched line in snippet from source file
     * @param ctxt lines of snippet
     */
-  final case class CodeSnippet(fileLink: String, numberOfFirstLine: Int, matchedLine: Int, ctxt: Seq[String])
+  final case class CodeSnippet(
+      fileLink: String,
+      numberOfFirstLine: Int,
+      matchedLine: Int,
+      ctxt: Seq[String]
+  )
 
   /**
     * Grouped code snippets by package
@@ -143,7 +147,11 @@ object LanguageIndex {
     * @param packageLink link to package source
     * @param results code snippets
     */
-  final case class PackageResult(name: String, packageLink: String, results: Seq[CodeSnippet])
+  final case class PackageResult(
+      name: String,
+      packageLink: String,
+      results: Seq[CodeSnippet]
+  )
 
   /**
     * @param query input regular expression
@@ -151,7 +159,12 @@ object LanguageIndex {
     * @param preciseMatch precise match flag
     * @param sourcesOnly sources only flag
     */
-  final case class SearchArguments(query: String, insensitive: Boolean, preciseMatch: Boolean, sourcesOnly: Boolean)
+  final case class SearchArguments(
+      query: String,
+      insensitive: Boolean,
+      preciseMatch: Boolean,
+      sourcesOnly: Boolean
+  )
 
   private[index] val PAGE_SIZE = 100
 
@@ -161,5 +174,9 @@ object LanguageIndex {
     * @param url link to package source
     * @param result matched code snippet
     */
-  private[index] final case class CSearchResult(name: String, url: String, result: CodeSnippet)
+  private[index] final case class CSearchResult(
+      name: String,
+      url: String,
+      result: CodeSnippet
+  )
 }
