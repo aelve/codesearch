@@ -17,10 +17,11 @@ trait DefaultDB[T <: DefaultTable] {
 
   def insertOrUpdate[A <: SourcePackage](pack: A): Future[Int] = {
     val insOrUpdate = table.insertOrUpdate(
+      (
       pack.name,
       pack.version,
       new Timestamp(System.currentTimeMillis())
-    )
+    ))
     db.run(insOrUpdate)
   }
 
