@@ -5,6 +5,7 @@ import java.nio.file.Path
 import codesearch.core.index.directory.Directory
 import codesearch.core.index.directory.PackageDirectory._
 import codesearch.core.index.repository.Extensions.Extension
+import com.softwaremill.sttp.asynchttpclient.future.AsyncHttpClientFutureBackend
 import com.softwaremill.sttp.{Uri, _}
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils.getExtension
@@ -18,6 +19,8 @@ import scala.util.Failure
 object SourceRepository {
 
   private val logger: Logger = LoggerFactory.getLogger(SourceRepository.getClass)
+
+  private implicit val asyncSttp: SttpBackend[Future, Nothing] = AsyncHttpClientFutureBackend()
 
   final case class DownloadException(
       message: String
@@ -40,15 +43,18 @@ object SourceRepository {
     * @return downloaded archive file with sources.
     */
   private def download(from: Uri, path: Path): Future[File] = {
-    implicit val sttpBackend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend()
-    Future { sttp.get(from).response(asByteArray).send.body }.flatMap(_.fold(
-      error => Future.failed(DownloadException(error)),
-      result => {
-        val archive = path.toFile
-        FileUtils.writeByteArrayToFile(archive, result)
-        Future.successful(archive)
-      }
-    ))
+    sttp
+      .get(from)
+      .response(asByteArray)
+      .send
+      .flatMap(_.body.fold(
+        error => Future.failed(DownloadException(error)),
+        result => {
+          val archive = path.toFile
+          FileUtils.writeByteArrayToFile(archive, result)
+          Future.successful(archive)
+        }
+      ))
   }
 
   /**

@@ -20,7 +20,7 @@ object Extensions {
   }
 
   implicit def rustExtensions[A <: Rust]: Extension[A] = new Extension[A] {
-    override def extensions: Set[String] = Set("rs", "cabal")
+    override def extensions: Set[String] = Set("rs")
   }
 
   object Extension {
