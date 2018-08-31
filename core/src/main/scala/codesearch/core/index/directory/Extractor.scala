@@ -12,7 +12,8 @@ import scala.concurrent.Future
 
 private[index] trait Extractor {
 
-  /**
+  /** Defines extraction method
+    *
     * @param from is file to unarchiving
     * @param to is target directory
     */
@@ -21,7 +22,8 @@ private[index] trait Extractor {
       .createArchiver(TAR, GZIP)
       .extract(from, to.toFile)
 
-  /**
+  /** Return directory containing all unarchived files and directories
+    *
     * @param archive is file to unarchiving
     * @param directory is target directory
     * @return directory containing all unarchived files and directories
@@ -31,7 +33,8 @@ private[index] trait Extractor {
     flatDir(directory)
   }
 
-  /**
+  /** Return same directory containing all files and directories from unarchived files
+    *
     * @param unarchived is directory contains unarchived files
     * @return same directory containing all files and directories from unarchived files
     */

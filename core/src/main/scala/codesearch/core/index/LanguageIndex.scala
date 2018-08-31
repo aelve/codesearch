@@ -107,7 +107,7 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
   /**
     * Update source code from remote repository
     *
-    * @see [[https://github.com/aelve/codesearch/wiki/%D0%A1odesearch-developer-Wiki#updating-packages]]
+    * @see [[https://github.com/aelve/codesearch/wiki/Codesearch-developer-Wiki#updating-packages]]
     * @param name of package
     * @param version of package
     * @return count of downloaded files (source files)

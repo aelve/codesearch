@@ -12,13 +12,36 @@ object PathOps {
   }
 }
 
-trait Directory[A <: SourcePackage] {
-  def root: Path        = Paths.get(s"./data")
+private[index] trait Directory[A <: SourcePackage] {
+
+  /** Defines root directory for sources storing
+    *
+    * @return root directory for sources storing
+    */
+  def sourcesDir: Path = Paths.get(s"./data")
+
+  /** Defines extension of archive file
+    *
+    * @return extension of archive file
+    */
   def extension: String = "tgz"
+
+  /** Return path of archive file
+    *
+    * @param pack is instance of inheritor [[SourcePackage]]
+    * @return path of archive file
+    */
   def archive(pack: A): Path
+
+  /** Return directory for unarchived files and dirs
+    *
+    * @param pack is instance of inheritor [[SourcePackage]]
+    * @return directory for unarchived files and dirs
+    */
   def unarchived(pack: A): Path = archive(pack).getParent
 }
 
+/** Companion contained defines type-classes for inheritors [[SourcePackage]] */
 object PackageDirectory {
 
   implicit class PackageDirectoryOps[A <: SourcePackage](val pack: A) {
@@ -28,22 +51,22 @@ object PackageDirectory {
 
   implicit def hackageDirectory: Directory[HackagePackage] = new Directory[HackagePackage] {
     override def archive(pack: HackagePackage): Path =
-      root / "hackage" / s"${pack.name}" / s"${pack.version}" / s"${pack.name}-${pack.version}.$extension"
+      sourcesDir / "hackage" / s"${pack.name}" / s"${pack.version}" / s"${pack.name}-${pack.version}.$extension"
   }
 
   implicit def npmDirectory: Directory[NpmPackage] = new Directory[NpmPackage] {
     override def archive(pack: NpmPackage): Path =
-      root / "npm" / s"${pack.name}" / s"${pack.version}" / s"${pack.name}-${pack.version}.$extension"
+      sourcesDir / "npm" / s"${pack.name}" / s"${pack.version}" / s"${pack.name}-${pack.version}.$extension"
   }
 
   implicit def gemDirectory: Directory[GemPackage] = new Directory[GemPackage] {
     override def extension: String = "gem"
     override def archive(pack: GemPackage): Path =
-      root / "gem" / s"${pack.name}" / s"${pack.version}" / s"${pack.name}-${pack.version}.$extension"
+      sourcesDir / "gem" / s"${pack.name}" / s"${pack.version}" / s"${pack.name}-${pack.version}.$extension"
   }
 
   implicit def sourceDirectory: Directory[CratesPackage] = new Directory[CratesPackage] {
     override def archive(pack: CratesPackage): Path =
-      root / "crates" / s"${pack.name}" / s"${pack.version}" / s"${pack.name}-${pack.version}.$extension"
+      sourcesDir / "crates" / s"${pack.name}" / s"${pack.version}" / s"${pack.name}-${pack.version}.$extension"
   }
 }
