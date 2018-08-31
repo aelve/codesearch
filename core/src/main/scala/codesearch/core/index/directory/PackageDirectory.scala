@@ -7,8 +7,8 @@ import codesearch.core.index.repository._
 
 object PathOps {
   implicit final class RichPath(val parent: Path) {
-    def /(child: Path): Path   = Paths.get(s"${parent.toFile.getPath}/${child.toFile.getPath}")
-    def /(child: String): Path = Paths.get(s"${parent.toFile.getPath}/$child")
+    def /(child: Path): Path   = Paths.get(parent.toFile.getPath, child.toFile.getPath)
+    def /(child: String): Path = Paths.get(parent.toFile.getPath, child)
   }
 }
 

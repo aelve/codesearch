@@ -25,7 +25,8 @@ object Builder {
       "-Yno-adapted-args",
       "-Ywarn-dead-code",
       "-Xfuture",
-      "-Xexperimental"
+      "-Xexperimental",
+      "-Ypartial-unification"
     ),
     scalacOptions in (Compile, console) -= "-Ywarn-unused-import",
     scalacOptions in (Compile, doc) ++= Seq("-diagrams", "-implicits"),
@@ -48,6 +49,7 @@ object Builder {
     .settings(commonSettings ++ commonDeps)
     .settings(name := "codesearch-core")
     .settings(
+      excludeDependencies ++= Seq(ExclusionRule("io.netty:netty-handler:4.1.13.Final")),
       assemblyJarName in assembly := "codesearch-core.jar",
       assemblyOutputPath in assembly := baseDirectory.value / "../codesearch-core.jar",
       libraryDependencies ++= Seq(
@@ -58,6 +60,7 @@ object Builder {
       ),
       assemblyMergeStrategy in assembly := {
         case PathList("META-INF", _ @_*) => MergeStrategy.discard
+        case PathList("reference.conf")  => MergeStrategy.concat
         case _                           => MergeStrategy.first
       }
     )
