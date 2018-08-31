@@ -4,11 +4,11 @@ import java.sql.Timestamp
 
 import codesearch.core.index.repository.SourcePackage
 import codesearch.core.model._
-import slick.lifted.TableQuery
 import slick.jdbc.PostgresProfile.api._
+import slick.lifted.TableQuery
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 trait DefaultDB[T <: DefaultTable] {
 
@@ -16,8 +16,11 @@ trait DefaultDB[T <: DefaultTable] {
   val db = Database.forConfig("mydb")
 
   def insertOrUpdate[A <: SourcePackage](pack: A): Future[Int] = {
-    val insOrUpdate = table
-        .insertOrUpdate((pack.name, pack.version, new Timestamp(System.currentTimeMillis())))
+    val insOrUpdate = table.insertOrUpdate(
+      pack.name,
+      pack.version,
+      new Timestamp(System.currentTimeMillis())
+    )
     db.run(insOrUpdate)
   }
 

@@ -56,8 +56,7 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
       val data = answers
         .slice(math.max(page - 1, 0) * LanguageIndex.PAGE_SIZE, page * LanguageIndex.PAGE_SIZE)
         .flatMap(mapCSearchOutput)
-        .groupBy { x => (x.name, x.url)
-        }
+        .groupBy(x => (x.name, x.url))
         .map {
           case ((verName, packageLink), results) =>
             PackageResult(verName, packageLink, results.map(_.result).toSeq)
@@ -124,7 +123,10 @@ object LanguageIndex {
     * @param data code snippets grouped by package
     * @param total number of total matches
     */
-  final case class CSearchPage(data: Seq[PackageResult], total: Int)
+  final case class CSearchPage(
+      data: Seq[PackageResult],
+      total: Int
+  )
 
   /**
     *

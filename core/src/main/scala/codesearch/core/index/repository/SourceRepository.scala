@@ -10,6 +10,7 @@ import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils.getExtension
 import org.slf4j.{Logger, LoggerFactory}
 
+import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Failure
@@ -31,13 +32,18 @@ object SourceRepository {
       } yield directory
     }.andThen { case Failure(ex) => logger.error(ex.getMessage) }
 
+  /**
+    * Function download sources from remote resource and save in file.
+    *
+    * @param from is uri of remote resource.
+    * @param path is path for downloaded file. If the file does not exist for this path will be create.
+    * @return downloaded archive file with sources.
+    */
   private def download(from: Uri, path: Path): Future[File] = {
     implicit val sttpBackend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend()
-    Future {
-      sttp.get(from).response(asByteArray).send().body
-    }.flatMap(_.fold(
-      error   => Future.failed(DownloadException(error)),
-      result  => {
+    Future { sttp.get(from).response(asByteArray).send.body }.flatMap(_.fold(
+      error => Future.failed(DownloadException(error)),
+      result => {
         val archive = path.toFile
         FileUtils.writeByteArrayToFile(archive, result)
         Future.successful(archive)
@@ -53,17 +59,18 @@ object SourceRepository {
     * @return count removed files
     */
   private def deleteExcessFiles(directory: File, allowedExtentions: Set[String]): Future[Int] = Future {
+    @tailrec
     def filterFiles(all: List[File], excess: List[File] = Nil): List[File] = all match {
       case Nil => excess
       case file :: others if file.isDirectory =>
-        if (file.listFiles().length > 0)
-          filterFiles(others ++ file.listFiles(), excess)
+        val subdirectories = file.listFiles
+        if (subdirectories.nonEmpty) filterFiles(others ++ subdirectories, excess)
         else filterFiles(others, file :: excess)
       case file :: others =>
         if (allowedExtentions.contains(getExtension(file.getName)))
           filterFiles(others, excess)
         else filterFiles(others, file :: excess)
     }
-    filterFiles(List(directory)).map(_.delete()).count(identity)
+    filterFiles(List(directory)).map(_.delete).count(identity)
   }
 }
