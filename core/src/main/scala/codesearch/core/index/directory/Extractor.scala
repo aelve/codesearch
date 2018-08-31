@@ -16,33 +16,32 @@ private[index] trait Extractor {
     * @param from is file to unarchiving
     * @param to is target directory
     */
-  def unzippingMethod(from: File, to: File): Unit =
+  def unzipUsingMethod(from: File, to: Path): Unit =
     ArchiverFactory
       .createArchiver(TAR, GZIP)
-      .extract(from, to)
+      .extract(from, to.toFile)
 
   /**
     * @param archive is file to unarchiving
     * @param directory is target directory
     * @return directory containing all unarchived files and directories
     */
-  def extract(archive: File, directory: Path): Future[File] = Future {
-    val unarchived = directory.toFile
-    unzippingMethod(archive, unarchived)
-    flatDir(unarchived)
+  def extract(archive: File, directory: Path): Future[Path] = Future {
+    unzipUsingMethod(archive, directory)
+    flatDir(directory)
   }
 
   /**
     * @param unarchived is directory contains unarchived files
     * @return same directory containing all files and directories from unarchived files
     */
-  def flatDir(unarchived: File): File = {
-    unarchived
-      .listFiles()
+  def flatDir(unarchived: Path): Path = {
+    val dir = unarchived.toFile
+    dir.listFiles
       .filter(_.isDirectory)
-      .foreach(_.listFiles().foreach(file =>
-        if (file.isDirectory) moveDirectoryToDirectory(file, unarchived, false)
-        else moveFileToDirectory(file, unarchived, false)))
+      .foreach(_.listFiles.foreach(file =>
+        if (file.isDirectory) moveDirectoryToDirectory(file, dir, false)
+        else moveFileToDirectory(file, dir, false)))
     unarchived
   }
 }

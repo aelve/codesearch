@@ -2,6 +2,7 @@ package codesearch.core.index.repository
 
 import java.io.File
 import java.net.URLEncoder
+import java.nio.file.Path
 
 import codesearch.core.index.directory.Extractor
 import com.softwaremill.sttp.{Uri, _}
@@ -14,30 +15,30 @@ trait SourcePackage extends Extractor {
   def url: Uri
 }
 
-final case class HackagePackage(
+private[index] final case class HackagePackage(
     name: String,
     version: String
 ) extends SourcePackage with Haskell {
   val url: Uri = uri"https://hackage.haskell.org/package/$name-$version/$name-$version.tar.gz"
 }
 
-final case class GemPackage(
+private[index] final case class GemPackage(
     name: String,
     version: String
 ) extends SourcePackage with Ruby {
   val url: Uri = uri"https://rubygems.org/downloads/$name-$version.gem"
-  override def unzippingMethod(from: File, to: File): Unit =
-    ArchiverFactory.createArchiver(TAR).extract(from, to)
+  override def unzipUsingMethod(from: File, to: Path): Unit =
+    ArchiverFactory.createArchiver(TAR).extract(from, to.toFile)
 }
 
-final case class CratesPackage(
+private[index] final case class CratesPackage(
     name: String,
     version: String
 ) extends SourcePackage with Rust {
   val url: Uri = uri"https://crates.io/api/v1/crates/$name/$version/download"
 }
 
-final case class NpmPackage(
+private[index] final case class NpmPackage(
     rawName: String,
     version: String
 ) extends SourcePackage with JavaScript {

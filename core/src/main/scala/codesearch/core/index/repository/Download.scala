@@ -1,9 +1,11 @@
 package codesearch.core.index.repository
-import java.io.File
+
+import java.nio.file.Path
+
 import scala.concurrent.Future
 
 trait Download[A <: SourcePackage] {
-  def downloadSources(pack: A): Future[File]
+  def downloadSources(pack: A): Future[Path]
 }
 
 object Download {

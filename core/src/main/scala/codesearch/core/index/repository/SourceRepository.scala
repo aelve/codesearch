@@ -64,7 +64,7 @@ object SourceRepository {
     * @param allowedExtentions is extensions defined for each language
     * @return count removed files
     */
-  private def deleteExcessFiles(directory: File, allowedExtentions: Set[String]): Future[Int] = Future {
+  private def deleteExcessFiles(directory: Path, allowedExtentions: Set[String]): Future[Int] = Future {
     @tailrec
     def filterFiles(all: List[File], excess: List[File] = Nil): List[File] = all match {
       case Nil => excess
@@ -77,6 +77,6 @@ object SourceRepository {
           filterFiles(others, excess)
         else filterFiles(others, file :: excess)
     }
-    filterFiles(List(directory)).map(_.delete).count(identity)
+    filterFiles(List(directory.toFile)).map(_.delete).count(identity)
   }
 }
