@@ -19,7 +19,7 @@ class NpmSearcher @Inject()(
 
       NpmDB.updated.flatMap(
         updated =>
-          JavaScriptIndex().csearch(SearchArguments(query = query,
+          JavaScriptIndex().search(SearchArguments(query = query,
                                                     insensitive = insensitive == "on",
                                                     preciseMatch = precise == "on",
                                                     sourcesOnly = sources == "on"),

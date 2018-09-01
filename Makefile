@@ -39,7 +39,15 @@ download-%:
 
 # Index Hackage packages
 index-hackage:
-  CSEARCHINDEX=data/.hackage_csearch_index cindex data/packages/
+  CSEARCHINDEX=data/.hackage_csearch_index cindex data/hackage/
+
+# Index npm packages
+index-npm:
+  CSEARCHINDEX=data/.npm_csearch_index cindex data/npm/
+
+# Index npm packages
+index-crates:
+  CSEARCHINDEX=data/.crates_csearch_index cindex data/crates/
 
 # Run the server
 .PHONY: serve

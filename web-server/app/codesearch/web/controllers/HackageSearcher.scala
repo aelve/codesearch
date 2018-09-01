@@ -19,7 +19,7 @@ class HackageSearcher @Inject()(
 
       HackageDB.updated.flatMap(
         updated =>
-          HaskellIndex().csearch(SearchArguments(query = query,
+          HaskellIndex().search(SearchArguments(query = query,
                                                  insensitive = insensitive == "on",
                                                  preciseMatch = precise == "on",
                                                  sourcesOnly = sources == "on"),

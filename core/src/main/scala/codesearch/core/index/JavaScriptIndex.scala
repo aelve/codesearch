@@ -1,18 +1,15 @@
 package codesearch.core.index
 
 import java.io.FileInputStream
-import java.net.URLDecoder
 
-import ammonite.ops.{Path, pwd}
+import ammonite.ops.pwd
 import codesearch.core.db.NpmDB
-import codesearch.core.index.LanguageIndex.{CSearchResult, CodeSnippet}
 import codesearch.core.index.repository.NpmPackage
 import repository.Extensions._
 import codesearch.core.index.directory.PackageDirectory._
 
 import scala.sys.process._
 import codesearch.core.model.{NpmTable, Version}
-import codesearch.core.util.Helper
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json.Json
 
@@ -24,10 +21,8 @@ class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] 
   override protected val indexFile: String = ".npm_csearch_index"
   override protected val langExts: String  = ".*\\.(js|json)$"
 
-  private val SOURCES: Path           = pwd / 'data / 'js / 'packages
-  private val NPM_INDEX_JSON          = pwd / 'data / 'js / "nameVersions.json"
-  private val NPM_UPDATER_SCRIPT      = pwd / 'codesearch / 'scripts / "update_npm_index.js"
-  private val extensions: Set[String] = Set("js", "json", "xml", "yml", "coffee", "markdown", "md", "yaml", "txt")
+  private val NPM_INDEX_JSON     = pwd / 'data / 'js / "names.json"
+  private val NPM_UPDATER_SCRIPT = pwd / 'scripts / "update_npm_index.js"
 
   private var counter: Int = 0
 
@@ -52,37 +47,8 @@ class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] 
     obj.map(map => (map.getOrElse("name", ""), Version(map.getOrElse("version", "")))).toMap
   }
 
-  override protected def mapCSearchOutput(uri: String): Option[CSearchResult] = {
-    val elems: Seq[String] = uri.split(':')
-    if (elems.length < 2) {
-      println(s"bad uri: $uri")
-      None
-    } else {
-      val fullPath             = elems.head
-      val pathSeq: Seq[String] = elems.head.split('/').drop(6)
-      val nLine                = elems.drop(1).head
-      pathSeq.headOption match {
-        case None =>
-          println(s"bad uri: $uri")
-          None
-        case Some(name) =>
-          val decodedName       = URLDecoder.decode(name, "UTF-8")
-          val (firstLine, rows) = Helper.extractRows(fullPath, nLine.toInt)
-
-          val remPath = pathSeq.drop(1).mkString("/")
-
-          Some(
-            CSearchResult(decodedName,
-                          s"https://www.npmjs.com/package/$decodedName",
-                          CodeSnippet(
-                            remPath,
-                            firstLine,
-                            nLine.toInt - 1,
-                            rows
-                          )))
-      }
-    }
-  }
+  override protected def buildRepUrl(packageName: String, version: String): String =
+    s"https://www.npmjs.com/package/$packageName/v/$version"
 }
 
 object JavaScriptIndex {
