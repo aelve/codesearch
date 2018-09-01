@@ -1,10 +1,10 @@
 package codesearch.core.index.repository
+
 import java.io.File
 import java.nio.file.Path
 
 import codesearch.core.index.directory.Directory
-import codesearch.core.index.directory.PackageDirectory._
-import codesearch.core.index.repository.Extensions.Extension
+import codesearch.core.index.directory.Directory.ops._
 import com.softwaremill.sttp.asynchttpclient.future.AsyncHttpClientFutureBackend
 import com.softwaremill.sttp.{Uri, _}
 import org.apache.commons.io.FileUtils
@@ -26,12 +26,12 @@ object SourceRepository {
       message: String
   ) extends Throwable(message)
 
-  implicit def packageDownloader[A <: SourcePackage: Extension: Directory]: Download[A] =
+  implicit def packageDownloader[A <: SourcePackage: Extensions: Directory]: Download[A] =
     (pack: A) => {
       for {
         archive   <- download(pack.url, pack.archive)
         directory <- pack.extract(archive, pack.unarchived)
-        _         <- deleteExcessFiles(directory, Extension[A].extensions)
+        _         <- deleteExcessFiles(directory, Extensions[A].extensions)
       } yield directory
     }.andThen { case Failure(ex) => logger.error(ex.getMessage) }
 

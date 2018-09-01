@@ -8,7 +8,7 @@ import codesearch.core.db.NpmDB
 import codesearch.core.index.LanguageIndex.{CSearchResult, CodeSnippet}
 import codesearch.core.index.repository.NpmPackage
 import repository.Extensions._
-import codesearch.core.index.directory.PackageDirectory._
+import codesearch.core.index.directory.Directory._
 
 import scala.sys.process._
 import codesearch.core.model.{NpmTable, Version}

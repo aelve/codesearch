@@ -4,7 +4,8 @@ import ammonite.ops.{Path, pwd}
 import codesearch.core.db.DefaultDB
 import codesearch.core.index.LanguageIndex.{CSearchPage, CSearchResult, PackageResult, SearchArguments}
 import codesearch.core.index.directory.Directory
-import codesearch.core.index.repository.{Download, Extension, SourcePackage}
+import codesearch.core.index.repository._
+import codesearch.core.index.repository.Download.ops._
 import codesearch.core.model.{DefaultTable, Version}
 import codesearch.core.util.Helper
 import org.slf4j.Logger
@@ -71,12 +72,12 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
 
   protected implicit def executor: ExecutionContext
 
-  protected def archiveDownloadAndExtract[A <: SourcePackage: Extension: Directory](pack: A): Future[Int] = {
+  protected def archiveDownloadAndExtract[A <: SourcePackage: Extensions: Directory](pack: A): Future[Int] = {
     import codesearch.core.index.repository.SourceRepository._
-    Download[A]
-      .downloadSources(pack)
-      .flatMap(_ => insertOrUpdate(pack))
-      .recover { case _ => 0 }
+    (for {
+      _         <- pack.downloadSources
+      rowsCount <- insertOrUpdate(pack)
+    } yield rowsCount).recover { case _ => 0 }
   }
 
   protected def runCsearch(arg: SearchArguments): Future[Array[String]] = {
