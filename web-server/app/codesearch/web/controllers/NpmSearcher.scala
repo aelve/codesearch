@@ -20,10 +20,10 @@ class NpmSearcher @Inject()(
       NpmDB.updated.flatMap(
         updated =>
           JavaScriptIndex().search(SearchArguments(query = query,
-                                                    insensitive = insensitive == "on",
-                                                    preciseMatch = precise == "on",
-                                                    sourcesOnly = sources == "on"),
-                                    page.toInt) map {
+                                                   insensitive = insensitive == "on",
+                                                   preciseMatch = precise == "on",
+                                                   sourcesOnly = sources == "on"),
+                                   page.toInt) map {
             case CSearchPage(results, total) =>
               Ok(
                 views.html.javascript_search(

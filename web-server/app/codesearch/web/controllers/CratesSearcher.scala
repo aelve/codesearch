@@ -19,10 +19,10 @@ class CratesSearcher @Inject()(implicit val executionContext: ExecutionContext) 
         updated =>
           RustIndex()
             .search(SearchArguments(query = query,
-                                     insensitive = insensitive == "on",
-                                     preciseMatch = precise == "on",
-                                     sourcesOnly = sources == "on"),
-                     page.toInt)
+                                    insensitive = insensitive == "on",
+                                    preciseMatch = precise == "on",
+                                    sourcesOnly = sources == "on"),
+                    page.toInt)
             .map {
               case CSearchPage(results, total) =>
                 Ok(
