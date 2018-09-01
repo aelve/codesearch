@@ -3,7 +3,7 @@
 # Run Postgres
 .PHONY: db
 db:
-  docker run --name codesearch-db \
+  docker start codesearch-db || docker run --name codesearch-db \
     -e POSTGRES_DB=sourcesdb \
     -e POSTGRES_USER=postgres \
     -e POSTGRES_PASSWORD=postgres \
