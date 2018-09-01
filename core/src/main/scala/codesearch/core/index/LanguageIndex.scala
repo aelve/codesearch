@@ -1,19 +1,17 @@
 package codesearch.core.index
 
-import java.io.File
-
 import ammonite.ops.{Path, pwd}
-
-import sys.process._
 import codesearch.core.db.DefaultDB
 import codesearch.core.index.LanguageIndex.{CSearchPage, CSearchResult, PackageResult, SearchArguments}
+import codesearch.core.index.directory.Directory
+import codesearch.core.index.repository.{Download, Extension, SourcePackage}
 import codesearch.core.model.{DefaultTable, Version}
 import codesearch.core.util.Helper
-import org.apache.commons.io.FilenameUtils
 import org.slf4j.Logger
 
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
+import scala.sys.process._
 
 trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
   protected val logger: Logger
@@ -30,6 +28,7 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
 
   /**
     * download all latest packages version
+    *
     * @return count of updated packages
     */
   def updatePackages(): Future[Int] = {
@@ -40,13 +39,12 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
       .flatMap { versions =>
         verNames().flatMap { packages =>
           val packagesMap = Map(packages: _*)
-
           Future.sequence(versions.filter {
             case (packageName, currentVersion) =>
               !packagesMap.get(packageName).contains(currentVersion)
           }.map {
             case (packageName, currentVersion) =>
-              downloadSources(packageName, currentVersion)
+              updateSources(packageName, currentVersion)
           })
         }
       }
@@ -58,9 +56,7 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
       val data = answers
         .slice(math.max(page - 1, 0) * LanguageIndex.PAGE_SIZE, page * LanguageIndex.PAGE_SIZE)
         .flatMap(mapCSearchOutput)
-        .groupBy { x =>
-          (x.name, x.url)
-        }
+        .groupBy(x => (x.name, x.url))
         .map {
           case ((verName, packageLink), results) =>
             PackageResult(verName, packageLink, results.map(_.result).toSeq)
@@ -75,55 +71,17 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
 
   protected implicit def executor: ExecutionContext
 
-  protected def archiveDownloadAndExtract(name: String,
-                                          ver: String,
-                                          packageURL: String,
-                                          packageFileGZ: Path,
-                                          packageFileDir: Path,
-                                          extensions: Option[Set[String]] = None,
-                                          extractor: (String, String) => Unit = defaultExtractor): Future[Int] = {
-
-    val archive     = packageFileGZ.toIO
-    val destination = packageFileDir.toIO
-
-    try {
-      destination.mkdirs()
-
-      Seq("curl", "-o", archive.getCanonicalPath, packageURL) !!
-
-      extractor(archive.getCanonicalPath, destination.getCanonicalPath)
-
-      if (extensions.isDefined) {
-        applyFilter(extensions.get, archive)
-        applyFilter(extensions.get, destination)
-      }
-
-      insertOrUpdate(name, ver)
-    } catch {
-      case e: Exception =>
-        logger.debug(e.getLocalizedMessage)
-        Future {
-          0
-        }
-    }
+  protected def archiveDownloadAndExtract[A <: SourcePackage: Extension: Directory](pack: A): Future[Int] = {
+    import codesearch.core.index.repository.SourceRepository._
+    Download[A]
+      .downloadSources(pack)
+      .flatMap(_ => insertOrUpdate(pack))
+      .recover { case _ => 0 }
   }
 
   protected def runCsearch(arg: SearchArguments): Future[Array[String]] = {
-    val pathRegex = {
-      if (arg.sourcesOnly) {
-        langExts
-      } else {
-        ".*"
-      }
-    }
-
-    val query: String = {
-      if (arg.preciseMatch) {
-        Helper.hideSymbols(arg.query)
-      } else {
-        arg.query
-      }
-    }
+    val pathRegex     = if (arg.sourcesOnly) langExts else ".*"
+    val query: String = if (arg.preciseMatch) Helper.hideSymbols(arg.query) else arg.query
 
     val args: mutable.ListBuffer[String] = mutable.ListBuffer("csearch", "-n")
     if (arg.insensitive) {
@@ -141,41 +99,34 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
   /**
     * Collect last versions of packages in local folder
     * Key for map is package name, value is last version
+    *
     * @return last versions of packages
     */
   protected def getLastVersions: Map[String, Version]
 
   /**
-    * download source code from remote repository
+    * Update source code from remote repository
+    *
+    * @see [[https://github.com/aelve/codesearch/wiki/Codesearch-developer-Wiki#updating-packages]]
     * @param name of package
-    * @param ver of package
+    * @param version of package
     * @return count of downloaded files (source files)
     */
-  protected def downloadSources(name: String, ver: String): Future[Int]
-
-  protected def applyFilter(extensions: Set[String], curFile: File): Unit = {
-    if (curFile.isDirectory) {
-      curFile.listFiles.foreach(applyFilter(extensions, _))
-    } else {
-      val ext = FilenameUtils.getExtension(curFile.getName)
-      if (curFile.exists() && !(extensions contains ext)) {
-        curFile.delete
-      }
-    }
-  }
-
-  private lazy val defaultExtractor: (String, String) => Unit =
-    (src: String, dst: String) => Seq("tar", "-xvf", src, "-C", dst) !!
+  protected def updateSources(name: String, version: String): Future[Int]
 }
 
 object LanguageIndex {
 
   /**
     * result of searching
+    *
     * @param data code snippets grouped by package
     * @param total number of total matches
     */
-  final case class CSearchPage(data: Seq[PackageResult], total: Int)
+  final case class CSearchPage(
+      data: Seq[PackageResult],
+      total: Int
+  )
 
   /**
     *
@@ -184,15 +135,25 @@ object LanguageIndex {
     * @param matchedLine number of matched line in snippet from source file
     * @param ctxt lines of snippet
     */
-  final case class CodeSnippet(fileLink: String, numberOfFirstLine: Int, matchedLine: Int, ctxt: Seq[String])
+  final case class CodeSnippet(
+      fileLink: String,
+      numberOfFirstLine: Int,
+      matchedLine: Int,
+      ctxt: Seq[String]
+  )
 
   /**
     * Grouped code snippets by package
+    *
     * @param name name of package
     * @param packageLink link to package source
     * @param results code snippets
     */
-  final case class PackageResult(name: String, packageLink: String, results: Seq[CodeSnippet])
+  final case class PackageResult(
+      name: String,
+      packageLink: String,
+      results: Seq[CodeSnippet]
+  )
 
   /**
     * @param query input regular expression
@@ -200,7 +161,12 @@ object LanguageIndex {
     * @param preciseMatch precise match flag
     * @param sourcesOnly sources only flag
     */
-  final case class SearchArguments(query: String, insensitive: Boolean, preciseMatch: Boolean, sourcesOnly: Boolean)
+  final case class SearchArguments(
+      query: String,
+      insensitive: Boolean,
+      preciseMatch: Boolean,
+      sourcesOnly: Boolean
+  )
 
   private[index] val PAGE_SIZE = 100
 
@@ -210,5 +176,9 @@ object LanguageIndex {
     * @param url link to package source
     * @param result matched code snippet
     */
-  private[index] final case class CSearchResult(name: String, url: String, result: CodeSnippet)
+  private[index] final case class CSearchResult(
+      name: String,
+      url: String,
+      result: CodeSnippet
+  )
 }

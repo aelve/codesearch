@@ -6,8 +6,11 @@ import java.net.URLDecoder
 import ammonite.ops.pwd
 import codesearch.core.db.GemDB
 import codesearch.core.index.LanguageIndex.{CSearchResult, CodeSnippet}
+import codesearch.core.index.repository.GemPackage
 import codesearch.core.model.{GemTable, Version}
 import codesearch.core.util.Helper
+import repository.Extensions._
+import codesearch.core.index.directory.PackageDirectory._
 
 import sys.process._
 import org.slf4j.{Logger, LoggerFactory}
@@ -27,25 +30,9 @@ class RubyIndex(val ec: ExecutionContext) extends LanguageIndex[GemTable] with G
 
   private val DESERIALIZER_PATH = pwd / 'codesearch / 'scripts / "update_index.rb"
 
-  override protected def downloadSources(name: String, ver: String): Future[Int] = {
+  override protected def updateSources(name: String, version: String): Future[Int] = {
     logger.info(s"downloading package $name")
-
-    val packageURL =
-      s"https://rubygems.org/downloads/$name-$ver.gem"
-
-    val packageFileGZ =
-      pwd / 'data / 'ruby / 'packages / name / ver / s"$ver.gem"
-
-    val packageFileDir =
-      pwd / 'data / 'ruby / 'packages / name / ver / ver
-
-    archiveDownloadAndExtract(name,
-                              ver,
-                              packageURL,
-                              packageFileGZ,
-                              packageFileDir,
-                              extensions = Some(Helper.langByExt.keySet),
-                              extractor = gemExtractor)
+    archiveDownloadAndExtract(GemPackage(name, version))
   }
 
   override def downloadMetaInformation(): Unit = {
