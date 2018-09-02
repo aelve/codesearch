@@ -76,7 +76,7 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
     */
   protected def mapCSearchOutput(out: String): Option[CSearchResult] = {
     val res = out.split(':').toList match {
-      case fullPath :: lineNumber :: _ => createCSearhResult(fullPath, lineNumber.toInt)
+      case fullPath :: lineNumber :: _ => createCSearchResult(fullPath, lineNumber.toInt)
       case _                           => None
     }
     if (res.isEmpty) {
@@ -138,7 +138,7 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
     */
   protected def updateSources(name: String, version: String): Future[Int]
 
-  private def createCSearhResult(fullPath: String, lineNumber: Int): Option[CSearchResult] = {
+  private def createCSearchResult(fullPath: String, lineNumber: Int): Option[CSearchResult] = {
     val relativePath = Path(fullPath).relativeTo(pwd).toString
     relativePath.split('/').drop(2).toList match {
       case libName :: version :: path =>

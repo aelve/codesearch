@@ -45,7 +45,7 @@ index-hackage:
 index-npm:
   CSEARCHINDEX=data/.npm_csearch_index cindex data/npm/
 
-# Index npm packages
+# Index crates packages
 index-crates:
   CSEARCHINDEX=data/.crates_csearch_index cindex data/crates/
 
