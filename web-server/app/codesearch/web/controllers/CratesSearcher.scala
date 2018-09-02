@@ -1,42 +1,18 @@
 package codesearch.web.controllers
 
-import codesearch.core.db.CratesDB
-import codesearch.core.index.LanguageIndex.{CSearchPage, SearchArguments}
+import codesearch.core.db.{CratesDB, DefaultDB}
 import codesearch.core.index.RustIndex
-import com.github.marlonlom.utilities.timeago.TimeAgo
+import codesearch.core.model.CratesTable
 import javax.inject.Inject
 import play.api.mvc.InjectedController
 
 import scala.concurrent.ExecutionContext
 
-class CratesSearcher @Inject()(implicit val executionContext: ExecutionContext) extends InjectedController {
+class CratesSearcher @Inject()(implicit override val executionContext: ExecutionContext)
+    extends InjectedController with BaseController[CratesTable, RustIndex] {
+  override def db: DefaultDB[CratesTable] = CratesDB
 
-  def index(query: String, insensitive: String, precise: String, sources: String, page: String) = Action.async {
-    implicit request =>
-      val callURI = s"/rust/search?query=$query&insensitive=$insensitive&precise=$precise&sources=$sources"
+  override lazy val indexEngine: RustIndex = RustIndex()
 
-      CratesDB.updated.flatMap(
-        updated =>
-          RustIndex()
-            .search(SearchArguments(query = query,
-                                    insensitive = insensitive == "on",
-                                    preciseMatch = precise == "on",
-                                    sourcesOnly = sources == "on"),
-                    page.toInt)
-            .map {
-              case CSearchPage(results, total) =>
-                Ok(
-                  views.html.rust_search(
-                    updated = TimeAgo.using(updated.getTime),
-                    packages = results,
-                    query = query,
-                    insensitive = insensitive == "on",
-                    precise = precise == "on",
-                    sources = sources == "on",
-                    page = page.toInt,
-                    totalMatches = total,
-                    callURI = callURI
-                  ))
-          })
-  }
+  override def lang: String = "rust"
 }

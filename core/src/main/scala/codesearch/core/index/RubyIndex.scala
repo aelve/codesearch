@@ -1,14 +1,11 @@
 package codesearch.core.index
 
 import java.io.FileInputStream
-import java.net.URLDecoder
 
 import ammonite.ops.pwd
 import codesearch.core.db.GemDB
-import codesearch.core.index.LanguageIndex.{CSearchResult, CodeSnippet}
 import codesearch.core.index.repository.GemPackage
 import codesearch.core.model.{GemTable, Version}
-import codesearch.core.util.Helper
 import repository.Extensions._
 import codesearch.core.index.directory.Directory._
 

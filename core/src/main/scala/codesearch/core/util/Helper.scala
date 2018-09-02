@@ -6,7 +6,9 @@ import org.apache.commons.io.FilenameUtils
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable
+import scala.concurrent.{ExecutionContext, Future}
 import scala.io.Source
+import scala.util.Try
 
 object Helper {
   private val logger: Logger = LoggerFactory.getLogger(this.getClass)
@@ -54,6 +56,13 @@ object Helper {
         (0, Seq.empty[String])
     }
   }
+
+  def extractFile(path: String)(implicit ec: ExecutionContext): Future[Option[List[String]]] =
+    Future {
+      Try {
+        Source.fromFile(path, "UTF-8").getLines
+      }.map(_.toList).toOption
+    }
 
   def hideSymbols(str: String): String = {
     str.foldRight("") {

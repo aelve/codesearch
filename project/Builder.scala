@@ -45,7 +45,8 @@ object Builder {
       "javax.inject"         % "javax.inject"    % "1",
       "ch.qos.logback"       % "logback-classic" % "1.2.3",
       "com.typesafe.play"    %% "play-json"      % "2.6.9",
-      "com.github.mpilquist" %% "simulacrum"     % "0.13.0"
+      "com.github.mpilquist" %% "simulacrum"     % "0.13.0",
+      "org.typelevel"        %% "cats-core"      % "1.2.0"
     )
   )
 
