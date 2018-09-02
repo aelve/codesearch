@@ -15,7 +15,7 @@ import scala.concurrent.{ExecutionContext, Future}
 /**
   * @author sss3 (Vladimir Alekseev)
   */
-trait BaseController[V <: DefaultTable, I <: LanguageIndex[V]] { self: InjectedController =>
+trait SearchController[V <: DefaultTable, I <: LanguageIndex[V]] { self: InjectedController =>
 
   implicit val executionContext: ExecutionContext
   def db: DefaultDB[V]
@@ -65,7 +65,7 @@ trait BaseController[V <: DefaultTable, I <: LanguageIndex[V]] { self: InjectedC
     OptionT
       .fromOption[Future](indexEngine.packageName(realPath))
       .flatMap(pack => {
-        OptionT(Helper.extractFile(realPath)).map(s => (pack, s))
+        OptionT(Helper.readFileAsync(realPath)).map(s => (pack, s))
       })
       .map {
         case (pack, code) =>

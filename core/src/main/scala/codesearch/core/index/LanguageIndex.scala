@@ -155,14 +155,16 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
     val relativePath = Path(fullPath).relativeTo(pwd).toString
     packageName(relativePath).map { p =>
       val (firstLine, rows) = Helper.extractRows(relativePath, lineNumber)
-      CSearchResult(p,
-                    CodeSnippet(
-                      relativePath.split('/').drop(4).mkString("/"), // drop `data/hackage/packageName/version/`
-                      relativePath.split('/').drop(1).mkString("/"), // drop `data`
-                      firstLine,
-                      lineNumber - 1,
-                      rows
-                    ))
+      CSearchResult(
+        p,
+        CodeSnippet(
+          relativePath.split('/').drop(4).mkString("/"), // drop `data/hackage/packageName/version/`
+          relativePath.split('/').drop(1).mkString("/"), // drop `data`
+          firstLine,
+          lineNumber - 1,
+          rows
+        )
+      )
     }
   }
 }
