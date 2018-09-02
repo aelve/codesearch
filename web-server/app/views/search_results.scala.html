@@ -1,6 +1,7 @@
 @import codesearch.core.index.LanguageIndex.PackageResult
 
-@(updated: String, packages: Seq[PackageResult], query: String, insensitive: Boolean, precise: Boolean, sources: Boolean, page: Int, totalMatches: Int, callURI: String)
+@(updated: String, packages: Seq[PackageResult], query: String, insensitive: Boolean,
+        precise: Boolean, sources: Boolean, page: Int, totalMatches: Int, callURI: String, lang: String)
 
 @headExtra = {
     <meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval' http://www.google.com">
@@ -11,8 +12,8 @@
     <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/search.css")">
 }
 
-@wrapper("Codesearch", headExtra){
-    @searchBox("/ruby/search", query, insensitive, precise, sources)
-    @resultFrame("ruby", insensitive, precise, query, updated, packages, totalMatches)
+@wrapper(s"Codesearch | $lang", headExtra){
+    @searchBox(s"/$lang/search", query, insensitive, precise, sources)
+    @resultFrame(lang, insensitive, precise, query, updated, packages, totalMatches)
     @pagination(page, totalMatches, callURI)
 }

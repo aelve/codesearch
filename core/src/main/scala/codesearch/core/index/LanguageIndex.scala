@@ -59,15 +59,27 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
       val data = answers
         .slice(math.max(page - 1, 0) * LanguageIndex.PAGE_SIZE, page * LanguageIndex.PAGE_SIZE)
         .flatMap(mapCSearchOutput)
-        .groupBy(x => (x.name, x.url))
+        .groupBy(x => x.pack)
         .map {
-          case ((verName, packageLink), results) =>
-            PackageResult(verName, packageLink, results.map(_.result).toSeq)
+          case (pack, results) =>
+            PackageResult(pack, results.map(_.result).toSeq)
         }
         .toSeq
-        .sortBy(_.name)
+        .sortBy(_.pack.name)
       CSearchPage(data, answers.length)
     }
+  }
+
+  /**
+    * Build package name and path to remote repository
+    * @param relativePath path to source code
+    * @return package name and url to repository
+    */
+  def packageName(relativePath: String): Option[Package] = relativePath.split('/').drop(2).toList match {
+    case libName :: version :: _ =>
+      val decodedName = URLDecoder.decode(libName, "UTF-8")
+      Some(Package(s"$decodedName-$version", buildRepUrl(decodedName, version)))
+    case _ => None
   }
 
   /**
@@ -141,21 +153,18 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
 
   private def createCSearchResult(fullPath: String, lineNumber: Int): Option[CSearchResult] = {
     val relativePath = Path(fullPath).relativeTo(pwd).toString
-    relativePath.split('/').drop(2).toList match {
-      case libName :: version :: path =>
-        val decodedName       = URLDecoder.decode(libName, "UTF-8")
-        val (firstLine, rows) = Helper.extractRows(relativePath, lineNumber)
-        Some(
-          CSearchResult(s"$decodedName-$version",
-                        buildRepUrl(decodedName, version),
-                        CodeSnippet(
-                          path.mkString("/"),
-                          firstLine,
-                          lineNumber - 1,
-                          rows
-                        )))
-      case _ =>
-        None
+    packageName(relativePath).map { p =>
+      val (firstLine, rows) = Helper.extractRows(relativePath, lineNumber)
+      CSearchResult(
+        p,
+        CodeSnippet(
+          relativePath.split('/').drop(4).mkString("/"), // drop `data/hackage/packageName/version/`
+          relativePath.split('/').drop(1).mkString("/"), // drop `data`
+          firstLine,
+          lineNumber - 1,
+          rows
+        )
+      )
     }
   }
 }
@@ -175,12 +184,14 @@ object LanguageIndex {
 
   /**
     *
+    * @param relativePath path into package sources
     * @param fileLink link to file with source code (relative)
     * @param numberOfFirstLine number of first line in snippet from source file
     * @param matchedLine number of matched line in snippet from source file
     * @param ctxt lines of snippet
     */
   final case class CodeSnippet(
+      relativePath: String,
       fileLink: String,
       numberOfFirstLine: Int,
       matchedLine: Int,
@@ -190,15 +201,20 @@ object LanguageIndex {
   /**
     * Grouped code snippets by package
     *
-    * @param name name of package
-    * @param packageLink link to package source
+    * @param pack name and link to package
     * @param results code snippets
     */
   final case class PackageResult(
-      name: String,
-      packageLink: String,
+      pack: Package,
       results: Seq[CodeSnippet]
   )
+
+  /**
+    * Representation of package
+    * @param name of package
+    * @param packageLink to remote repository
+    */
+  final case class Package(name: String, packageLink: String)
 
   /**
     * @param query input regular expression
@@ -217,13 +233,11 @@ object LanguageIndex {
 
   /**
     *
-    * @param name name of package
-    * @param url link to package source
+    * @param pack name and link to package
     * @param result matched code snippet
     */
   private[index] final case class CSearchResult(
-      name: String,
-      url: String,
+      pack: Package,
       result: CodeSnippet
   )
 }
