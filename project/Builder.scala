@@ -1,3 +1,5 @@
+import com.typesafe.sbt.digest.Import._
+import com.typesafe.sbt.web.Import._
 import play.sbt.PlayImport._
 import play.sbt.PlayScala
 import sbt.Keys._
@@ -93,7 +95,9 @@ object Builder {
           oldStrategy(x)
       },
       assemblyJarName in assembly := "codesearch-server.jar",
-      assemblyOutputPath in assembly := baseDirectory.value / "../codesearch-server.jar"
+      assemblyOutputPath in assembly := baseDirectory.value / "../codesearch-server.jar",
+      pipelineStages := Seq(digest),
+      pipelineStages in Assets := Seq(digest)
     )
     .dependsOn(core)
     .enablePlugins(PlayScala)

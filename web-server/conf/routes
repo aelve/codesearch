@@ -14,6 +14,6 @@ GET     /js/search                  codesearch.web.controllers.NpmSearcher.index
 GET     /ruby                       codesearch.web.controllers.Application.ruby
 GET     /ruby/search                codesearch.web.controllers.GemSearcher.index(query: String ?= "", insensitive: String ?= "", precise: String ?= "", sources: String ?= "on", page: String ?= "1")
 
-GET     /versionedAssets/file       controllers.Assets.versioned(file)
+GET     /versionedAssets/*file      controllers.Assets.versioned(path="/public", file: Asset)
 
 
