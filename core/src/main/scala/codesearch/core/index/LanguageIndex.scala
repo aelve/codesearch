@@ -1,8 +1,10 @@
 package codesearch.core.index
 
+import java.net.URLDecoder
+
 import ammonite.ops.{Path, pwd}
 import codesearch.core.db.DefaultDB
-import codesearch.core.index.LanguageIndex.{CSearchPage, CSearchResult, PackageResult, SearchArguments}
+import codesearch.core.index.LanguageIndex._
 import codesearch.core.index.directory.Directory
 import codesearch.core.index.repository._
 import codesearch.core.index.repository.Download.ops._
@@ -52,7 +54,7 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
       .map(_.sum)
   }
 
-  def csearch(args: SearchArguments, page: Int): Future[CSearchPage] = {
+  def search(args: SearchArguments, page: Int): Future[CSearchPage] = {
     runCsearch(args).map { answers =>
       val data = answers
         .slice(math.max(page - 1, 0) * LanguageIndex.PAGE_SIZE, page * LanguageIndex.PAGE_SIZE)
@@ -68,7 +70,29 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
     }
   }
 
-  protected def mapCSearchOutput(out: String): Option[CSearchResult]
+  /**
+    * Map code search output to case class
+    * @param out csearch console out
+    * @return search result
+    */
+  protected def mapCSearchOutput(out: String): Option[CSearchResult] = {
+    val res = out.split(':').toList match {
+      case fullPath :: lineNumber :: _ => createCSearchResult(fullPath, lineNumber.toInt)
+      case _                           => None
+    }
+    if (res.isEmpty) {
+      logger.warn(s"bad codesearch output: $out")
+    }
+    res
+  }
+
+  /**
+    * Create link to remote repository.
+    * @param packageName local package name
+    * @param version of package
+    * @return link
+    */
+  protected def buildRepUrl(packageName: String, version: String): String = ""
 
   protected implicit def executor: ExecutionContext
 
@@ -114,6 +138,26 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
     * @return count of downloaded files (source files)
     */
   protected def updateSources(name: String, version: String): Future[Int]
+
+  private def createCSearchResult(fullPath: String, lineNumber: Int): Option[CSearchResult] = {
+    val relativePath = Path(fullPath).relativeTo(pwd).toString
+    relativePath.split('/').drop(2).toList match {
+      case libName :: version :: path =>
+        val decodedName       = URLDecoder.decode(libName, "UTF-8")
+        val (firstLine, rows) = Helper.extractRows(relativePath, lineNumber)
+        Some(
+          CSearchResult(s"$decodedName-$version",
+                        buildRepUrl(decodedName, version),
+                        CodeSnippet(
+                          path.mkString("/"),
+                          firstLine,
+                          lineNumber - 1,
+                          rows
+                        )))
+      case _ =>
+        None
+    }
+  }
 }
 
 object LanguageIndex {

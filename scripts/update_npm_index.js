@@ -44,7 +44,6 @@ function addPackage (pkg) {
   const name = pkg.name
   version = extractVersion(pkg)
   if (name && name.length) {
-  	// console.log(name, version)
   	names.push({"name": name, "version": version})
   }
   // to check the finish function early...
@@ -52,7 +51,7 @@ function addPackage (pkg) {
 }
 
 function finish () {
-  const filename = path.join(__dirname, '../names.json')
+  const filename = path.join(__dirname, '../data/js/names.json')
   const finalNames = chain(names)
     .compact()
     .uniq()

@@ -28,7 +28,7 @@ class RubyIndex(val ec: ExecutionContext) extends LanguageIndex[GemTable] with G
   private val GEM_INDEX_ARCHIVE = pwd / 'data / 'ruby / "ruby_index.gz"
   private val GEM_INDEX_JSON    = pwd / 'data / 'ruby / "ruby_index.json"
 
-  private val DESERIALIZER_PATH = pwd / 'codesearch / 'scripts / "update_index.rb"
+  private val DESERIALIZER_PATH = pwd / 'scripts / "update_index.rb"
 
   override protected def updateSources(name: String, version: String): Future[Int] = {
     logger.info(s"downloading package $name")
@@ -36,13 +36,10 @@ class RubyIndex(val ec: ExecutionContext) extends LanguageIndex[GemTable] with G
   }
 
   override def downloadMetaInformation(): Unit = {
+    (pwd / 'data / 'ruby).toIO.mkdirs()
     Seq("curl", "-o", GEM_INDEX_ARCHIVE.toString, GEM_INDEX_URL) !!
 
     Seq("/usr/bin/ruby", DESERIALIZER_PATH.toString(), GEM_INDEX_ARCHIVE.toString(), GEM_INDEX_JSON.toString()) !!
-  }
-
-  def gemExtractor(src: String, dst: String): Unit = {
-    Seq("gem", "unpack", s"--target=$dst", src) !!
   }
 
   override protected implicit def executor: ExecutionContext = ec
@@ -54,38 +51,8 @@ class RubyIndex(val ec: ExecutionContext) extends LanguageIndex[GemTable] with G
     obj.map { case Seq(name, ver, _) => (name, Version(ver)) }.toMap
   }
 
-  override protected def mapCSearchOutput(uri: String): Option[CSearchResult] = {
-    val elems: Seq[String] = uri.split(':')
-    if (elems.length < 2) {
-      logger.warn(s"bad uri: $uri")
-      None
-    } else {
-      val fullPath             = elems.head
-      val pathSeq: Seq[String] = elems.head.split('/').drop(6)
-      val nLine                = elems.drop(1).head
-      pathSeq.headOption match {
-        case None =>
-          logger.warn(s"bad uri: $uri")
-          None
-        case Some(name) =>
-          val decodedName       = URLDecoder.decode(name, "UTF-8")
-          val (firstLine, rows) = Helper.extractRows(fullPath, nLine.toInt)
-
-          val remPath = pathSeq.drop(1).mkString("/")
-
-          Some(
-            CSearchResult(decodedName,
-                          s"https://rubygems.org/gems/$decodedName",
-                          CodeSnippet(
-                            remPath,
-                            firstLine,
-                            nLine.toInt - 1,
-                            rows
-                          )))
-      }
-    }
-
-  }
+  override protected def buildRepUrl(packageName: String, version: String): String =
+    s"https://rubygems.org/gems/$packageName/versions/$version"
 }
 
 object RubyIndex {

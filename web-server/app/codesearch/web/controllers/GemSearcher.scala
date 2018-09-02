@@ -20,11 +20,11 @@ class GemSearcher @Inject()(
       GemDB.updated.flatMap(
         updated =>
           RubyIndex()
-            .csearch(SearchArguments(query = query,
-                                     insensitive = insensitive == "on",
-                                     preciseMatch = precise == "on",
-                                     sourcesOnly = sources == "on"),
-                     page.toInt) map {
+            .search(SearchArguments(query = query,
+                                    insensitive = insensitive == "on",
+                                    preciseMatch = precise == "on",
+                                    sourcesOnly = sources == "on"),
+                    page.toInt) map {
             case CSearchPage(results, total) =>
               Ok(
                 views.html.ruby_search(

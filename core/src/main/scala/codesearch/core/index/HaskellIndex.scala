@@ -4,14 +4,12 @@ import java.net.URL
 
 import ammonite.ops.{Path, pwd}
 import codesearch.core.db.HackageDB
-import codesearch.core.index.LanguageIndex.{CSearchResult, CodeSnippet}
 import codesearch.core.index.repository.HackagePackage
 import repository.Extensions._
 import codesearch.core.index.directory.Directory._
 
 import sys.process._
 import codesearch.core.model.{HackageTable, Version}
-import codesearch.core.util.Helper
 import org.rauschig.jarchivelib.{ArchiveFormat, ArchiverFactory, CompressionType}
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -61,36 +59,8 @@ class HaskellIndex(val ec: ExecutionContext) extends LanguageIndex[HackageTable]
     lastVersions
   }
 
-  override protected def mapCSearchOutput(uri: String): Option[CSearchResult] = {
-    val elems: Seq[String] = uri.split(':')
-    if (elems.length < 2) {
-      logger.warn(s"bad uri: $uri")
-      None
-    } else {
-      val fullPath             = Path(elems.head).relativeTo(pwd).toString
-      val pathSeq: Seq[String] = fullPath.split('/').drop(4) // drop "data/packages/x/1.0/"
-      val nLine                = elems.drop(1).head
-      pathSeq.headOption match {
-        case None =>
-          logger.warn(s"bad uri: $uri")
-          None
-        case Some(name) =>
-          val (firstLine, rows) = Helper.extractRows(fullPath, nLine.toInt)
-
-          val remPath = pathSeq.drop(1).mkString("/")
-
-          Some(
-            CSearchResult(name,
-                          s"https://hackage.haskell.org/package/$name",
-                          CodeSnippet(
-                            remPath,
-                            firstLine,
-                            nLine.toInt - 1,
-                            rows
-                          )))
-      }
-    }
-  }
+  override protected def buildRepUrl(packageName: String, version: String): String =
+    s"https://hackage.haskell.org/package/$packageName-$version"
 
   override protected implicit def executor: ExecutionContext = ec
 }

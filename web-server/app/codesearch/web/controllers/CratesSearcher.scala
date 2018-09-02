@@ -18,11 +18,11 @@ class CratesSearcher @Inject()(implicit val executionContext: ExecutionContext) 
       CratesDB.updated.flatMap(
         updated =>
           RustIndex()
-            .csearch(SearchArguments(query = query,
-                                     insensitive = insensitive == "on",
-                                     preciseMatch = precise == "on",
-                                     sourcesOnly = sources == "on"),
-                     page.toInt)
+            .search(SearchArguments(query = query,
+                                    insensitive = insensitive == "on",
+                                    preciseMatch = precise == "on",
+                                    sourcesOnly = sources == "on"),
+                    page.toInt)
             .map {
               case CSearchPage(results, total) =>
                 Ok(
