@@ -30,18 +30,20 @@ object Builder {
     ),
     scalacOptions in (Compile, console) -= "-Ywarn-unused-import",
     scalacOptions in (Compile, doc) ++= Seq("-diagrams", "-implicits"),
-    scalacOptions in Test ++= Seq("-Yrangepos")
+    scalacOptions in Test ++= Seq("-Yrangepos"),
+    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
   )
 
   lazy val commonDeps = Seq(
     libraryDependencies ++= Seq(
-      "com.github.scopt"  %% "scopt"          % "3.7.0",
-      "com.lihaoyi"       %% "ammonite-ops"   % "1.0.3",
-      "org.rauschig"      % "jarchivelib"     % "0.7.1",
-      "commons-io"        % "commons-io"      % "2.6",
-      "javax.inject"      % "javax.inject"    % "1",
-      "ch.qos.logback"    % "logback-classic" % "1.2.3",
-      "com.typesafe.play" %% "play-json"      % "2.6.9"
+      "com.github.scopt"     %% "scopt"          % "3.7.0",
+      "com.lihaoyi"          %% "ammonite-ops"   % "1.0.3",
+      "org.rauschig"         % "jarchivelib"     % "0.7.1",
+      "commons-io"           % "commons-io"      % "2.6",
+      "javax.inject"         % "javax.inject"    % "1",
+      "ch.qos.logback"       % "logback-classic" % "1.2.3",
+      "com.typesafe.play"    %% "play-json"      % "2.6.9",
+      "com.github.mpilquist" %% "simulacrum"     % "0.13.0"
     )
   )
 

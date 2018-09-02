@@ -5,7 +5,7 @@ import codesearch.core.db.CratesDB
 import codesearch.core.index.LanguageIndex._
 import codesearch.core.index.repository.CratesPackage
 import repository.Extensions._
-import codesearch.core.index.directory.PackageDirectory._
+import codesearch.core.index.directory.Directory._
 import codesearch.core.model
 import codesearch.core.model.{CratesTable, Version}
 import codesearch.core.util.Helper

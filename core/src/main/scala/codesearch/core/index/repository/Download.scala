@@ -2,12 +2,10 @@ package codesearch.core.index.repository
 
 import java.nio.file.Path
 
+import simulacrum.typeclass
+
 import scala.concurrent.Future
 
-trait Download[A <: SourcePackage] {
+@typeclass trait Download[A] {
   def downloadSources(pack: A): Future[Path]
-}
-
-object Download {
-  def apply[A <: SourcePackage](implicit download: Download[A]): Download[A] = download
 }

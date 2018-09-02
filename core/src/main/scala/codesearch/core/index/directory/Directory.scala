@@ -4,6 +4,7 @@ import java.nio.file.{Path, Paths}
 
 import codesearch.core.index.directory.PathOps._
 import codesearch.core.index.repository._
+import simulacrum.typeclass
 
 object PathOps {
   implicit final class RichPath(val parent: Path) {
@@ -12,7 +13,7 @@ object PathOps {
   }
 }
 
-private[index] trait Directory[A <: SourcePackage] {
+@typeclass trait Directory[A <: SourcePackage] {
 
   /** Defines root directory for sources storing
     *
@@ -42,12 +43,7 @@ private[index] trait Directory[A <: SourcePackage] {
 }
 
 /** Companion contained defines type-classes for inheritors [[SourcePackage]] */
-object PackageDirectory {
-
-  implicit class PackageDirectoryOps[A <: SourcePackage](val pack: A) {
-    def archive(implicit ev: Directory[A]): Path    = ev.archive(pack)
-    def unarchived(implicit ev: Directory[A]): Path = ev.unarchived(pack)
-  }
+object Directory {
 
   implicit def hackageDirectory: Directory[HackagePackage] = new Directory[HackagePackage] {
     override def archive(pack: HackagePackage): Path =

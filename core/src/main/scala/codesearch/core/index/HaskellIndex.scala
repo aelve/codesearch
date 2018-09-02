@@ -7,7 +7,7 @@ import codesearch.core.db.HackageDB
 import codesearch.core.index.LanguageIndex.{CSearchResult, CodeSnippet}
 import codesearch.core.index.repository.HackagePackage
 import repository.Extensions._
-import codesearch.core.index.directory.PackageDirectory._
+import codesearch.core.index.directory.Directory._
 
 import sys.process._
 import codesearch.core.model.{HackageTable, Version}

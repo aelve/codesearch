@@ -10,7 +10,7 @@ import codesearch.core.index.repository.GemPackage
 import codesearch.core.model.{GemTable, Version}
 import codesearch.core.util.Helper
 import repository.Extensions._
-import codesearch.core.index.directory.PackageDirectory._
+import codesearch.core.index.directory.Directory._
 
 import sys.process._
 import org.slf4j.{Logger, LoggerFactory}
