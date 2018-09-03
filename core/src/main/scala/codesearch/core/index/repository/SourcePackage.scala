@@ -33,10 +33,7 @@ private[index] final case class GemPackage(
     val allowedSet = Set("tgz", "tar.gz")
     ArchiverFactory.createArchiver(TAR).extract(from, destDir)
     destDir.listFiles
-      .filter(file => {
-        val fileName = file.getName.toLowerCase
-        allowedSet.exists(ext => fileName.endsWith(ext))
-      })
+      .filter(file => allowedSet.exists(file.getName.toLowerCase.endsWith))
       .foreach(file => ArchiverFactory.createArchiver(TAR, GZIP).extract(file, destDir))
   }
 }
