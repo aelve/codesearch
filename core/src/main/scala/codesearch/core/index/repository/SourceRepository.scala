@@ -65,6 +65,7 @@ object SourceRepository {
     * @return count removed files
     */
   private def deleteExcessFiles(directory: Path, allowedExtentions: Set[String]): Future[Int] = Future {
+    val maxFileSize = 1024 * 1024
     @tailrec
     def filterFiles(all: List[File], excess: List[File] = Nil): List[File] = all match {
       case Nil => excess
@@ -73,8 +74,8 @@ object SourceRepository {
         if (subdirectories.nonEmpty) filterFiles(others ++ subdirectories, excess)
         else filterFiles(others, file :: excess)
       case file :: others =>
-        if (allowedExtentions.contains(getExtension(file.getName)))
-          filterFiles(others, excess)
+        if (file.getTotalSpace >= maxFileSize) filterFiles(others, file :: excess)
+        else if (allowedExtentions.contains(getExtension(file.getName))) filterFiles(others, excess)
         else filterFiles(others, file :: excess)
     }
     filterFiles(List(directory.toFile)).map(_.delete).count(identity)
