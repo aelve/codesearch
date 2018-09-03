@@ -7,6 +7,7 @@ import java.nio.file.Path
 import codesearch.core.index.directory.Extractor
 import com.softwaremill.sttp.{Uri, _}
 import org.rauschig.jarchivelib.ArchiveFormat.TAR
+import org.rauschig.jarchivelib.CompressionType.GZIP
 import org.rauschig.jarchivelib.ArchiverFactory
 
 trait SourcePackage extends Extractor {
@@ -27,10 +28,18 @@ private[index] final case class GemPackage(
     version: String
 ) extends SourcePackage with Ruby {
   val url: Uri = uri"https://rubygems.org/downloads/$name-$version.gem"
-  override def unzipUsingMethod(from: File, to: Path): Unit =
-    ArchiverFactory.createArchiver(TAR).extract(from, to.toFile)
+  override def unzipUsingMethod(from: File, to: Path): Unit = {
+    val destDir    = to.toFile
+    val allowedSet = Set("tgz", "tar.gz")
+    ArchiverFactory.createArchiver(TAR).extract(from, destDir)
+    destDir.listFiles
+      .filter(file => {
+        val fileName = file.getName.toLowerCase
+        allowedSet.exists(ext => fileName.endsWith(ext))
+      })
+      .foreach(file => ArchiverFactory.createArchiver(TAR, GZIP).extract(file, destDir))
+  }
 }
-
 private[index] final case class CratesPackage(
     name: String,
     version: String
