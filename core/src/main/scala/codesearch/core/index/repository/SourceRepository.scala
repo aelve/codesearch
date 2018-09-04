@@ -74,7 +74,7 @@ object SourceRepository {
         if (subdirectories.nonEmpty) filterFiles(others ++ subdirectories, excess)
         else filterFiles(others, file :: excess)
       case file :: others =>
-        if (file.getTotalSpace >= maxFileSize) filterFiles(others, file :: excess)
+        if (file.length >= maxFileSize) filterFiles(others, file :: excess)
         else if (allowedExtentions.contains(getExtension(file.getName))) filterFiles(others, excess)
         else filterFiles(others, file :: excess)
     }

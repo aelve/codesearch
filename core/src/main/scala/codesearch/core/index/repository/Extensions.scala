@@ -3,7 +3,7 @@ package codesearch.core.index.repository
 import simulacrum.typeclass
 
 @typeclass trait Extensions[A] {
-  def commonExtensions: Set[String] = Set("json", "cabal", "md", "txt", "xml", "yml", "yaml", "properties")
+  def commonExtensions: Set[String] = Set("json", "md", "txt", "xml", "yml", "yaml", "properties")
   def sourceExtensions: Set[String]
   def extensions: Set[String] = commonExtensions ++ sourceExtensions
 }
