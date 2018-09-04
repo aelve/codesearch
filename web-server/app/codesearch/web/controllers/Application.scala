@@ -15,43 +15,6 @@ class Application @Inject()(
     implicit val executionContext: ExecutionContext
 ) extends InjectedController {
 
-  def haskell = Action.async { implicit request =>
-    HaskellIndex().updated.map(
-      updated =>
-        Ok(
-          views.html.haskell(
-            TimeAgo.using(updated.getTime)
-          )))
-  }
-
-  def rust = Action.async { implicit request =>
-    RustIndex().updated.map(
-      updated =>
-        Ok(
-          views.html.rust(
-            TimeAgo.using(updated.getTime)
-          )))
-  }
-
-  def javascript = Action.async { implicit request =>
-    JavaScriptIndex().updated.map(
-      updated =>
-        Ok(
-          views.html.javascript(
-            TimeAgo.using(updated.getTime)
-          )))
-  }
-
-  def ruby = Action.async { implicit request =>
-    RubyIndex().updated.map(
-      updated =>
-        Ok(
-          views.html.ruby(
-            TimeAgo.using(updated.getTime)
-          )))
-
-  }
-
   def index = Action.async { implicit request =>
     HaskellIndex().updated
       .zip(HaskellIndex().getSize)

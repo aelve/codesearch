@@ -1,35 +1,18 @@
 package codesearch.web.controllers
 
-import codesearch.core.db.CratesDB
+import codesearch.core.db.{CratesDB, DefaultDB}
 import codesearch.core.index.RustIndex
-import com.github.marlonlom.utilities.timeago.TimeAgo
+import codesearch.core.model.CratesTable
 import javax.inject.Inject
 import play.api.mvc.InjectedController
 
 import scala.concurrent.ExecutionContext
 
-class CratesSearcher @Inject()(implicit val executionContext: ExecutionContext) extends InjectedController {
+class CratesSearcher @Inject()(implicit override val executionContext: ExecutionContext)
+    extends InjectedController with SearchController[CratesTable, RustIndex] {
+  override def db: DefaultDB[CratesTable] = CratesDB
 
-  def index(query: String, insensitive: String, precise: String, sources: String, page: String) = Action.async {
-    implicit request =>
-      val callURI = s"/rust/search?query=$query&insensitive=$insensitive&precise=$precise&sources=$sources"
+  override lazy val indexEngine: RustIndex = RustIndex()
 
-      CratesDB.updated
-        .zip(RustIndex().csearch(query, insensitive == "on", precise == "on", sources == "on", page.toInt))
-        .map {
-          case (updated, (count, results)) =>
-            Ok(
-              views.html.rust_search(
-                TimeAgo.using(updated.getTime),
-                results,
-                query,
-                insensitive == "on",
-                precise == "on",
-                sources == "on",
-                page = page.toInt,
-                count,
-                callURI
-              ))
-        }
-  }
+  override def lang: String = "rust"
 }
