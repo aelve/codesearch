@@ -25,16 +25,9 @@ class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] 
   private val NPM_INDEX_JSON     = pwd / 'data / 'js / "names.json"
   private val NPM_UPDATER_SCRIPT = pwd / 'scripts / "update_npm_index.js"
 
-  private var counter: Int = 0
-
   override def downloadMetaInformation(): Unit = Seq("node", NPM_UPDATER_SCRIPT.toString) !!
 
   override protected def updateSources(name: String, version: String): Future[Int] = {
-    counter += 1
-    if (counter == 100) {
-      counter = 0
-      Thread.sleep(10000)
-    }
     archiveDownloadAndExtract(NpmPackage(name, version))
   }
 
