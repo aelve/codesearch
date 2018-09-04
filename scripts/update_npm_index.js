@@ -1,7 +1,11 @@
 #!/usr/bin/env node
 
 function extractVersion(pkg) {
+
     const name = pkg.name;
+    let version = null;
+    let versions = null;
+
     if (pkg.version) {
         version = pkg.version
     } else {
@@ -42,12 +46,15 @@ registry
 
 function addPackage(pkg) {
     const name = pkg.name;
-    version = extractVersion(pkg);
+    const version = extractVersion(pkg);
     if (name && name.length) {
-        names.push({"name": name, "version": version})
+        names.push({
+            "name": name,
+            "version": version
+        })
     }
     // to check the finish function early...
-    // if (names.length > 100) finish()
+    if (names.length > 100) finish()
 }
 
 function finish() {
