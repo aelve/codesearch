@@ -1,19 +1,19 @@
+import com.typesafe.sbt.digest.Import._
+import com.typesafe.sbt.web.Import._
+import play.sbt.PlayImport._
+import play.sbt.PlayScala
 import sbt.Keys._
 import sbt._
 import sbtassembly.AssemblyKeys.{assemblyMergeStrategy, _}
-import play.sbt.PlayImport._
-import play.sbt.PlayScala
 import sbtassembly.AssemblyPlugin.autoImport.{assemblyJarName, assemblyOutputPath}
 import sbtassembly._
 
 object Builder {
   lazy val commonSettings = Seq(
-
     organization := "org.aelve",
     version := "0.1",
     scalaVersion := "2.12.4",
     resolvers += Resolver.sbtPluginRepo("releases"),
-
     scalacOptions := Seq(
       "-encoding",
       "UTF-8",
@@ -27,23 +27,26 @@ object Builder {
       "-Yno-adapted-args",
       "-Ywarn-dead-code",
       "-Xfuture",
-      "-Xexperimental"
+      "-Xexperimental",
+      "-Ypartial-unification"
     ),
     scalacOptions in (Compile, console) -= "-Ywarn-unused-import",
     scalacOptions in (Compile, doc) ++= Seq("-diagrams", "-implicits"),
-    scalacOptions in Test ++= Seq("-Yrangepos")
+    scalacOptions in Test ++= Seq("-Yrangepos"),
+    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
   )
 
   lazy val commonDeps = Seq(
     libraryDependencies ++= Seq(
-      "com.github.scopt" %% "scopt" % "3.7.0" ,
-      "com.lihaoyi" %% "ammonite-ops" % "1.0.3",
-      "org.rauschig" % "jarchivelib" % "0.7.1",
-      "commons-io" % "commons-io" % "2.6",
-      "javax.inject"      % "javax.inject"     % "1",
-      "ch.qos.logback" % "logback-classic" % "1.2.3",
-
-      "com.typesafe.play" %% "play-json" % "2.6.9"
+      "com.github.scopt"     %% "scopt"          % "3.7.0",
+      "com.lihaoyi"          %% "ammonite-ops"   % "1.0.3",
+      "org.rauschig"         % "jarchivelib"     % "0.7.1",
+      "commons-io"           % "commons-io"      % "2.6",
+      "javax.inject"         % "javax.inject"    % "1",
+      "ch.qos.logback"       % "logback-classic" % "1.2.3",
+      "com.typesafe.play"    %% "play-json"      % "2.6.9",
+      "com.github.mpilquist" %% "simulacrum"     % "0.13.0",
+      "org.typelevel"        %% "cats-core"      % "1.2.0"
     )
   )
 
@@ -51,16 +54,21 @@ object Builder {
     .settings(commonSettings ++ commonDeps)
     .settings(name := "codesearch-core")
     .settings(
+      excludeDependencies ++= Seq(ExclusionRule("io.netty:netty-handler:4.1.13.Final")),
       assemblyJarName in assembly := "codesearch-core.jar",
       assemblyOutputPath in assembly := baseDirectory.value / "../codesearch-core.jar",
-
       libraryDependencies ++= Seq(
-        "com.typesafe.slick" %% "slick" % "3.2.3",
-        "com.typesafe.slick" %% "slick-hikaricp" % "3.2.3",
-        "org.postgresql" % "postgresql" % "42.2.2"
-      )
+        "com.typesafe.slick"    %% "slick"                            % "3.2.3",
+        "com.typesafe.slick"    %% "slick-hikaricp"                   % "3.2.3",
+        "org.postgresql"        % "postgresql"                        % "42.2.2",
+        "com.softwaremill.sttp" %% "async-http-client-backend-future" % "1.3.0"
+      ),
+      assemblyMergeStrategy in assembly := {
+        case PathList("META-INF", _ @_*) => MergeStrategy.discard
+        case PathList("reference.conf")  => MergeStrategy.concat
+        case _                           => MergeStrategy.first
+      }
     )
-
 
   lazy val webServer = Project(id = "web-server", base = file("web-server"))
     .settings(commonSettings ++ commonDeps)
@@ -68,12 +76,12 @@ object Builder {
       name := "codesearch-web-server",
       libraryDependencies ++= Seq(
         guice,
-        "org.webjars"       % "bootstrap"        % "4.1.0",
-        "com.github.marlonlom" % "timeago"       % "3.0.2"
+        "org.webjars"          % "bootstrap" % "4.1.0",
+        "com.github.marlonlom" % "timeago"   % "3.0.2"
       ),
       fullClasspath in assembly += Attributed.blank(PlayKeys.playPackageAssets.value),
       assemblyMergeStrategy in assembly := {
-       case manifest if manifest.contains("MANIFEST.MF") =>
+        case manifest if manifest.contains("MANIFEST.MF") =>
           // We don't need manifest files since sbt-assembly will create
           // one with the given settings
           MergeStrategy.discard
@@ -88,7 +96,9 @@ object Builder {
           oldStrategy(x)
       },
       assemblyJarName in assembly := "codesearch-server.jar",
-      assemblyOutputPath in assembly := baseDirectory.value / "../codesearch-server.jar"
+      assemblyOutputPath in assembly := baseDirectory.value / "../codesearch-server.jar",
+      pipelineStages := Seq(digest),
+      pipelineStages in Assets := Seq(digest)
     )
     .dependsOn(core)
     .enablePlugins(PlayScala)

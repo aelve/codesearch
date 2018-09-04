@@ -1,16 +1,21 @@
 package codesearch.core.util
 
 import java.io.File
+import java.util.concurrent.Executors
 
 import org.apache.commons.io.FilenameUtils
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable
+import scala.concurrent.{ExecutionContext, Future}
 import scala.io.Source
+import scala.util.Try
 
 object Helper {
-  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
+  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  private implicit val executionContext: ExecutionContext =
+    ExecutionContext.fromExecutor(Executors.newFixedThreadPool(100))
   private val SPECIAL_CHARS = "$^*+().?|"
 
   val langByExt: Map[String, String] = Map(
@@ -55,6 +60,13 @@ object Helper {
     }
   }
 
+  def readFileAsync(path: String): Future[Option[List[String]]] =
+    Future {
+      Try {
+        Source.fromFile(path, "UTF-8").getLines
+      }.map(_.toList).toOption
+    }
+
   def hideSymbols(str: String): String = {
     str.foldRight("") {
       case (c, res) if SPECIAL_CHARS contains c =>
@@ -62,15 +74,6 @@ object Helper {
       case (c, res) =>
         s"$c$res"
     }
-  }
-
-  def linkByLang(lang: String, packageLink: String, fileLink: String): String = lang match {
-    case "haskell" =>
-      packageLink + "/src/" + fileLink
-    case "rust" =>
-      packageLink + "/source/" + fileLink
-    case _ =>
-      ""
   }
 
   def langByLink(fileLink: String, defaultLang: String): String = {
