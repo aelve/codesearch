@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 const ora = require('ora');
 const spinner = ora('').start();
@@ -13,21 +13,25 @@ const filename = path.join(__dirname, fullDir);
 
 let packageCounter = 0;
 
-try {
-    if (fs.existsSync(dir)) fs.rmdir(dir);
-    else registry()
+start();
+
+function start() {
+    if (fs.existsSync(dir))
+        fs.remove(dir, updatePackages);
+    else updatePackages();
+}
+
+function updatePackages() {
+    registry()
         .on('package', addPackage)
         .on('up-to-date', done);
-} catch (e) {
-    done();
-    console.log(e.message)
 }
 
 function extractVersion(pkg) {
     const latestVersion = (versionsList) => {
         if (Array.isArray(versionsList))
             return Math.max(...versionsList);
-        return Math.max(Array.from(Object.keys(versionsList)))
+        return Math.max(Array.from(null.keys()))
     };
     if (!pkg.versions && !pkg.version)
         throw new Error("Undefined version");
@@ -37,16 +41,20 @@ function extractVersion(pkg) {
 function addPackage(pkg) {
     const packageName = pkg.name;
     if (packageName && packageName.length) {
-        const pack = JSON.stringify({
-            name: packageName,
-            version: extractVersion(pkg)
-        }, null, 2);
-        packageCounter++;
-        if (fs.existsSync(dir))
-            fs.appendFileSync(filename, `,\n${pack}`);
-        else {
-            fs.mkdirSync(dir);
-            fs.writeFileSync(filename, `[${pack}`);
+        try {
+            const pack = JSON.stringify({
+                name: packageName,
+                version: extractVersion(pkg)
+            }, null, 2);
+            if (fs.existsSync(dir))
+                fs.appendFileSync(filename, `,\n${pack}`);
+            else {
+                fs.mkdirSync(dir);
+                fs.writeFileSync(filename, `[${pack}`);
+            }
+            packageCounter++
+        } catch (e) {
+            console.log(e.message)
         }
     }
 }

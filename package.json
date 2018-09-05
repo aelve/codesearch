@@ -15,7 +15,7 @@
     "homepage": "https://github.com/aelve/codesearch#README",
     "dependencies": {
         "@types/node": "^10.9.4",
-        "fs": "0.0.1-security",
+        "fs-extra": "^7.0.0",
         "ora": "^3.0.0",
         "package-stream": "^3.0.1",
         "path": "^0.12.7"
