@@ -50,12 +50,15 @@ whole Hackage, so stop it after a minute or less.
 
 Next, index the packages:
 
-    $ make index-hackage
+    $ make index-haskell
 
 After that you should be able to visit <http://localhost:9000/haskell> and
 play with some queries (e.g. `module` should bring up a lot of results).
 
+The full list of supported languages can be found in the `Makefile`.
+
 ### Build on MacOS
+
 MacOS has `make` version 3.81 by default. In order to avoid error on running
 `make` you have to install version 3.82 or above.
 
