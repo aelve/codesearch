@@ -10,13 +10,17 @@ import codesearch.core.index.directory.Directory.ops._
 import codesearch.core.index.repository.Extensions._
 import codesearch.core.index.repository.NpmPackage
 import codesearch.core.model.{NpmTable, Version}
+import com.softwaremill.sttp.SttpBackend
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json.Json
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.sys.process._
 
-class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] with NpmDB {
+class JavaScriptIndex(
+    private val ec: ExecutionContext,
+    private val sttp: SttpBackend[Future, Nothing]
+) extends LanguageIndex[NpmTable] with NpmDB {
 
   override protected val logger: Logger    = LoggerFactory.getLogger(this.getClass)
   override protected val indexFile: String = ".npm_csearch_index"
@@ -32,6 +36,8 @@ class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] 
   }
 
   override protected implicit def executor: ExecutionContext = ec
+
+  override protected implicit def http: SttpBackend[Future, Nothing] = sttp
 
   override protected def getLastVersions: Map[String, Version] = {
     val stream = new FileInputStream(NPM_INDEX_JSON.toIO)
@@ -49,5 +55,5 @@ class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] 
 }
 
 object JavaScriptIndex {
-  def apply()(implicit ec: ExecutionContext) = new JavaScriptIndex(ec)
+  def apply()(implicit ec: ExecutionContext, http: SttpBackend[Future, Nothing]) = new JavaScriptIndex(ec, http)
 }

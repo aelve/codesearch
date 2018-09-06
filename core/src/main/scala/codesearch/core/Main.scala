@@ -5,6 +5,8 @@ import java.util.concurrent.Executors
 import codesearch.core.index._
 import codesearch.core.db._
 import codesearch.core.model._
+import com.softwaremill.sttp.SttpBackend
+import com.softwaremill.sttp.asynchttpclient.future.AsyncHttpClientFutureBackend
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -15,6 +17,7 @@ object Main {
   private val logger: Logger = LoggerFactory.getLogger(Main.getClass)
   private implicit val ec: ExecutionContext = ExecutionContext
     .fromExecutorService(Executors.newFixedThreadPool(2 * Runtime.getRuntime.availableProcessors()))
+  private implicit val httpClient: SttpBackend[Future, Nothing] = AsyncHttpClientFutureBackend()
 
   case class Config(
       updatePackages: Boolean = false,

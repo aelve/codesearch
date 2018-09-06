@@ -37,6 +37,7 @@ private[index] final case class GemPackage(
       .foreach(file => ArchiverFactory.createArchiver(TAR, GZIP).extract(file, destDir))
   }
 }
+
 private[index] final case class CratesPackage(
     name: String,
     version: String

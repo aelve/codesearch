@@ -9,9 +9,9 @@ import codesearch.core.db.DefaultDB
 import codesearch.core.index.LanguageIndex._
 import codesearch.core.index.directory.Directory
 import codesearch.core.index.repository._
-import codesearch.core.index.repository.Download.ops._
 import codesearch.core.model.{DefaultTable, Version}
 import codesearch.core.util.Helper
+import com.softwaremill.sttp.SttpBackend
 import org.slf4j.Logger
 
 import scala.collection.mutable
@@ -152,10 +152,12 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
 
   protected implicit def executor: ExecutionContext
 
+  protected implicit def http: SttpBackend[Future, Nothing]
+
   protected def archiveDownloadAndExtract[A <: SourcePackage: Extensions: Directory](pack: A): Future[Int] = {
-    import codesearch.core.index.repository.SourceRepository._
+    val repository = SourceRepository[A](new FileDownloader())
     (for {
-      _         <- pack.downloadSources
+      _         <- repository.downloadSources(pack)
       rowsCount <- insertOrUpdate(pack)
     } yield rowsCount).recover { case _ => 0 }
   }
