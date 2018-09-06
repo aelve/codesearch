@@ -1,19 +1,20 @@
 package codesearch.core.index
 
 import java.net.URL
+import java.nio.file.{Path => NioPath}
 
 import ammonite.ops.{Path, pwd}
 import codesearch.core.db.HackageDB
-import codesearch.core.index.repository.HackagePackage
-import repository.Extensions._
 import codesearch.core.index.directory.Directory._
-
-import sys.process._
+import codesearch.core.index.directory.Directory.ops._
+import codesearch.core.index.repository.Extensions._
+import codesearch.core.index.repository.HackagePackage
 import codesearch.core.model.{HackageTable, Version}
 import org.rauschig.jarchivelib.{ArchiveFormat, ArchiverFactory, CompressionType}
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.sys.process._
 
 class HaskellIndex(val ec: ExecutionContext) extends LanguageIndex[HackageTable] with HackageDB {
 
@@ -61,6 +62,9 @@ class HaskellIndex(val ec: ExecutionContext) extends LanguageIndex[HackageTable]
 
   override protected def buildRepUrl(packageName: String, version: String): String =
     s"https://hackage.haskell.org/package/$packageName-$version"
+
+  override protected def buildFsUrl(packageName: String, version: String): NioPath =
+    HackagePackage(packageName, version).packageDir
 
   override protected implicit def executor: ExecutionContext = ec
 }

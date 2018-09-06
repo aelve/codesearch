@@ -1,19 +1,20 @@
 package codesearch.core.index
 
 import java.io.FileInputStream
+import java.nio.file.Path
 
 import ammonite.ops.pwd
 import codesearch.core.db.GemDB
+import codesearch.core.index.directory.Directory._
+import codesearch.core.index.directory.Directory.ops._
+import codesearch.core.index.repository.Extensions._
 import codesearch.core.index.repository.GemPackage
 import codesearch.core.model.{GemTable, Version}
-import repository.Extensions._
-import codesearch.core.index.directory.Directory._
-
-import sys.process._
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json.Json
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.sys.process._
 
 class RubyIndex(val ec: ExecutionContext) extends LanguageIndex[GemTable] with GemDB {
 
@@ -50,6 +51,9 @@ class RubyIndex(val ec: ExecutionContext) extends LanguageIndex[GemTable] with G
 
   override protected def buildRepUrl(packageName: String, version: String): String =
     s"https://rubygems.org/gems/$packageName/versions/$version"
+
+  override protected def buildFsUrl(packageName: String, version: String): Path =
+    GemPackage(packageName, version).packageDir
 }
 
 object RubyIndex {

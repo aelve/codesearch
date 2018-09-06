@@ -1,18 +1,21 @@
 package codesearch.core.index
 
+import java.nio.file.Path
+
 import ammonite.ops.pwd
 import codesearch.core.db.CratesDB
-import codesearch.core.index.repository.CratesPackage
-import repository.Extensions._
 import codesearch.core.index.directory.Directory._
+import codesearch.core.index.directory.Directory.ops._
+import codesearch.core.index.repository.CratesPackage
+import codesearch.core.index.repository.Extensions._
 import codesearch.core.model
 import codesearch.core.model.{CratesTable, Version}
 import codesearch.core.util.Helper
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json.Json
 
-import scala.sys.process._
 import scala.concurrent.{ExecutionContext, Future}
+import scala.sys.process._
 
 class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] with CratesDB {
 
@@ -55,6 +58,9 @@ class RustIndex(val ec: ExecutionContext) extends LanguageIndex[CratesTable] wit
 
   override protected def buildRepUrl(packageName: String, version: String): String =
     s"https://docs.rs/crate/$packageName/$version"
+
+  override protected def buildFsUrl(packageName: String, version: String): Path =
+    CratesPackage(packageName, version).packageDir
 }
 
 object RustIndex {

@@ -13,13 +13,19 @@ object PathOps {
   }
 }
 
-@typeclass trait Directory[A <: SourcePackage] {
+@typeclass trait Directory[A] {
 
   /** Defines root directory for sources storing
     *
     * @return root directory for sources storing
     */
   def sourcesDir: Path = Paths.get(s"./data")
+
+  /** Defines path to directory with source files
+    *
+    * @return path to directory with source files
+    */
+  def packageDir(pack: A): Path
 
   /** Defines extension of archive file
     *
@@ -47,22 +53,35 @@ object Directory {
 
   implicit def hackageDirectory: Directory[HackagePackage] = new Directory[HackagePackage] {
     override def archive(pack: HackagePackage): Path =
-      sourcesDir / "hackage" / s"${pack.name}" / s"${pack.version}" / s"${pack.name}-${pack.version}.$extension"
+      packageDir(pack) / s"${pack.name}-${pack.version}.$extension"
+
+    override def packageDir(pack: HackagePackage): Path =
+      sourcesDir / "hackage" / pack.name / pack.version
   }
 
   implicit def npmDirectory: Directory[NpmPackage] = new Directory[NpmPackage] {
     override def archive(pack: NpmPackage): Path =
-      sourcesDir / "npm" / s"${pack.name}" / s"${pack.version}" / s"${pack.name}-${pack.version}.$extension"
+      packageDir(pack) / s"${pack.name}-${pack.version}.$extension"
+
+    override def packageDir(pack: NpmPackage): Path =
+      sourcesDir / "npm" / pack.name / pack.version
   }
 
   implicit def gemDirectory: Directory[GemPackage] = new Directory[GemPackage] {
     override def extension: String = "gem"
+
     override def archive(pack: GemPackage): Path =
-      sourcesDir / "gem" / s"${pack.name}" / s"${pack.version}" / s"${pack.name}-${pack.version}.$extension"
+      packageDir(pack) / s"${pack.name}-${pack.version}.$extension"
+
+    override def packageDir(pack: GemPackage): Path =
+      sourcesDir / "gem" / pack.name / pack.version
   }
 
   implicit def sourceDirectory: Directory[CratesPackage] = new Directory[CratesPackage] {
     override def archive(pack: CratesPackage): Path =
-      sourcesDir / "crates" / s"${pack.name}" / s"${pack.version}" / s"${pack.name}-${pack.version}.$extension"
+      packageDir(pack) / s"${pack.name}-${pack.version}.$extension"
+
+    override def packageDir(pack: CratesPackage): Path =
+      sourcesDir / "crates" / pack.name / pack.version
   }
 }
