@@ -12,11 +12,10 @@ object DatabaseConfig {
   implicit def hint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
 
   case class DatabaseConfig(dataSourceClass: String, properties: DatabaseDetails)
-  case class DatabaseDetails(portNumber: Int, databaseName: String, user: String, password: String,
-                             dataSourceClass: String = "org.postgresql.ds.PGSimpleDataSource")
+  case class DatabaseDetails(portNumber: Int, databaseName: String, user: String, password: String)
 
   def load(): Either[ConfigReaderFailures, Config] = loadConfig[Config]
 
   def empty(): DatabaseConfig =
-    new DatabaseConfig(" ", DatabaseDetails(0, "", "", "", ""))
+    new DatabaseConfig(" ", DatabaseDetails(0, "", "", ""))
 }
