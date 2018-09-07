@@ -19,9 +19,13 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.sys.process._
 
 trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
-  protected val logger: Logger
-  protected val langExts: String
 
+  protected implicit def executor: ExecutionContext
+  protected implicit def http: SttpBackend[Future, Nothing]
+
+  protected val logger: Logger
+
+  protected val langExts: String
   protected val indexFile: String
   protected lazy val indexPath: Path     = pwd / 'data / indexFile
   protected lazy val tempIndexPath: Path = pwd / 'data / s"$indexFile.tmp"
@@ -107,6 +111,7 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
 
   /**
     * Build package name and path to remote repository
+    *
     * @param relativePath path to source code
     * @return package name and url to repository
     */
@@ -119,6 +124,7 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
 
   /**
     * Map code search output to case class
+    *
     * @param out csearch console out
     * @return search result
     */
@@ -135,6 +141,7 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
 
   /**
     * Create link to remote repository.
+    *
     * @param packageName local package name
     * @param version of package
     * @return link
@@ -149,10 +156,6 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
     * @return path
     */
   protected def buildFsUrl(packageName: String, version: String): NioPath
-
-  protected implicit def executor: ExecutionContext
-
-  protected implicit def http: SttpBackend[Future, Nothing]
 
   protected def archiveDownloadAndExtract[A <: SourcePackage: Extensions: Directory](pack: A): Future[Int] = {
     val repository = SourceRepository[A](new FileDownloader())
@@ -257,6 +260,7 @@ object LanguageIndex {
 
   /**
     * Representation of package
+    *
     * @param name of package
     * @param packageLink to remote repository
     */

@@ -19,11 +19,11 @@ import scala.sys.process._
 
 class HaskellIndex(
     private val ec: ExecutionContext,
-    private val sttp: SttpBackend[Future, Nothing]
+    private val httpClient: SttpBackend[Future, Nothing]
 ) extends LanguageIndex[HackageTable] with HackageDB {
 
-  override protected implicit def executor: ExecutionContext         = ec
-  override protected implicit def http: SttpBackend[Future, Nothing] = sttp
+  override protected implicit def executor: ExecutionContext = ec
+  override protected implicit def http: SttpBackend[Future, Nothing] = httpClient
 
   override protected val logger: Logger    = LoggerFactory.getLogger(this.getClass)
   override protected val indexFile: String = ".hackage_csearch_index"

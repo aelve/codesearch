@@ -63,9 +63,12 @@ object Builder {
         "com.typesafe.slick"    %% "slick-hikaricp"                   % "3.2.3",
         "org.postgresql"        % "postgresql"                        % "42.2.2",
         "com.softwaremill.sttp" %% "async-http-client-backend-future" % "1.3.0",
-        "com.github.pureconfig" %% "pureconfig" % "0.9.2",
-        "org.scalactic" %% "scalactic" % "3.0.5",
-        "org.scalatest" %% "scalatest" % "3.0.5" % "test"
+        "com.github.pureconfig" %% "pureconfig"                       % "0.9.2",
+        "org.scalactic"         %% "scalactic"                        % "3.0.5",
+        "org.scalatest"         %% "scalatest"                        % "3.0.5" % "test",
+        "io.circe"              %% "circe-core"                       % "0.9.3",
+        "io.circe"              %% "circe-generic"                    % "0.9.3",
+        "io.circe"              %% "circe-parser"                     % "0.9.3"
       ),
       assemblyMergeStrategy in assembly := {
         case PathList("META-INF", _ @_*) => MergeStrategy.discard
@@ -86,7 +89,7 @@ object Builder {
       fullClasspath in assembly += Attributed.blank(PlayKeys.playPackageAssets.value),
       assemblyMergeStrategy in assembly := {
         case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.concat
-        case manifest if manifest.contains("MANIFEST.MF") =>
+        case manifest if manifest.contains("MANIFEST.MF")         =>
           // We don't need manifest files since sbt-assembly will create
           // one with the given settings
           MergeStrategy.discard

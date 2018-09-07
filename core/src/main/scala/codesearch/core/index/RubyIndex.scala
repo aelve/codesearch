@@ -21,13 +21,14 @@ import scala.sys.process._
 
 class RubyIndex(
     private val ec: ExecutionContext,
-    private val sttp: SttpBackend[Future, Nothing]
+    private val httpClient: SttpBackend[Future, Nothing]
 ) extends LanguageIndex[GemTable] with GemDB {
 
-  override protected implicit def executor: ExecutionContext = ec
-  override protected implicit def http: SttpBackend[Future, Nothing] = sttp
+  override protected implicit def executor: ExecutionContext         = ec
+  override protected implicit def http: SttpBackend[Future, Nothing] = httpClient
 
   override protected val logger: Logger    = LoggerFactory.getLogger(this.getClass)
+
   override protected val indexFile: String = ".gem_csearch_index"
   override protected val langExts: String  = ".*\\.(rb)$"
 

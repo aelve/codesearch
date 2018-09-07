@@ -15,7 +15,7 @@ final case class DownloadException(message: String) extends Throwable(message)
 
 final class FileDownloader(
     implicit ec: ExecutionContext,
-     http: SttpBackend[Future, Nothing]
+    http: SttpBackend[Future, Nothing]
 ) extends Downloader[Future] {
 
   /**
