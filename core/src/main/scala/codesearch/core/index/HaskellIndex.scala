@@ -22,6 +22,9 @@ class HaskellIndex(
     private val sttp: SttpBackend[Future, Nothing]
 ) extends LanguageIndex[HackageTable] with HackageDB {
 
+  override protected implicit def executor: ExecutionContext         = ec
+  override protected implicit def http: SttpBackend[Future, Nothing] = sttp
+
   override protected val logger: Logger    = LoggerFactory.getLogger(this.getClass)
   override protected val indexFile: String = ".hackage_csearch_index"
   override protected val langExts: String  = ".*\\.(hs|lhs|hsc|hs-boot|lhs-boot)$"
@@ -70,9 +73,6 @@ class HaskellIndex(
   override protected def buildFsUrl(packageName: String, version: String): NioPath =
     HackagePackage(packageName, version).packageDir
 
-  override protected implicit def executor: ExecutionContext = ec
-
-  override protected implicit def http: SttpBackend[Future, Nothing] = sttp
 }
 
 object HaskellIndex {

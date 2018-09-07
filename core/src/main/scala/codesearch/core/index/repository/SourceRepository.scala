@@ -18,7 +18,7 @@ import scala.util.Failure
 final class SourceRepository[A <: SourcePackage: Extensions: Directory](downloader: Downloader[Future])
     extends Download[A] {
 
-  private val logger: Logger = LoggerFactory.getLogger(SourceRepository.super.getClass)
+  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
   override def downloadSources(pack: A): Future[Path] = {
     for {

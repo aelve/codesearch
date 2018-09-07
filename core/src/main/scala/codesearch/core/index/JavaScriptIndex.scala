@@ -1,46 +1,47 @@
 package codesearch.core.index
 
-import java.io.FileInputStream
 import java.nio.file.Path
+import java.io.FileInputStream
+import java.nio.file.Paths
 
-import ammonite.ops.pwd
 import codesearch.core.db.NpmDB
+import codesearch.core.index.repository.{FileDownloader, NpmPackage}
 import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
 import codesearch.core.index.repository.Extensions._
-import codesearch.core.index.repository.NpmPackage
 import codesearch.core.model.{NpmTable, Version}
 import com.softwaremill.sttp.SttpBackend
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json.Json
+import com.softwaremill.sttp.{Uri, _}
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.sys.process._
 
 class JavaScriptIndex(
     private val ec: ExecutionContext,
     private val sttp: SttpBackend[Future, Nothing]
 ) extends LanguageIndex[NpmTable] with NpmDB {
 
+  override protected implicit def executor: ExecutionContext = ec
+  override protected implicit def http: SttpBackend[Future, Nothing] = sttp
+
   override protected val logger: Logger    = LoggerFactory.getLogger(this.getClass)
   override protected val indexFile: String = ".npm_csearch_index"
   override protected val langExts: String  = ".*\\.(js|json)$"
 
-  private val NPM_INDEX_JSON     = pwd / 'data / 'js / "names.json"
-  private val NPM_UPDATER_SCRIPT = pwd / 'scripts / "update_npm_index.js"
+  private val NpmIndexJson = Paths.get("./data/js/names.json")
+  private val NpmRegistryUrl = uri"https://replicate.npmjs.com/_all_docs?include_docs=true"
 
-  override def downloadMetaInformation(): Unit = Seq("node", NPM_UPDATER_SCRIPT.toString) !!
+  override def downloadMetaInformation(): Unit = {
+    val npmIndex = new FileDownloader().download(NpmRegistryUrl, NpmIndexJson)
 
-  override protected def updateSources(name: String, version: String): Future[Int] = {
-    archiveDownloadAndExtract(NpmPackage(name, version))
   }
 
-  override protected implicit def executor: ExecutionContext = ec
-
-  override protected implicit def http: SttpBackend[Future, Nothing] = sttp
+  override protected def updateSources(name: String, version: String): Future[Int] =
+    archiveDownloadAndExtract(NpmPackage(name, version))
 
   override protected def getLastVersions: Map[String, Version] = {
-    val stream = new FileInputStream(NPM_INDEX_JSON.toIO)
+    val stream = new FileInputStream(NpmIndexJson.toFile)
     val obj    = Json.parse(stream).as[Seq[Map[String, String]]]
     stream.close()
 

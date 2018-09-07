@@ -13,8 +13,10 @@ trait Downloader[F[_]] {
 
 final case class DownloadException(message: String) extends Throwable(message)
 
-final class FileDownloader(implicit ec: ExecutionContext, http: SttpBackend[Future, Nothing])
-    extends Downloader[Future] {
+final class FileDownloader(
+    implicit ec: ExecutionContext,
+     http: SttpBackend[Future, Nothing]
+) extends Downloader[Future] {
 
   /**
     * Function download sources from remote resource and save in file.

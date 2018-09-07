@@ -23,6 +23,9 @@ class RustIndex(
     private val sttp: SttpBackend[Future, Nothing]
 ) extends LanguageIndex[CratesTable] with CratesDB {
 
+  override protected implicit def executor: ExecutionContext = ec
+  override protected implicit def http: SttpBackend[Future, Nothing] = sttp
+
   override protected val logger: Logger    = LoggerFactory.getLogger(this.getClass)
   override protected val indexFile: String = ".crates_csearch_index"
   override protected val langExts: String  = ".*\\.(rs)$"
@@ -42,10 +45,6 @@ class RustIndex(
   override protected def updateSources(name: String, version: String): Future[Int] = {
     archiveDownloadAndExtract(CratesPackage(name, version))
   }
-
-  override protected implicit def executor: ExecutionContext = ec
-
-  override protected implicit def http: SttpBackend[Future, Nothing] = sttp
 
   override protected def getLastVersions: Map[String, Version] = {
     val seq = Helper

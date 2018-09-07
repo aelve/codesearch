@@ -24,6 +24,9 @@ class RubyIndex(
     private val sttp: SttpBackend[Future, Nothing]
 ) extends LanguageIndex[GemTable] with GemDB {
 
+  override protected implicit def executor: ExecutionContext = ec
+  override protected implicit def http: SttpBackend[Future, Nothing] = sttp
+
   override protected val logger: Logger    = LoggerFactory.getLogger(this.getClass)
   override protected val indexFile: String = ".gem_csearch_index"
   override protected val langExts: String  = ".*\\.(rb)$"
@@ -45,10 +48,6 @@ class RubyIndex(
 
     Seq("/usr/bin/ruby", DESERIALIZER_PATH.toString(), GEM_INDEX_ARCHIVE.toString(), GEM_INDEX_JSON.toString()) !!
   }
-
-  override protected implicit def executor: ExecutionContext = ec
-
-  override protected implicit def http: SttpBackend[Future, Nothing] = sttp
 
   override protected def getLastVersions: Map[String, Version] = {
     val stream = new FileInputStream(GEM_INDEX_JSON.toIO)
