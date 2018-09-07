@@ -2,18 +2,22 @@ GET     /                          codesearch.web.controllers.Application.index
 
 GET     /*path/                    codesearch.web.controllers.Application.untrail(path: String)
 
-GET     /haskell                   codesearch.web.controllers.Application.haskell
-GET     /haskell/search            codesearch.web.controllers.HackageSearcher.index(query: String ?= "", insensitive: String ?= "", precise: String ?= "", sources: String ?= "on", page: String ?= "1")
+GET     /haskell                   codesearch.web.controllers.HackageSearcher.index
+GET     /haskell/search            codesearch.web.controllers.HackageSearcher.search(query: String ?= "", insensitive: String ?= "", precise: String ?= "", sources: String ?= "on", page: String ?= "1")
+GET     /haskell/src/*relativePath codesearch.web.controllers.HackageSearcher.source(relativePath)
 
-GET     /rust                       codesearch.web.controllers.Application.rust
-GET     /rust/search                codesearch.web.controllers.CratesSearcher.index(query: String ?= "", insensitive: String ?= "", precise: String ?= "", sources: String ?= "on", page: String ?= "1")
+GET     /rust                       codesearch.web.controllers.CratesSearcher.index
+GET     /rust/search                codesearch.web.controllers.CratesSearcher.search(query: String ?= "", insensitive: String ?= "", precise: String ?= "", sources: String ?= "on", page: String ?= "1")
+GET     /rust/src/*relativePath     codesearch.web.controllers.CratesSearcher.source(relativePath)
 
-GET     /js                         codesearch.web.controllers.Application.javascript
-GET     /js/search                  codesearch.web.controllers.NpmSearcher.index(query: String ?= "", insensitive: String ?= "", precise: String ?= "", sources: String ?= "on", page: String ?= "1")
+GET     /js                         codesearch.web.controllers.NpmSearcher.index
+GET     /js/search                  codesearch.web.controllers.NpmSearcher.search(query: String ?= "", insensitive: String ?= "", precise: String ?= "", sources: String ?= "on", page: String ?= "1")
+GET     /js/src/*relativePath       codesearch.web.controllers.NpmSearcher.source(relativePath)
 
-GET     /ruby                       codesearch.web.controllers.Application.ruby
-GET     /ruby/search                codesearch.web.controllers.GemSearcher.index(query: String ?= "", insensitive: String ?= "", precise: String ?= "", sources: String ?= "on", page: String ?= "1")
+GET     /ruby                       codesearch.web.controllers.GemSearcher.index
+GET     /ruby/search                codesearch.web.controllers.GemSearcher.search(query: String ?= "", insensitive: String ?= "", precise: String ?= "", sources: String ?= "on", page: String ?= "1")
+GET     /ruby/src/*relativePath     codesearch.web.controllers.GemSearcher.source(relativePath)
 
-GET     /versionedAssets/file       controllers.Assets.versioned(file)
+GET     /versionedAssets/*file      controllers.Assets.versioned(path="/public", file: Asset)
 
 
