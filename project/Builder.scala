@@ -61,7 +61,10 @@ object Builder {
         "com.typesafe.slick"    %% "slick"                            % "3.2.3",
         "com.typesafe.slick"    %% "slick-hikaricp"                   % "3.2.3",
         "org.postgresql"        % "postgresql"                        % "42.2.2",
-        "com.softwaremill.sttp" %% "async-http-client-backend-future" % "1.3.0"
+        "com.softwaremill.sttp" %% "async-http-client-backend-future" % "1.3.0",
+        "com.github.pureconfig" %% "pureconfig" % "0.9.2",
+        "org.scalactic" %% "scalactic" % "3.0.5",
+        "org.scalatest" %% "scalatest" % "3.0.5" % "test"
       ),
       assemblyMergeStrategy in assembly := {
         case PathList("META-INF", _ @_*) => MergeStrategy.discard
