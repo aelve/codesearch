@@ -81,6 +81,7 @@ object Builder {
       ),
       fullClasspath in assembly += Attributed.blank(PlayKeys.playPackageAssets.value),
       assemblyMergeStrategy in assembly := {
+        case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.concat
         case manifest if manifest.contains("MANIFEST.MF") =>
           // We don't need manifest files since sbt-assembly will create
           // one with the given settings
