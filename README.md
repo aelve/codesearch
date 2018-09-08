@@ -50,7 +50,7 @@ whole Hackage, so stop it after a minute or less.
 
 Next, index the packages:
 
-    $ make index-haskell
+    $ make index-hackage
 
 After that you should be able to visit <http://localhost:9000/haskell> and
 play with some queries (e.g. `module` should bring up a lot of results).
