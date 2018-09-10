@@ -1,31 +1,31 @@
 package codesearch.core.index.details
-import java.io.File
 import java.nio.file.Paths
 
+import cats.effect.IO
 import codesearch.core.index.repository.DownloadException
 import com.softwaremill.sttp.SttpBackend
 import com.softwaremill.sttp.{Uri, _}
-import io.circe.{Decoder, HCursor, Json}
+import fs2.{Chunk, Pipe, Sink, Stream}
+import fs2.io._
+import io.circe.{Decoder, HCursor}
 import io.circe.parser.decode
-import io.circe.generic.auto._
 import io.circe.syntax._
-import org.apache.commons.io.FileUtils
+import io.circe.generic.auto._
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Failure
 
 final case class PackageKey(key: String) extends AnyVal
 final case class NpmPackagesKeys(rows: List[PackageKey])
 
-final case class NpmPackageDetails(name: String, tag: LatestTag)
+final case class NpmPackageDetails(name: String, version: LatestTag)
 final case class LatestTag(latest: String) extends AnyVal
 
 private[index] final class NpmDetails(implicit ec: ExecutionContext, http: SttpBackend[Future, Nothing]) {
 
   private val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
-  private val FsIndexPath        = Paths.get("./data/js/names.json")
+  private val FsIndexPath        = Paths.get("./index/npm/names.json")
   private val NpmRegistryUrl     = uri"https://replicate.npmjs.com/"
   private val NpmPackagesKeysUrl = uri"$NpmRegistryUrl/_all_docs"
 
@@ -36,19 +36,20 @@ private[index] final class NpmDetails(implicit ec: ExecutionContext, http: SttpB
     } yield NpmPackageDetails(name, tag)
   }
 
-  def index: Future[File] = {
-    for {
-      npmKeys        <- download[NpmPackagesKeys](NpmPackagesKeysUrl)
-      packageDetails <- traverse(npmKeys)
-      indexFile      <- saveIndex(packageDetails)
-    } yield indexFile
-  }.andThen { case Failure(ex) => logger.error(ex.getMessage) }
+  def index: Stream[Future, Unit] =
+    allPackages
+      .evalMap(latestVersion)
+      .through(packageToString)
+      .to(toFile)
+
+  private def allPackages: Stream[Future, NpmPackagesKeys] =
+    Stream.eval(download[NpmPackagesKeys](NpmPackagesKeysUrl))
 
   private def download[A: Decoder](url: Uri): Future[A] = {
     sttp
       .get(url)
       .response(asString)
-      .send()
+      .send
       .flatMap(_.body.fold(
         error => Future.failed(DownloadException(error)),
         result =>
@@ -59,18 +60,13 @@ private[index] final class NpmDetails(implicit ec: ExecutionContext, http: SttpB
       ))
   }
 
-  private def traverse(npmKeys: NpmPackagesKeys): Future[List[NpmPackageDetails]] = Future.sequence(
-    npmKeys.rows.map(row => download[NpmPackageDetails](npmPackageDetailsUrl(row.key)))
-  )
+  private def latestVersion(keys: NpmPackagesKeys): Future[NpmPackageDetails] = {}
 
-  private def npmPackageDetailsUrl(packageName: String) = uri"$NpmRegistryUrl/$packageName"
-
-  private def saveIndex(packageDetails: List[NpmPackageDetails]) = Future {
-    val indexFile   = FsIndexPath.toFile
-    val jsonToWrite = packageDetails.asJson.noSpaces.getBytes
-    FileUtils.writeByteArrayToFile(indexFile, jsonToWrite)
-    indexFile
+  private def packageToString[F[_]]: Pipe[Future, NpmPackageDetails, Byte] = { in =>
+    in.flatMap(pack => Stream.chunk(Chunk.array(pack.asJson.noSpaces.getBytes)))
   }
+
+  private def toFile: Sink[Future, Byte] = file.writeAllAsync(FsIndexPath)
 
 }
 
