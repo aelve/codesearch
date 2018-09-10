@@ -17,11 +17,11 @@ object Main {
     .fromExecutorService(Executors.newFixedThreadPool(2 * Runtime.getRuntime.availableProcessors()))
 
   case class Config(
-    updatePackages: Boolean = false,
-    downloadMeta: Boolean = false,
-    initDB: Boolean = false,
-    buildIndex: Boolean = false,
-    lang: String = "all"
+      updatePackages: Boolean = false,
+      downloadMeta: Boolean = false,
+      initDB: Boolean = false,
+      buildIndex: Boolean = false,
+      lang: String = "all"
   )
 
   private val parser = new scopt.OptionParser[Config]("main") {
