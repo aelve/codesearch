@@ -15,7 +15,8 @@ import com.softwaremill.sttp.SttpBackend
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json.Json
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 class JavaScriptIndex(
     private val ec: ExecutionContext,
@@ -32,7 +33,7 @@ class JavaScriptIndex(
 
   private val NpmIndexJson = Paths.get("./data/js/names.json")
 
-  override def downloadMetaInformation(): Unit = NpmDetails().index
+  override def downloadMetaInformation(): Unit = Await.result(NpmDetails().index, Duration.Inf)
 
   override protected def updateSources(name: String, version: String): Future[Int] =
     archiveDownloadAndExtract(NpmPackage(name, version))
