@@ -15,13 +15,6 @@ The project is written in Scala. You need to install the following:
 * Scala >= 2.12.4
 * `sbt` >= 1.0.2
 
-### cargo-clone
-
-To fetch Rust packages we use `cargo-clone`. Install Cargo, Ruby, and
-`cmake`. Then you can use Cargo to install `cargo-clone`:
-
-    $ cargo install cargo-clone
-
 ### Running the project
 
 You can run Postgres by yourself, but it's better to use Docker. If you have
