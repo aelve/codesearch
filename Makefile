@@ -37,17 +37,21 @@ build:
 download-%:
   java -jar codesearch-core.jar -d -u -l "$*"
 
-# Index Hackage packages
-index-hackage:
-  CSEARCHINDEX=data/.hackage_csearch_index cindex data/hackage/
+# Index haskell packages
+index-haskell:
+  java -jar codesearch-core.jar -b -l "haskell"
 
-# Index npm packages
-index-npm:
-  CSEARCHINDEX=data/.npm_csearch_index cindex data/npm/
+# Index js packages
+index-javascript:
+  java -jar codesearch-core.jar -b -l "javascript"
 
-# Index crates packages
-index-crates:
-  CSEARCHINDEX=data/.crates_csearch_index cindex data/crates/
+# Index rust packages
+index-rust:
+  java -jar codesearch-core.jar -b -l "rust"
+
+# Index ruby packages
+index-ruby:
+  java -jar codesearch-core.jar -b -l "ruby"
 
 # Run the server
 .PHONY: serve

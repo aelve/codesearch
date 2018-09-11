@@ -1,19 +1,20 @@
 package codesearch.core.index
 
 import java.io.FileInputStream
+import java.nio.file.Path
 
 import ammonite.ops.pwd
 import codesearch.core.db.NpmDB
-import codesearch.core.index.repository.NpmPackage
-import repository.Extensions._
 import codesearch.core.index.directory.Directory._
-
-import scala.sys.process._
+import codesearch.core.index.directory.Directory.ops._
+import codesearch.core.index.repository.Extensions._
+import codesearch.core.index.repository.NpmPackage
 import codesearch.core.model.{NpmTable, Version}
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json.Json
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.sys.process._
 
 class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] with NpmDB {
 
@@ -49,6 +50,9 @@ class JavaScriptIndex(val ec: ExecutionContext) extends LanguageIndex[NpmTable] 
 
   override protected def buildRepUrl(packageName: String, version: String): String =
     s"https://www.npmjs.com/package/$packageName/v/$version"
+
+  override protected def buildFsUrl(packageName: String, version: String): Path =
+    NpmPackage(packageName, version).packageDir
 }
 
 object JavaScriptIndex {
