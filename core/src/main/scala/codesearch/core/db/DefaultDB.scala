@@ -10,10 +10,14 @@ import slick.lifted.TableQuery
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
+object DefaultDB {
+  lazy val db = Database.forConfig("mydb")
+}
+
 trait DefaultDB[T <: DefaultTable] {
 
   val table: TableQuery[T]
-  val db = Database.forConfig("mydb")
+  lazy val db = DefaultDB.db
 
   def insertOrUpdate[A <: SourcePackage](pack: A): Future[Int] = {
     val insOrUpdate = table.insertOrUpdate(
