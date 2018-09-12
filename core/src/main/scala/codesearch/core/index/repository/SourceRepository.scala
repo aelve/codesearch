@@ -3,6 +3,7 @@ package codesearch.core.index.repository
 import java.io.File
 import java.nio.file.Path
 
+import cats.Eval
 import codesearch.core.index.directory.Directory
 import codesearch.core.index.directory.Directory.ops._
 import com.softwaremill.sttp.asynchttpclient.future.AsyncHttpClientFutureBackend
@@ -10,8 +11,10 @@ import com.softwaremill.sttp.{Uri, _}
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils.getExtension
 import org.slf4j.{Logger, LoggerFactory}
+import cats.syntax.traverse._
+import cats.instances.list._
+import cats.syntax.applicative._
 
-import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Failure
@@ -31,7 +34,7 @@ object SourceRepository {
       for {
         archive   <- download(pack.url, pack.archive)
         directory <- pack.extract(archive, pack.unarchived)
-        _         <- deleteExcessFiles(directory, Extensions[A].extensions)
+        _         <- Future(deleteExcessFiles(directory, Extensions[A].extensions))
       } yield directory
     }.andThen { case Failure(ex) => logger.error(ex.getMessage) }
 
@@ -64,20 +67,16 @@ object SourceRepository {
     * @param allowedExtentions is extensions defined for each language
     * @return count removed files
     */
-  private def deleteExcessFiles(directory: Path, allowedExtentions: Set[String]): Future[Int] = Future {
-    val maxFileSize = 1024 * 1024
-    @tailrec
-    def filterFiles(all: List[File], excess: List[File] = Nil): List[File] = all match {
-      case Nil => excess
-      case file :: others if file.isDirectory =>
-        val subdirectories = file.listFiles
-        if (subdirectories.nonEmpty) filterFiles(others ++ subdirectories, excess)
-        else filterFiles(others, file :: excess)
-      case file :: others =>
-        if (file.length >= maxFileSize) filterFiles(others, file :: excess)
-        else if (allowedExtentions.contains(getExtension(file.getName))) filterFiles(others, excess)
-        else filterFiles(others, file :: excess)
+  private def deleteExcessFiles(directory: Path, allowedExtentions: Set[String]): Int = {
+    def deleteRecursively(dir: File, predicate: File => Boolean): Eval[Int] = {
+      for {
+        (dirs, files)      <- Eval.later(dir.listFiles.toList.partition(_.isDirectory))
+        filesDeleted       <- files.filterNot(predicate).traverse(file => Eval.later(file.delete)).map(_.size)
+        nestedFilesDeletes <- dirs.traverse(dir => deleteRecursively(dir, predicate)).map(_.size)
+        _                  <- Eval.later(dir.delete).whenA(dir.listFiles.isEmpty)
+      } yield filesDeleted + nestedFilesDeletes
     }
-    filterFiles(List(directory.toFile)).map(_.delete).count(identity)
+    deleteRecursively(directory.toFile, file => allowedExtentions.contains(getExtension(file.getName))).value
+
   }
 }
