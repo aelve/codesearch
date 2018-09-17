@@ -47,12 +47,7 @@ object Builder {
       "ch.qos.logback"       % "logback-classic" % "1.2.3",
       "com.typesafe.play"    %% "play-json"      % "2.6.9",
       "com.github.mpilquist" %% "simulacrum"     % "0.13.0",
-      "org.typelevel"        %% "cats-core"      % "1.2.0",
-      "io.circe"             %% "circe-core"     % "0.9.3",
-      "io.circe"             %% "circe-generic"  % "0.9.3",
-      "io.circe"             %% "circe-parser"   % "0.9.3",
-      "co.fs2"               %% "fs2-core"       % "0.10.6",
-      "co.fs2"               %% "fs2-io"         % "0.10.6"
+      "org.typelevel"        %% "cats-core"      % "1.2.0"
     )
   )
 
@@ -67,7 +62,14 @@ object Builder {
         "com.typesafe.slick"    %% "slick"                            % "3.2.3",
         "com.typesafe.slick"    %% "slick-hikaricp"                   % "3.2.3",
         "org.postgresql"        % "postgresql"                        % "42.2.2",
-        "com.softwaremill.sttp" %% "async-http-client-backend-future" % "1.3.0",
+        "com.softwaremill.sttp" %% "async-http-client-backend-future" % "1.3.1",
+        "com.softwaremill.sttp" %% "async-http-client-backend-fs2"    % "1.3.1",
+        "co.fs2"                %% "fs2-core"                         % "1.0.0-M1",
+        "co.fs2"                %% "fs2-io"                           % "1.0.0-M1",
+        "io.circe"              %% "circe-fs2"                        % "0.9.0",
+        "io.circe"              %% "circe-core"                       % "0.9.3",
+        "io.circe"              %% "circe-generic"                    % "0.9.3",
+        "io.circe"              %% "circe-parser"                     % "0.9.3",
         "com.github.pureconfig" %% "pureconfig"                       % "0.9.2",
         "org.scalactic"         %% "scalactic"                        % "3.0.5",
         "org.scalatest"         %% "scalatest"                        % "3.0.5" % "test"
