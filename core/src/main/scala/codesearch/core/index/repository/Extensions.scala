@@ -54,6 +54,7 @@ object Extensions {
   }
 
   implicit def haskellExtensions[A <: Haskell]: Extensions[A] = new Extensions[A] {
+    override def commonExtensions: Set[String] = super.commonExtensions ++ Set("cabal", "project")
     override def sourceExtensions: Set[String] = Set("hs", "lhs", "hsc", "hs-boot", "lhs-boot")
   }
 
