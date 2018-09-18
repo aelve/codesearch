@@ -9,7 +9,6 @@ import codesearch.core.index.directory.Directory.ops._
 import com.softwaremill.sttp.asynchttpclient.future.AsyncHttpClientFutureBackend
 import com.softwaremill.sttp.{Uri, _}
 import org.apache.commons.io.FileUtils
-import org.apache.commons.io.FilenameUtils.getExtension
 import org.slf4j.{Logger, LoggerFactory}
 import cats.syntax.traverse._
 import cats.instances.list._
@@ -25,16 +24,14 @@ object SourceRepository {
 
   private implicit val asyncSttp: SttpBackend[Future, Nothing] = AsyncHttpClientFutureBackend()
 
-  final case class DownloadException(
-      message: String
-  ) extends Throwable(message)
+  final case class DownloadException(message: String) extends Throwable(message)
 
   implicit def packageDownloader[A <: SourcePackage: Extensions: Directory]: Download[A] =
     (pack: A) => {
       for {
         archive   <- download(pack.url, pack.archive)
         directory <- pack.extract(archive, pack.unarchived)
-        _         <- Future(deleteExcessFiles(directory, Extensions[A].extensions))
+        _         <- Future(deleteExcessFiles(directory, FileFilter.create[A]))
       } yield directory
     }.andThen { case Failure(ex) => logger.error(ex.getMessage) }
 
@@ -64,19 +61,18 @@ object SourceRepository {
     * Function removes all extension files that are not contained in the set of allowed extensions
     *
     * @param directory is root directory of specific package
-    * @param allowedExtentions is extensions defined for each language
+    * @param fileFilter is implementation of trait [[FileFilter]]
     * @return count removed files
     */
-  private def deleteExcessFiles(directory: Path, allowedExtentions: Set[String]): Int = {
+  private def deleteExcessFiles[A](directory: Path, fileFilter: FileFilter[A]): Int = {
     def deleteRecursively(dir: File, predicate: File => Boolean): Eval[Int] = {
       for {
         (dirs, files)      <- Eval.later(dir.listFiles.toList.partition(_.isDirectory))
         filesDeleted       <- files.filterNot(predicate).traverse(file => Eval.later(file.delete)).map(_.size)
-        nestedFilesDeletes <- dirs.traverse(dir => deleteRecursively(dir, predicate)).map(_.size)
+        nestedFilesDeleted <- dirs.traverse(dir => deleteRecursively(dir, predicate)).map(_.size)
         _                  <- Eval.later(dir.delete).whenA(dir.listFiles.isEmpty)
-      } yield filesDeleted + nestedFilesDeletes
+      } yield filesDeleted + nestedFilesDeleted
     }
-    deleteRecursively(directory.toFile, file => allowedExtentions.contains(getExtension(file.getName))).value
-
+    deleteRecursively(directory.toFile, fileFilter.filter).value
   }
 }
