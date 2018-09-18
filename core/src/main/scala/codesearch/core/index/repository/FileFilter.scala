@@ -15,12 +15,13 @@ trait FileFilter[A] {
 
 object FileFilter {
   def create[A](implicit E: Extensions[A]): FileFilter[A] = new FileFilter[A] {
+    val maxFileSize: Int = 1024 * 1024
     val allowedFileNames = Set("makefile", "dockerfile", "readme", "changelog", "changes")
     override def filter(file: File): Boolean = {
       val fileName = file.getName.toLowerCase
       val fileExt  = getExtension(fileName)
-      if (fileExt.isEmpty) allowedFileNames.contains(fileName)
-      else E.extensions.contains(fileExt)
+      (if (fileExt.isEmpty) allowedFileNames.contains(fileName)
+       else E.extensions.contains(fileExt)) && file.length < maxFileSize
     }
   }
 }
