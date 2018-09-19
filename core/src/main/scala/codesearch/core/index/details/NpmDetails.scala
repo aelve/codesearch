@@ -23,8 +23,9 @@ import scala.concurrent.ExecutionContext
 import scala.language.higherKinds
 
 private final case class Doc(name: String, tag: LatestTag)
-private final case class NpmPackageDetails(name: String, version: String)
+private final case class NpmRegistryPackage(name: String, version: String)
 private final case class LatestTag(latest: String) extends AnyVal
+private final case class NpmPackage(name: String, version: String)
 
 private[index] final class NpmDetails(implicit ec: ExecutionContext, http: SttpBackend[IO, Stream[IO, ByteBuffer]]) {
 
@@ -39,8 +40,8 @@ private[index] final class NpmDetails(implicit ec: ExecutionContext, http: SttpB
       tag  <- c.get[LatestTag]("dist-tags")
     } yield Doc(name, tag)
 
-  private implicit val npmPackageDetailsDecoder: Decoder[NpmPackageDetails] =
-    (c: HCursor) => c.get[Doc]("doc").map(doc => NpmPackageDetails(doc.name, doc.tag.latest))
+  private implicit val npmRegistryPackageDecoder: Decoder[NpmRegistryPackage] =
+    (c: HCursor) => c.get[Doc]("doc").map(doc => NpmRegistryPackage(doc.name, doc.tag.latest))
 
   private implicit val mapMonoid: Monoid[Map[String, Version]] = new Monoid[Map[String, Version]] {
     override def empty: Map[String, Version] = Map.empty
@@ -56,7 +57,7 @@ private[index] final class NpmDetails(implicit ec: ExecutionContext, http: SttpB
         _.through(toBytes)
           .through(cutStream)
           .through(byteArrayParser[IO])
-          .through(decoder[IO, NpmPackageDetails])
+          .through(decoder[IO, NpmRegistryPackage])
           .through(packageToString)
           .to(toFile)
           .compile
@@ -66,14 +67,14 @@ private[index] final class NpmDetails(implicit ec: ExecutionContext, http: SttpB
     file
       .readAllAsync[IO](FsIndexPath, chunkSize = 4096)
       .through(byteStreamParser[IO])
-      .through(decoder[IO, NpmPackageDetails])
+      .through(decoder[IO, NpmPackage])
       .through(toMap)
       .compile
       .foldMonoid
   }
 
-  private def toMap[F[_]]: Pipe[IO, NpmPackageDetails, Map[String, Version]] = { input =>
-    input.map(details => Map(details.name -> Version(details.version)))
+  private def toMap[F[_]]: Pipe[IO, NpmPackage, Map[String, Version]] = { input =>
+    input.map(npmPackage => Map(npmPackage.name -> Version(npmPackage.version)))
   }
 
   private def stream(url: Uri): IO[Stream[IO, ByteBuffer]] = {
@@ -108,8 +109,8 @@ private[index] final class NpmDetails(implicit ec: ExecutionContext, http: SttpB
       }
     }
 
-  private def packageToString[F[_]]: Pipe[IO, NpmPackageDetails, Byte] = { input =>
-    input.flatMap(details => Stream.chunk(Chunk.array(details.asJson.noSpaces.getBytes)))
+  private def packageToString[F[_]]: Pipe[IO, NpmRegistryPackage, Byte] = { input =>
+    input.flatMap(registryPackage => Stream.chunk(Chunk.array(registryPackage.asJson.noSpaces.getBytes)))
   }
 
   private def toFile: Sink[IO, Byte] = file.writeAllAsync(FsIndexPath)
