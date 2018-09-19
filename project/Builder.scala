@@ -33,7 +33,8 @@ object Builder {
     scalacOptions in (Compile, console) -= "-Ywarn-unused-import",
     scalacOptions in (Compile, doc) ++= Seq("-diagrams", "-implicits"),
     scalacOptions in Test ++= Seq("-Yrangepos"),
-    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
+    addCompilerPlugin("org.scalamacros" % "paradise"            % "2.1.0" cross CrossVersion.full),
+    addCompilerPlugin("com.olegpy"      %% "better-monadic-for" % "0.2.4")
   )
 
   lazy val commonDeps = Seq(
