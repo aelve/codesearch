@@ -50,7 +50,6 @@ object Extensions {
     override def commonExtensions: Set[String] =
       super.commonExtensions ++ Set("css", "scss", "postcss", "sass", "less", "stylus", "html", "xhtml")
     override def sourceExtensions: Set[String] = Set("js", "ts", "coffee", "jsx")
-    override def extensions: Set[String]       = commonExtensions ++ sourceExtensions
   }
 
   implicit def haskellExtensions[A <: Haskell]: Extensions[A] = new Extensions[A] {
