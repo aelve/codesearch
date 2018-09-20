@@ -10,7 +10,6 @@ import codesearch.core.index.directory.Directory.ops._
 import codesearch.core.index.repository.Extensions._
 import codesearch.core.index.repository.GemPackage
 import codesearch.core.model.{GemTable, Version}
-import repository.Extensions._
 import com.softwaremill.sttp.SttpBackend
 
 import org.slf4j.{Logger, LoggerFactory}

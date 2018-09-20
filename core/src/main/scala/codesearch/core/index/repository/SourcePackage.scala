@@ -4,6 +4,7 @@ import java.io.File
 import java.net.URLEncoder
 import java.nio.file.Path
 
+import codesearch.core.index.SupportedLangs.{Haskell, JavaScript, Ruby, Rust}
 import codesearch.core.index.directory.Extractor
 import com.softwaremill.sttp.{Uri, _}
 import org.rauschig.jarchivelib.ArchiveFormat.TAR

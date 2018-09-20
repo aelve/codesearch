@@ -5,10 +5,10 @@ import java.nio.file.{Path => NioPath}
 
 import ammonite.ops.{Path, pwd}
 import codesearch.core.db.HackageDB
+import codesearch.core.index.repository.HackagePackage
 import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
 import codesearch.core.index.repository.Extensions._
-import codesearch.core.index.repository.HackagePackage
 import codesearch.core.model.{HackageTable, Version}
 import com.softwaremill.sttp.SttpBackend
 import org.rauschig.jarchivelib.{ArchiveFormat, ArchiverFactory, CompressionType}
@@ -22,7 +22,7 @@ class HaskellIndex(
     private val httpClient: SttpBackend[Future, Nothing]
 ) extends LanguageIndex[HackageTable] with HackageDB {
 
-  override protected implicit def executor: ExecutionContext = ec
+  override protected implicit def executor: ExecutionContext         = ec
   override protected implicit def http: SttpBackend[Future, Nothing] = httpClient
 
   override protected val logger: Logger    = LoggerFactory.getLogger(this.getClass)

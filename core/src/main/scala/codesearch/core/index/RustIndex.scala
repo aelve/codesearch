@@ -4,9 +4,9 @@ import java.nio.file.Path
 
 import ammonite.ops.pwd
 import codesearch.core.db.CratesDB
+import codesearch.core.index.repository.CratesPackage
 import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
-import codesearch.core.index.repository.CratesPackage
 import codesearch.core.index.repository.Extensions._
 import codesearch.core.model
 import codesearch.core.model.{CratesTable, Version}

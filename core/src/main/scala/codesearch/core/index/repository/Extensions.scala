@@ -1,5 +1,6 @@
 package codesearch.core.index.repository
 
+import codesearch.core.index.{Haskell, JavaScript, Ruby, Rust}
 import simulacrum.typeclass
 
 /**
