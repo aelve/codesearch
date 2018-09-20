@@ -1,5 +1,4 @@
 package codesearch.core.search
-import codesearch.core.index.repository.Extensions
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.ExecutionContext
