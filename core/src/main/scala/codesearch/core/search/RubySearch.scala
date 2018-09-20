@@ -1,4 +1,5 @@
 package codesearch.core.search
+
 import org.slf4j.{Logger, LoggerFactory}
 
 class RubySearch extends Searcher {

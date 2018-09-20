@@ -27,7 +27,6 @@ class RubyIndex(
   override protected implicit def http: SttpBackend[Future, Nothing] = httpClient
 
   override protected val logger: Logger    = LoggerFactory.getLogger(this.getClass)
-
   override protected val indexFile: String = ".gem_csearch_index"
   override protected val langExts: String  = ".*\\.(rb)$"
 

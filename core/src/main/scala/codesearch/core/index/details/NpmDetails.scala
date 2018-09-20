@@ -113,9 +113,7 @@ private[index] final class NpmDetails(implicit ec: ExecutionContext, http: SttpB
     }
 
   private def packageToString[F[_]]: Pipe[IO, NpmRegistryPackage, Byte] = { input =>
-    input.flatMap(registryPackage =>
-      Stream.chunk(Chunk.array(registryPackage.asJson.noSpaces.getBytes :+ '\n'.toByte))
-    )
+    input.flatMap(registryPackage => Stream.chunk(Chunk.array(registryPackage.asJson.noSpaces.getBytes :+ '\n'.toByte)))
   }
 
   private def toFile: Sink[IO, Byte] = file.writeAllAsync(FsIndexPath, List(TRUNCATE_EXISTING))
