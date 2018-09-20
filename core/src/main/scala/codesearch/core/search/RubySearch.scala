@@ -1,9 +1,7 @@
 package codesearch.core.search
 import org.slf4j.{Logger, LoggerFactory}
 
-import scala.concurrent.ExecutionContext
-
-class RubySearch(implicit ec: ExecutionContext) extends Searcher {
+class RubySearch extends Searcher {
 
   override protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
 

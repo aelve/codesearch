@@ -1,7 +1,8 @@
 package codesearch.core.index.details
 
 import java.nio.ByteBuffer
-import java.nio.file.Paths
+import java.nio.file.StandardOpenOption.TRUNCATE_EXISTING
+import java.nio.file.{Path, Paths}
 
 import cats.effect.IO
 import codesearch.core.index.repository.DownloadException
@@ -21,6 +22,8 @@ import cats.kernel.Monoid
 import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext
 import scala.language.higherKinds
+import codesearch.core.index.directory.PathOps._
+import codesearch.core.index.details.NpmDetails.FsIndexRoot
 
 private final case class Doc(name: String, tag: LatestTag)
 private final case class NpmRegistryPackage(name: String, version: String)
@@ -31,8 +34,8 @@ private[index] final class NpmDetails(implicit ec: ExecutionContext, http: SttpB
 
   private val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
-  private val FsIndexPath    = Paths.get("./index/npm_packages_index.json")
   private val NpmRegistryUrl = uri"https://replicate.npmjs.com/_all_docs?include_docs=true"
+  private val FsIndexPath    = FsIndexRoot / "npm_packages_index.json"
 
   private implicit val docDecoder: Decoder[Doc] = (c: HCursor) =>
     for {
@@ -110,14 +113,17 @@ private[index] final class NpmDetails(implicit ec: ExecutionContext, http: SttpB
     }
 
   private def packageToString[F[_]]: Pipe[IO, NpmRegistryPackage, Byte] = { input =>
-    input.flatMap(registryPackage => Stream.chunk(Chunk.array(registryPackage.asJson.noSpaces.getBytes)))
+    input.flatMap(registryPackage =>
+      Stream.chunk(Chunk.array(registryPackage.asJson.noSpaces.getBytes :+ '\n'.toByte))
+    )
   }
 
-  private def toFile: Sink[IO, Byte] = file.writeAllAsync(FsIndexPath)
+  private def toFile: Sink[IO, Byte] = file.writeAllAsync(FsIndexPath, List(TRUNCATE_EXISTING))
 
 }
 
-object NpmDetails {
+private[index] object NpmDetails {
+  val FsIndexRoot: Path = Paths.get("./index/npm")
   def apply()(
       implicit ec: ExecutionContext,
       http: SttpBackend[IO, Stream[IO, ByteBuffer]]

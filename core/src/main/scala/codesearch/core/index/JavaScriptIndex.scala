@@ -13,7 +13,6 @@ import codesearch.core.index.repository.Extensions._
 import codesearch.core.model.{NpmTable, Version}
 import com.softwaremill.sttp.SttpBackend
 import fs2.Stream
-
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -32,7 +31,12 @@ class JavaScriptIndex(
   override protected val indexFile: String = ".npm_csearch_index"
   override protected val langExts: String  = ".*\\.(js|json)$"
 
-  override def downloadMetaInformation(): Unit = NpmDetails().index.unsafeRunSync()
+  override def downloadMetaInformation(): Unit = {
+    (for {
+      _     <- IO(NpmDetails.FsIndexRoot.toFile.mkdirs())
+      index <- NpmDetails().index
+    } yield index).unsafeRunSync()
+  }
 
   override protected def updateSources(name: String, version: String): Future[Int] =
     archiveDownloadAndExtract(NpmPackage(name, version))

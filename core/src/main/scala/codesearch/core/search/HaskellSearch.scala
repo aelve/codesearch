@@ -1,8 +1,7 @@
 package codesearch.core.search
 import org.slf4j.{Logger, LoggerFactory}
-import scala.concurrent.ExecutionContext
 
-class HaskellSearch(implicit ec: ExecutionContext) extends Searcher {
+class HaskellSearch extends Searcher {
 
   override protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
