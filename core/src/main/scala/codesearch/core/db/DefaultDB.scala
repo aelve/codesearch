@@ -11,7 +11,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object DefaultDB {
-  lazy val db = Database.forConfig("mydb")
+  lazy val db = Database.forConfig("db")
 }
 
 trait DefaultDB[T <: DefaultTable] {
