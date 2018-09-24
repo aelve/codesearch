@@ -7,6 +7,8 @@ import codesearch.core.util.Helper
 import com.github.marlonlom.utilities.timeago.TimeAgo
 import play.api.mvc.{Action, AnyContent, InjectedController}
 import cats.instances.future._
+import cats.syntax.eq._
+import cats.instances.string._
 import codesearch.core.search.Searcher
 import codesearch.core.search.Searcher.{CSearchPage, SearchArguments}
 
@@ -39,9 +41,9 @@ trait SearchController[V <: DefaultTable, I <: Searcher] { self: InjectedControl
       db.updated.flatMap(
         updated =>
           indexEngine.search(SearchArguments(query = query,
-                                             insensitive = insensitive == "on",
-                                             preciseMatch = precise == "on",
-                                             sourcesOnly = sources == "on"),
+                                             insensitive = isEnable(insensitive),
+                                             preciseMatch = isEnable(precise),
+                                             sourcesOnly = isEnable(sources)),
                              page.toInt) map {
             case CSearchPage(results, total) =>
               Ok(
@@ -49,9 +51,9 @@ trait SearchController[V <: DefaultTable, I <: Searcher] { self: InjectedControl
                   updated = TimeAgo.using(updated.getTime),
                   packages = results,
                   query = query,
-                  insensitive = insensitive == "on",
-                  precise = precise == "on",
-                  sources = sources == "on",
+                  insensitive = isEnable(insensitive),
+                  precise = isEnable(precise),
+                  sources = isEnable(sources),
                   page = page.toInt,
                   totalMatches = total,
                   callURI = callURI,
@@ -60,22 +62,27 @@ trait SearchController[V <: DefaultTable, I <: Searcher] { self: InjectedControl
         })
     }
 
-  def source(relativePath: String): Action[AnyContent] = Action.async { implicit request =>
-    val realPath = s"data/$relativePath"
-    OptionT
-      .fromOption[Future](indexEngine.packageName(realPath))
-      .flatMap(pack => {
-        OptionT(Helper.readFileAsync(realPath)).map(s => (pack, s))
-      })
-      .map {
-        case (pack, code) =>
-          Ok(
-            views.html.sourceCode(sourceCode = code,
-                                  pack = pack,
-                                  relativePath = relativePath.split('/').drop(3).mkString("/"),
-                                  lang = lang))
-      }
-      .getOrElse(NotFound.apply("Not found"))
-  }
+  def source(relativePath: String, query: String, insensitive: Boolean, precise: Boolean): Action[AnyContent] =
+    Action.async { implicit request =>
+      val realPath = s"data/$relativePath"
+      OptionT
+        .fromOption[Future](indexEngine.packageName(realPath))
+        .flatMap(pack => {
+          OptionT(Helper.readFileAsync(realPath)).map(s => (pack, s))
+        })
+        .map {
+          case (pack, code) =>
+            Ok(
+              views.html.sourceCode(sourceCode = code,
+                                    pack = pack,
+                                    relativePath = relativePath.split('/').drop(3).mkString("/"),
+                                    lang = lang,
+                                    query = query,
+                                    insensitive = insensitive,
+                                    precise = precise))
+        }
+        .getOrElse(NotFound.apply("Not found"))
+    }
 
+  private def isEnable(param: String) = param === "on"
 }

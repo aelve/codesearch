@@ -10,6 +10,7 @@ import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 import scala.io.Source
 import scala.util.Try
+import scala.util.matching.Regex
 
 object Helper {
 
@@ -80,4 +81,20 @@ object Helper {
     val ext = FilenameUtils.getExtension(fileLink)
     langByExt.getOrElse(ext, defaultLang)
   }
+
+  def buildRegex(query: String, insensitive: Boolean, precise: Boolean): Regex = {
+    val regex = mutable.StringBuilder.newBuilder
+    if (insensitive) {
+      regex.append("(?i)")
+    }
+    regex.append {
+      if (precise) {
+        Helper.hideSymbols(query)
+      } else {
+        query
+      }
+    }
+    regex.toString.r
+  }
+
 }
