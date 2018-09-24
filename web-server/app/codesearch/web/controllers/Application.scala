@@ -1,9 +1,9 @@
 package codesearch.web.controllers
 
-import codesearch.core.index.{HaskellIndex, JavaScriptIndex, RubyIndex, RustIndex}
+import codesearch.core.db.{CratesDB, GemDB, HackageDB, NpmDB}
 import com.github.marlonlom.utilities.timeago.TimeAgo
 import javax.inject.Inject
-import play.api.mvc.InjectedController
+import play.api.mvc.{Action, AnyContent, InjectedController}
 
 import scala.concurrent.ExecutionContext
 
@@ -15,12 +15,12 @@ class Application @Inject()(
     implicit val executionContext: ExecutionContext
 ) extends InjectedController {
 
-  def index = Action.async { implicit request =>
-    HaskellIndex().updated
-      .zip(HaskellIndex().getSize)
-      .zip(RustIndex().updated.zip(RustIndex().getSize))
-      .zip(JavaScriptIndex().updated.zip(JavaScriptIndex().getSize))
-      .zip(RubyIndex().updated.zip(RubyIndex().getSize))
+  def index: Action[AnyContent] = Action.async { implicit request =>
+    HackageDB.updated
+      .zip(HackageDB.getSize)
+      .zip(CratesDB.updated.zip(CratesDB.getSize))
+      .zip(NpmDB.updated.zip(NpmDB.getSize))
+      .zip(GemDB.updated.zip(GemDB.getSize))
       .map {
         case ((((updatedHackage, sizeHackage), (updatedCrates, sizeCrates)), (updatedNpm, sizeNpm)),
               (updatedGem, sizeGem)) =>

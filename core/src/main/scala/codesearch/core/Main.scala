@@ -1,10 +1,16 @@
 package codesearch.core
 
+import java.nio.ByteBuffer
 import java.util.concurrent.Executors
 
+import cats.effect.IO
 import codesearch.core.index._
 import codesearch.core.db._
 import codesearch.core.model._
+import com.softwaremill.sttp.SttpBackend
+import com.softwaremill.sttp.asynchttpclient.fs2.AsyncHttpClientFs2Backend
+import com.softwaremill.sttp.asynchttpclient.future.AsyncHttpClientFutureBackend
+import fs2.Stream
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -13,8 +19,11 @@ import scala.concurrent.duration.Duration
 object Main {
 
   private val logger: Logger = LoggerFactory.getLogger(Main.getClass)
+
   private implicit val ec: ExecutionContext = ExecutionContext
     .fromExecutorService(Executors.newFixedThreadPool(2 * Runtime.getRuntime.availableProcessors()))
+  private implicit val futureHttpClient: SttpBackend[Future, Nothing]         = AsyncHttpClientFutureBackend()
+  private implicit val fs2HttpClient: SttpBackend[IO, Stream[IO, ByteBuffer]] = AsyncHttpClientFs2Backend[IO]()
 
   case class Config(
       updatePackages: Boolean = false,
@@ -114,7 +123,8 @@ object Main {
         logger.info(s"${c.lang} packages successfully indexed")
       }
     }
-
+    futureHttpClient.close()
+    fs2HttpClient.close()
     scala.sys.exit(0)
   }
 }

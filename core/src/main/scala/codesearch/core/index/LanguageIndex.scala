@@ -9,9 +9,9 @@ import codesearch.core.db.DefaultDB
 import codesearch.core.index.LanguageIndex._
 import codesearch.core.index.directory.Directory
 import codesearch.core.index.repository._
-import codesearch.core.index.repository.Download.ops._
 import codesearch.core.model.{DefaultTable, Version}
 import codesearch.core.util.Helper
+import com.softwaremill.sttp.SttpBackend
 import org.slf4j.Logger
 
 import scala.collection.mutable
@@ -19,9 +19,13 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.sys.process._
 
 trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
-  protected val logger: Logger
-  protected val langExts: String
 
+  protected implicit def executor: ExecutionContext
+  protected implicit def http: SttpBackend[Future, Nothing]
+
+  protected val logger: Logger
+
+  protected val langExts: String
   protected val indexFile: String
   protected lazy val indexPath: Path     = pwd / 'data / indexFile
   protected lazy val tempIndexPath: Path = pwd / 'data / s"$indexFile.tmp"
@@ -107,6 +111,7 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
 
   /**
     * Build package name and path to remote repository
+    *
     * @param relativePath path to source code
     * @return package name and url to repository
     */
@@ -119,6 +124,7 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
 
   /**
     * Map code search output to case class
+    *
     * @param out csearch console out
     * @return search result
     */
@@ -135,6 +141,7 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
 
   /**
     * Create link to remote repository.
+    *
     * @param packageName local package name
     * @param version of package
     * @return link
@@ -150,12 +157,10 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
     */
   protected def buildFsUrl(packageName: String, version: String): NioPath
 
-  protected implicit def executor: ExecutionContext
-
   protected def archiveDownloadAndExtract[A <: SourcePackage: Extensions: Directory](pack: A): Future[Int] = {
-    import codesearch.core.index.repository.SourceRepository._
+    val repository = SourceRepository[A](new FileDownloader())
     (for {
-      _         <- pack.downloadSources
+      _         <- repository.downloadSources(pack)
       rowsCount <- insertOrUpdate(pack)
     } yield rowsCount).recover { case _ => 0 }
   }
@@ -255,6 +260,7 @@ object LanguageIndex {
 
   /**
     * Representation of package
+    *
     * @param name of package
     * @param packageLink to remote repository
     */

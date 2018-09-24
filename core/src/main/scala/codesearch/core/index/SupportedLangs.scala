@@ -1,4 +1,4 @@
-package codesearch.core.index.repository
+package codesearch.core.index
 
 trait JavaScript
 trait Haskell

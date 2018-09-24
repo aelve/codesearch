@@ -1,10 +1,11 @@
-@import codesearch.core.index.LanguageIndex.PackageResult
 @import codesearch.core.util.Helper
 @import scala.collection.mutable
 @import scala.math.max
 @import scala.collection.mutable.ListBuffer
 @import scala.collection.immutable
 @import play.twirl.api._
+@import codesearch.core.search.Searcher.PackageResult
+
 @(lang: String, insensitive: Boolean, precise: Boolean, query: String, updated: String, packages: Seq[PackageResult], totalMatches: Int)
 
 <section class="container">

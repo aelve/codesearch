@@ -4,6 +4,7 @@ import java.io.File
 import java.net.URLEncoder
 import java.nio.file.Path
 
+import codesearch.core.index.{Haskell, JavaScript, Ruby, Rust}
 import codesearch.core.index.directory.Extractor
 import com.softwaremill.sttp.{Uri, _}
 import org.rauschig.jarchivelib.ArchiveFormat.TAR
@@ -37,6 +38,7 @@ private[index] final case class GemPackage(
       .foreach(file => ArchiverFactory.createArchiver(TAR, GZIP).extract(file, destDir))
   }
 }
+
 private[index] final case class CratesPackage(
     name: String,
     version: String
