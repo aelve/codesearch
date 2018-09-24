@@ -7,8 +7,10 @@ import codesearch.core.util.Helper
 import com.github.marlonlom.utilities.timeago.TimeAgo
 import play.api.mvc.{Action, AnyContent, InjectedController}
 import cats.instances.future._
+import codesearch.core.config.{Config, SnippetConfig}
 import codesearch.core.search.Searcher
 import codesearch.core.search.Searcher.{CSearchPage, SearchArguments}
+import codesearch.web.controllers.SearchController._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -78,4 +80,12 @@ trait SearchController[V <: DefaultTable, I <: Searcher] { self: InjectedControl
       .getOrElse(NotFound.apply("Not found"))
   }
 
+}
+
+object SearchController {
+  lazy implicit val snippetConfig: SnippetConfig = Config
+    .load()
+    .toOption
+    .map(_.snippetConfig)
+    .getOrElse(SnippetConfig(30, 3, 5))
 }
