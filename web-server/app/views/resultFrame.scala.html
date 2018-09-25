@@ -22,7 +22,7 @@
         <span class="text-secondary" style="margin-bottom: 1em">@pack.results.size matches</span> <br>
 
         @for(result <- pack.results) {
-            <a href="src/@result.fileLink?query=@query&insensitive=@insensitive&precise=@precise">@result.relativePath</a>
+            <a href="src/@result.fileLink?query=@query&insensitive=@insensitive&precise=@precise&L=@{result.matchedLine + 1}#snippet.@{result.matchedLine + 1}">@result.relativePath</a>
             <pre data-start=@{result.numberOfFirstLine + 1}><code class="@("language-" + Helper.langByLink(result.fileLink, lang) +
                     " line-numbers")">@{
                 val re = Helper.buildRegex(query, insensitive, precise)

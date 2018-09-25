@@ -62,7 +62,7 @@ trait SearchController[V <: DefaultTable, I <: Searcher] { self: InjectedControl
         })
     }
 
-  def source(relativePath: String, query: String, insensitive: Boolean, precise: Boolean): Action[AnyContent] =
+  def source(relativePath: String, query: String, insensitive: Boolean, precise: Boolean, L: Int): Action[AnyContent] =
     Action.async { implicit request =>
       val realPath = s"data/$relativePath"
       OptionT
@@ -78,6 +78,7 @@ trait SearchController[V <: DefaultTable, I <: Searcher] { self: InjectedControl
                                     relativePath = relativePath.split('/').drop(3).mkString("/"),
                                     lang = lang,
                                     query = query,
+                                    firstMatch = L,
                                     insensitive = insensitive,
                                     precise = precise))
         }

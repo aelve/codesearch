@@ -6,7 +6,7 @@
 @import play.twirl.api._
 @import codesearch.web.SnippetHelper
 
-@(sourceCode: List[String], pack: Package, relativePath: String, lang: String, query: String,
+@(sourceCode: List[String], pack: Package, relativePath: String, lang: String, query: String, firstMatch: Int,
         insensitive: Boolean, precise: Boolean)
 
 @headExtra = {
@@ -22,7 +22,7 @@
     <h5 class="display-7" style="margin-bottom: 0em; margin-top: 1em;"><a href=@pack.packageLink>@pack.name</a></h5>
     <a href="#">@relativePath</a>
     <br/>
-    <pre data-start="1"><code class="@("language-" + lang + " line-numbers")">@{
+    <pre data-start="1" id="snippet" @if(firstMatch > 0){ data-line="@firstMatch" } else {}><code class="@("language-" + lang + " line-numbers")">@{
         val re = Helper.buildRegex(query, insensitive, precise)
         val htmlBuilder: ListBuffer[Html] = mutable.ListBuffer.empty[Html]
         for(line <- sourceCode) {
