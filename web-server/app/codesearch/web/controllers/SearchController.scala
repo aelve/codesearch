@@ -41,9 +41,9 @@ trait SearchController[V <: DefaultTable, I <: Searcher] { self: InjectedControl
       db.updated.flatMap(
         updated =>
           indexEngine.search(SearchArguments(query = query,
-                                             insensitive = isEnable(insensitive),
-                                             preciseMatch = isEnable(precise),
-                                             sourcesOnly = isEnable(sources)),
+                                             insensitive = isEnabled(insensitive),
+                                             preciseMatch = isEnabled(precise),
+                                             sourcesOnly = isEnabled(sources)),
                              page.toInt) map {
             case CSearchPage(results, total) =>
               Ok(
@@ -51,9 +51,9 @@ trait SearchController[V <: DefaultTable, I <: Searcher] { self: InjectedControl
                   updated = TimeAgo.using(updated.getTime),
                   packages = results,
                   query = query,
-                  insensitive = isEnable(insensitive),
-                  precise = isEnable(precise),
-                  sources = isEnable(sources),
+                  insensitive = isEnabled(insensitive),
+                  precise = isEnabled(precise),
+                  sources = isEnabled(sources),
                   page = page.toInt,
                   totalMatches = total,
                   callURI = callURI,
@@ -62,7 +62,7 @@ trait SearchController[V <: DefaultTable, I <: Searcher] { self: InjectedControl
         })
     }
 
-  def source(relativePath: String, query: String, insensitive: Boolean, precise: Boolean, L: Int): Action[AnyContent] =
+  def source(relativePath: String, query: String, L: Int): Action[AnyContent] =
     Action.async { implicit request =>
       val realPath = s"data/$relativePath"
       OptionT
@@ -78,12 +78,10 @@ trait SearchController[V <: DefaultTable, I <: Searcher] { self: InjectedControl
                                     relativePath = relativePath.split('/').drop(3).mkString("/"),
                                     lang = lang,
                                     query = query,
-                                    firstMatch = L,
-                                    insensitive = insensitive,
-                                    precise = precise))
+                                    firstMatch = L))
         }
         .getOrElse(NotFound.apply("Not found"))
     }
 
-  private def isEnable(param: String) = param === "on"
+  private def isEnabled(param: String) = param === "on"
 }
