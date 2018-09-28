@@ -1,9 +1,11 @@
 package codesearch.core.index
 
 import java.io.FileInputStream
+import java.nio.ByteBuffer
 import java.nio.file.Path
 
 import ammonite.ops.pwd
+import cats.effect.IO
 import codesearch.core.db.GemDB
 import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
@@ -11,7 +13,7 @@ import codesearch.core.index.repository.Extensions._
 import codesearch.core.index.repository.GemPackage
 import codesearch.core.model.{GemTable, Version}
 import com.softwaremill.sttp.SttpBackend
-
+import fs2.Stream
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json.Json
 
@@ -20,11 +22,11 @@ import scala.sys.process._
 
 class RubyIndex(
     private val ec: ExecutionContext,
-    private val httpClient: SttpBackend[Future, Nothing]
+    private val httpClient: SttpBackend[IO, Stream[IO, ByteBuffer]]
 ) extends LanguageIndex[GemTable] with GemDB {
 
-  override protected implicit def executor: ExecutionContext         = ec
-  override protected implicit def http: SttpBackend[Future, Nothing] = httpClient
+  override protected implicit def executor: ExecutionContext                    = ec
+  override protected implicit def http: SttpBackend[IO, Stream[IO, ByteBuffer]] = httpClient
 
   override protected val logger: Logger    = LoggerFactory.getLogger(this.getClass)
   override protected val indexFile: String = ".gem_csearch_index"
@@ -65,6 +67,6 @@ class RubyIndex(
 object RubyIndex {
   def apply()(
       implicit ec: ExecutionContext,
-      http: SttpBackend[Future, Nothing]
+      http: SttpBackend[IO, Stream[IO, ByteBuffer]]
   ) = new RubyIndex(ec, http)
 }

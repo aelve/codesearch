@@ -1,10 +1,12 @@
 package codesearch.core.index
 
 import java.net.URLDecoder
+import java.nio.ByteBuffer
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 import java.nio.file.{Files, Path => NioPath}
 
 import ammonite.ops.{Path, pwd}
+import cats.effect.IO
 import codesearch.core.db.DefaultDB
 import codesearch.core.index.LanguageIndex._
 import codesearch.core.index.directory.Directory
@@ -12,6 +14,7 @@ import codesearch.core.index.repository._
 import codesearch.core.model.{DefaultTable, Version}
 import codesearch.core.util.Helper
 import com.softwaremill.sttp.SttpBackend
+import fs2.Stream
 import org.slf4j.Logger
 
 import scala.collection.mutable
@@ -21,7 +24,7 @@ import scala.sys.process._
 trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
 
   protected implicit def executor: ExecutionContext
-  protected implicit def http: SttpBackend[Future, Nothing]
+  protected implicit def http: SttpBackend[IO, Stream[IO, ByteBuffer]]
 
   protected val logger: Logger
 
@@ -160,9 +163,9 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
   protected def archiveDownloadAndExtract[A <: SourcePackage: Extensions: Directory](pack: A): Future[Int] = {
     val repository = SourceRepository[A](new FileDownloader())
     (for {
-      _         <- repository.downloadSources(pack)
+      _         <- repository.downloadSources(pack).unsafeToFuture()
       rowsCount <- insertOrUpdate(pack)
-    } yield rowsCount).recover { case _ => 0 }
+    } yield rowsCount).recover { case ex => logger.error(ex.getMessage); 0 }
   }
 
   protected def runCsearch(arg: SearchArguments): Future[Array[String]] = {

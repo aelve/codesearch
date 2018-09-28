@@ -4,29 +4,23 @@ import java.io.File
 import java.nio.file.Path
 
 import cats.Eval
+import cats.effect.IO
 import codesearch.core.index.directory.Directory
 import codesearch.core.index.directory.Directory.ops._
-import org.slf4j.{Logger, LoggerFactory}
 import cats.syntax.traverse._
 import cats.instances.list._
 import cats.syntax.applicative._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.util.Failure
-
-final class SourceRepository[A <: SourcePackage: Extensions: Directory](downloader: Downloader[Future])
+final class SourceRepository[A <: SourcePackage: Extensions: Directory](downloader: Downloader[IO, File])
     extends Download[A] {
 
-  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
-
-  override def downloadSources(pack: A): Future[Path] = {
+  override def downloadSources(pack: A): IO[Path] = {
     for {
       archive   <- downloader.download(pack.url, pack.archive)
       directory <- pack.extract(archive, pack.unarchived)
-      _         <- Future(deleteExcessFiles(directory, FileFilter.create[A]))
+      _         <- deleteExcessFiles(directory, FileFilter.create[A])
     } yield directory
-  }.andThen { case Failure(ex) => logger.error(ex.getMessage) }
+  }
 
   /**
     * Function removes all extension files that are not contained in the set of allowed extensions
@@ -35,7 +29,7 @@ final class SourceRepository[A <: SourcePackage: Extensions: Directory](download
     * @param fileFilter is implementation of trait [[FileFilter]]
     * @return count removed files
     */
-  private def deleteExcessFiles[A](directory: Path, fileFilter: FileFilter[A]): Int = {
+  private def deleteExcessFiles(directory: Path, fileFilter: FileFilter): IO[Int] = {
     def deleteRecursively(dir: File, predicate: File => Boolean): Eval[Int] = {
       for {
         (dirs, files)      <- Eval.later(dir.listFiles.toList.partition(_.isDirectory))
@@ -44,11 +38,12 @@ final class SourceRepository[A <: SourcePackage: Extensions: Directory](download
         _                  <- Eval.later(dir.delete).whenA(dir.listFiles.isEmpty)
       } yield filesDeleted + nestedFilesDeleted
     }
-    deleteRecursively(directory.toFile, fileFilter.filter).value
+    IO.eval(deleteRecursively(directory.toFile, fileFilter.filter))
   }
 }
 
 object SourceRepository {
-  def apply[A <: SourcePackage: Extensions: Directory](downloader: Downloader[Future]): SourceRepository[A] =
-    new SourceRepository[A](downloader)
+  def apply[A <: SourcePackage: Extensions: Directory](
+      downloader: Downloader[IO, File]
+  ): SourceRepository[A] = new SourceRepository[A](downloader)
 }

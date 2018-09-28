@@ -7,20 +7,18 @@ import java.nio.file.{Path, Paths}
 
 import cats.Semigroup
 import cats.effect.IO
-import codesearch.core.index.repository.DownloadException
+import codesearch.core.index.repository.ByteStreamDownloader
 import codesearch.core.model.Version
 import com.softwaremill.sttp.SttpBackend
-import com.softwaremill.sttp.{Uri, _}
+import com.softwaremill.sttp._
 import fs2.{Chunk, Pipe, Sink, Stream}
 import fs2.io._
 import io.circe.fs2._
 import io.circe.{Decoder, HCursor, Json}
 import io.circe.syntax._
 import io.circe.generic.auto._
-import org.slf4j.{Logger, LoggerFactory}
 import cats.implicits._
 
-import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext
 import scala.language.higherKinds
 import codesearch.core.index.directory.PathOps._
@@ -30,8 +28,6 @@ private final case class NpmRegistryPackage(name: String, version: String)
 private final case class NpmPackage(name: String, version: String)
 
 private[index] final class NpmDetails(implicit ec: ExecutionContext, http: SttpBackend[IO, Stream[IO, ByteBuffer]]) {
-
-  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
   private val NpmRegistryUrl = uri"https://replicate.npmjs.com/_all_docs?include_docs=true"
   private val FsIndexPath    = FsIndexRoot / "npm_packages_index.json"
@@ -48,10 +44,10 @@ private[index] final class NpmDetails(implicit ec: ExecutionContext, http: SttpB
   }
 
   def index: IO[Unit] =
-    stream(NpmRegistryUrl)
+    new ByteStreamDownloader()
+      .download(NpmRegistryUrl)
       .flatMap(
-        _.through(toBytes)
-          .through(cutStream)
+        _.through(cutStream)
           .through(byteArrayParser[IO])
           .through(decoder[IO, NpmRegistryPackage])
           .through(packageToString)
@@ -67,19 +63,6 @@ private[index] final class NpmDetails(implicit ec: ExecutionContext, http: SttpB
       .through(toMap)
       .compile
       .foldMonoid
-  }
-
-  private def stream(url: Uri): IO[Stream[IO, ByteBuffer]] = {
-    sttp
-      .get(url)
-      .response(asStream[Stream[IO, ByteBuffer]])
-      .readTimeout(Duration.Inf)
-      .send
-      .flatMap(response => IO.fromEither(response.body.leftMap(DownloadException)))
-  }
-
-  private def toBytes[F[_]]: Pipe[IO, ByteBuffer, Byte] = { input =>
-    input.flatMap(buffer => Stream.chunk(Chunk.array(buffer.array)))
   }
 
   private def toMap[F[_]]: Pipe[IO, NpmPackage, Map[String, Version]] = { input =>

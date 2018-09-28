@@ -4,6 +4,7 @@ import java.io.File
 import java.net.URLEncoder
 import java.nio.file.Path
 
+import cats.effect.IO
 import codesearch.core.index.{Haskell, JavaScript, Ruby, Rust}
 import codesearch.core.index.directory.Extractor
 import com.softwaremill.sttp.{Uri, _}
@@ -29,7 +30,7 @@ private[index] final case class GemPackage(
     version: String
 ) extends SourcePackage with Ruby {
   val url: Uri = uri"https://rubygems.org/downloads/$name-$version.gem"
-  override def unzipUsingMethod(from: File, to: Path): Unit = {
+  override def unzipUsingMethod(from: File, to: Path): IO[Unit] = IO {
     val destDir    = to.toFile
     val allowedSet = Set("tgz", "tar.gz")
     ArchiverFactory.createArchiver(TAR).extract(from, destDir)
@@ -50,7 +51,8 @@ private[index] final case class NpmPackage(
     rawName: String,
     version: String
 ) extends SourcePackage with JavaScript {
+  private val urlString = s"https://registry.npmjs.org/$rawName/-/$rawName-$version.tgz"
   //Because package name can look like: react>>=native@@router!!v2.1.123(refactored:-))
   val name: String = URLEncoder.encode(rawName, "UTF-8")
-  val url: Uri     = uri"https://registry.npmjs.org/$name/-/$name-$version.tgz"
+  val url: Uri     = uri"$urlString"
 }

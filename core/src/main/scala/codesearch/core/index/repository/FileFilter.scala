@@ -3,7 +3,7 @@ import java.io.File
 
 import org.apache.commons.io.FilenameUtils.getExtension
 
-trait FileFilter[A] {
+trait FileFilter {
 
   /** Function tells whether the file matches the defines predicate
     *
@@ -14,7 +14,7 @@ trait FileFilter[A] {
 }
 
 object FileFilter {
-  def create[A](implicit E: Extensions[A]): FileFilter[A] = new FileFilter[A] {
+  def create[A](implicit E: Extensions[A]): FileFilter = new FileFilter {
     val maxFileSize: Int = 1024 * 1024
     val allowedFileNames = Set("makefile", "dockerfile", "readme", "changelog", "changes")
     override def filter(file: File): Boolean = {

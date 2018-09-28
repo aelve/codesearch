@@ -19,12 +19,11 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class JavaScriptIndex(
     private val ec: ExecutionContext,
-    private val httpClient: SttpBackend[Future, Nothing],
-    private implicit val streamHttp: SttpBackend[IO, Stream[IO, ByteBuffer]]
+    private val httpClient: SttpBackend[IO, Stream[IO, ByteBuffer]]
 ) extends LanguageIndex[NpmTable] with NpmDB {
 
-  override protected implicit def executor: ExecutionContext         = ec
-  override protected implicit def http: SttpBackend[Future, Nothing] = httpClient
+  override protected implicit def executor: ExecutionContext                    = ec
+  override protected implicit def http: SttpBackend[IO, Stream[IO, ByteBuffer]] = httpClient
 
   override protected val logger: Logger    = LoggerFactory.getLogger(this.getClass)
   override protected val indexFile: String = ".npm_csearch_index"
@@ -52,7 +51,6 @@ class JavaScriptIndex(
 object JavaScriptIndex {
   def apply()(
       implicit ec: ExecutionContext,
-      http: SttpBackend[Future, Nothing],
-      streamHttp: SttpBackend[IO, Stream[IO, ByteBuffer]]
-  ) = new JavaScriptIndex(ec, http, streamHttp)
+      http: SttpBackend[IO, Stream[IO, ByteBuffer]]
+  ) = new JavaScriptIndex(ec, http)
 }
