@@ -41,14 +41,14 @@ object Helper {
     these.filter(_.isFile) ++ these.filter(_.isDirectory).filter(_.getName != ".git").flatMap(recursiveListFiles)
   }
 
-  def extractRows(path: String, codeLine: Int): (Int, Seq[String]) = {
+  def extractRows(path: String, codeLine: Int, beforeLines: Int, afterLines: Int): (Int, Seq[String]) = {
     try {
       val lines     = Source.fromFile(path, "UTF-8").getLines
       val result    = mutable.Buffer[String]()
       var firstLine = -1
-      lines.zipWithIndex.takeWhile(_._2 <= codeLine + 1).foreach {
+      lines.zipWithIndex.takeWhile(_._2 < codeLine + afterLines).foreach {
         case (line, ind) =>
-          if (ind >= codeLine - 2) {
+          if (ind >= codeLine - beforeLines - 1) {
             if (firstLine < 0) firstLine = ind
             result.append(line)
           }

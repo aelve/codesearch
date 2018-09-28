@@ -203,7 +203,7 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
   private def createCSearchResult(fullPath: String, lineNumber: Int): Option[CSearchResult] = {
     val relativePath = Path(fullPath).relativeTo(pwd).toString
     packageName(relativePath).map { p =>
-      val (firstLine, rows) = Helper.extractRows(relativePath, lineNumber)
+      val (firstLine, rows) = Helper.extractRows(relativePath, lineNumber, 3, 5) // temp
       CSearchResult(
         p,
         CodeSnippet(

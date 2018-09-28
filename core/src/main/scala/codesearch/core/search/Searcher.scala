@@ -2,6 +2,7 @@ package codesearch.core.search
 import java.net.URLDecoder
 
 import ammonite.ops.{Path, pwd}
+import codesearch.core.config.SnippetConfig
 import codesearch.core.search.Searcher._
 import codesearch.core.util.Helper
 import org.slf4j.Logger
@@ -18,11 +19,12 @@ trait Searcher {
   protected def indexFile: String
   protected def indexPath: Path = pwd / 'data / indexFile
 
-  def search(args: SearchArguments, page: Int)(implicit ec: ExecutionContext): Future[CSearchPage] = {
+  def search(args: SearchArguments, page: Int)(implicit ec: ExecutionContext,
+                                               snippetConfig: SnippetConfig): Future[CSearchPage] = {
     runCsearch(args).map { answers =>
       val data = answers
-        .slice(math.max(page - 1, 0) * PageSize, page * PageSize)
-        .flatMap(mapCSearchOutput)
+        .slice(math.max(page - 1, 0) * snippetConfig.pageSize, page * snippetConfig.pageSize)
+        .flatMap(out => mapCSearchOutput(out, snippetConfig))
         .groupBy(x => x.pack)
         .map {
           case (pack, results) =>
@@ -40,9 +42,9 @@ trait Searcher {
     * @param out csearch console out
     * @return search result
     */
-  protected def mapCSearchOutput(out: String): Option[CSearchResult] = {
+  protected def mapCSearchOutput(out: String, snippetConfig: SnippetConfig): Option[CSearchResult] = {
     val res = out.split(':').toList match {
-      case fullPath :: lineNumber :: _ => createCSearchResult(fullPath, lineNumber.toInt)
+      case fullPath :: lineNumber :: _ => createCSearchResult(fullPath, lineNumber.toInt, snippetConfig)
       case _                           => None
     }
     if (res.isEmpty) logger.warn(s"bad codesearch output: $out")
@@ -71,10 +73,13 @@ trait Searcher {
     */
   protected def buildRepUrl(packageName: String, version: String): String
 
-  private def createCSearchResult(fullPath: String, lineNumber: Int): Option[CSearchResult] = {
+  private def createCSearchResult(fullPath: String,
+                                  lineNumber: Int,
+                                  snippetConfig: SnippetConfig): Option[CSearchResult] = {
     val relativePath = Path(fullPath).relativeTo(pwd).toString
     packageName(relativePath).map { p =>
-      val (firstLine, rows) = Helper.extractRows(relativePath, lineNumber)
+      val (firstLine, rows) =
+        Helper.extractRows(relativePath, lineNumber, snippetConfig.linesBefore, snippetConfig.linesAfter)
       CSearchResult(
         p,
         CodeSnippet(
@@ -107,8 +112,6 @@ trait Searcher {
 }
 
 object Searcher {
-
-  private[search] val PageSize = 100
 
   /**
     * result of searching
