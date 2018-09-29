@@ -61,7 +61,7 @@ trait SearchController[V <: DefaultTable, I <: Searcher] { self: InjectedControl
                   callURI = callURI,
                   lang = lang
                 ))
-        })
+          } unsafeToFuture)
     }
 
   def source(relativePath: String, query: String, L: Int): Action[AnyContent] =
@@ -70,7 +70,7 @@ trait SearchController[V <: DefaultTable, I <: Searcher] { self: InjectedControl
       OptionT
         .fromOption[Future](indexEngine.packageName(realPath))
         .flatMap(pack => {
-          OptionT(Helper.readFileAsync(realPath)).map(s => (pack, s))
+          OptionT.liftF(Helper.readFileAsync(realPath).unsafeToFuture()).map(s => (pack, s))
         })
         .map {
           case (pack, code) =>

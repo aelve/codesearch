@@ -2,13 +2,16 @@ package codesearch.core.search
 import java.net.URLDecoder
 
 import ammonite.ops.{Path, pwd}
+import cats.effect.IO
+import cats.syntax.traverse._
+import cats.instances.option._
+import cats.instances.list._
 import codesearch.core.config.SnippetConfig
 import codesearch.core.search.Searcher._
 import codesearch.core.util.Helper
 import org.slf4j.Logger
 
 import scala.collection.mutable
-import scala.concurrent.{ExecutionContext, Future}
 import scala.sys.process.Process
 
 trait Searcher {
@@ -19,21 +22,21 @@ trait Searcher {
   protected def indexFile: String
   protected def indexPath: Path = pwd / 'data / indexFile
 
-  def search(args: SearchArguments, page: Int)(implicit ec: ExecutionContext,
-                                               snippetConfig: SnippetConfig): Future[CSearchPage] = {
-    runCsearch(args).map { answers =>
-      val data = answers
+  def search(args: SearchArguments, page: Int)(implicit snippetConfig: SnippetConfig): IO[CSearchPage] = {
+    for {
+      answers <- runCsearch(args)
+      searchResults <- answers
         .slice(math.max(page - 1, 0) * snippetConfig.pageSize, page * snippetConfig.pageSize)
-        .flatMap(out => mapCSearchOutput(out, snippetConfig))
-        .groupBy(x => x.pack)
+        .traverse(out => mapCSearchOutput(out, snippetConfig))
+      data = searchResults.flatten
+        .groupBy(_.pack)
         .map {
           case (pack, results) =>
-            PackageResult(pack, results.map(_.result).toSeq)
+            PackageResult(pack, results.map(_.result))
         }
         .toSeq
         .sortBy(_.pack.name)
-      CSearchPage(data, answers.length)
-    }
+    } yield CSearchPage(data, answers.size)
   }
 
   /**
@@ -42,13 +45,11 @@ trait Searcher {
     * @param out csearch console out
     * @return search result
     */
-  protected def mapCSearchOutput(out: String, snippetConfig: SnippetConfig): Option[CSearchResult] = {
-    val res = out.split(':').toList match {
+  protected def mapCSearchOutput(out: String, snippetConfig: SnippetConfig): IO[Option[CSearchResult]] = {
+    out.split(':').toList match {
       case fullPath :: lineNumber :: _ => createCSearchResult(fullPath, lineNumber.toInt, snippetConfig)
-      case _                           => None
+      case _                           => IO.pure(None)
     }
-    if (res.isEmpty) logger.warn(s"bad codesearch output: $out")
-    res
   }
 
   /**
@@ -75,25 +76,26 @@ trait Searcher {
 
   private def createCSearchResult(fullPath: String,
                                   lineNumber: Int,
-                                  snippetConfig: SnippetConfig): Option[CSearchResult] = {
+                                  snippetConfig: SnippetConfig): IO[Option[CSearchResult]] = {
     val relativePath = Path(fullPath).relativeTo(pwd).toString
-    packageName(relativePath).map { p =>
-      val (firstLine, rows) =
-        Helper.extractRows(relativePath, lineNumber, snippetConfig.linesBefore, snippetConfig.linesAfter)
-      CSearchResult(
-        p,
-        CodeSnippet(
-          relativePath.split('/').drop(4).mkString("/"), // drop `data/hackage/packageName/version/`
-          relativePath.split('/').drop(1).mkString("/"), // drop `data`
-          firstLine,
-          lineNumber - 1,
-          rows
-        )
-      )
+    packageName(relativePath).traverse { p =>
+      Helper.extractRows(relativePath, lineNumber, snippetConfig.linesBefore, snippetConfig.linesAfter).map {
+        case (firstLine, rows) =>
+          CSearchResult(
+            p,
+            CodeSnippet(
+              relativePath.split('/').drop(4).mkString("/"), // drop `data/hackage/packageName/version/`
+              relativePath.split('/').drop(1).mkString("/"), // drop `data`
+              firstLine,
+              lineNumber - 1,
+              rows
+            )
+          )
+      }
     }
   }
 
-  protected def runCsearch(arg: SearchArguments)(implicit ec: ExecutionContext): Future[Array[String]] = {
+  protected def runCsearch(arg: SearchArguments): IO[List[String]] = {
     val pathRegex     = if (arg.sourcesOnly) langExts else ".*"
     val query: String = if (arg.preciseMatch) Helper.hideSymbols(arg.query) else arg.query
 
@@ -104,8 +106,8 @@ trait Searcher {
     args.append("-f", pathRegex)
     args.append(query)
 
-    Future {
-      (Process(args, None, "CSEARCHINDEX" -> indexPath.toString()) #| Seq("head", "-1001")).!!.split('\n')
+    IO {
+      (Process(args, None, "CSEARCHINDEX" -> indexPath.toString()) #| Seq("head", "-1001")).!!.split('\n').toList
     }
   }
 
