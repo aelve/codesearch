@@ -1,22 +1,16 @@
 package codesearch.core.util
 
 import java.io.File
-import java.util.concurrent.Executors
 
+import cats.effect.IO
 import org.apache.commons.io.FilenameUtils
-import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable
-import scala.concurrent.{ExecutionContext, Future}
 import scala.io.Source
-import scala.util.Try
 import scala.util.matching.Regex
 
 object Helper {
 
-  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
-  private implicit val executionContext: ExecutionContext =
-    ExecutionContext.fromExecutor(Executors.newFixedThreadPool(100))
   private val SPECIAL_CHARS = "$^*+().?|"
 
   val langByExt: Map[String, String] = Map(
@@ -41,32 +35,21 @@ object Helper {
     these.filter(_.isFile) ++ these.filter(_.isDirectory).filter(_.getName != ".git").flatMap(recursiveListFiles)
   }
 
-  def extractRows(path: String, codeLine: Int, beforeLines: Int, afterLines: Int): (Int, Seq[String]) = {
-    try {
-      val lines     = Source.fromFile(path, "UTF-8").getLines
-      val result    = mutable.Buffer[String]()
-      var firstLine = -1
-      lines.zipWithIndex.takeWhile(_._2 < codeLine + afterLines).foreach {
-        case (line, ind) =>
-          if (ind >= codeLine - beforeLines - 1) {
-            if (firstLine < 0) firstLine = ind
-            result.append(line)
-          }
-      }
-      (firstLine, result)
-    } catch {
-      case e: Exception =>
-        logger.debug(e.getMessage)
-        (0, Seq.empty[String])
+  /**
+    * Returns index of first matched lines and lines of code
+    */
+  def extractRows(path: String, codeLine: Int, beforeLines: Int, afterLines: Int): IO[(Int, Seq[String])] = {
+    readFileAsync(path).map { lines =>
+      val (code, indexes) = lines.zipWithIndex.filter {
+        case (_, index) => index >= codeLine - beforeLines - 1 && index <= codeLine + afterLines
+      }.unzip
+
+      indexes.head -> code
     }
   }
 
-  def readFileAsync(path: String): Future[Option[List[String]]] =
-    Future {
-      Try {
-        Source.fromFile(path, "UTF-8").getLines
-      }.map(_.toList).toOption
-    }
+  def readFileAsync(path: String): IO[List[String]] =
+    IO(Source.fromFile(path, "UTF-8")).bracket(source => IO.pure(source.getLines.toList))(source => IO(source.close()))
 
   def hideSymbols(str: String): String = {
     str.foldRight("") {
