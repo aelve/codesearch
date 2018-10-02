@@ -1,10 +1,11 @@
-@import codesearch.core.index.LanguageIndex.PackageResult
 @import codesearch.core.util.Helper
 @import scala.collection.mutable
-@import scala.math.max
 @import scala.collection.mutable.ListBuffer
 @import scala.collection.immutable
 @import play.twirl.api._
+@import codesearch.core.search.Searcher.PackageResult
+@import codesearch.web.SnippetHelper
+
 @(lang: String, insensitive: Boolean, precise: Boolean, query: String, updated: String, packages: Seq[PackageResult], totalMatches: Int)
 
 <section class="container">
@@ -21,29 +22,15 @@
         <span class="text-secondary" style="margin-bottom: 1em">@pack.results.size matches</span> <br>
 
         @for(result <- pack.results) {
-            <a href="src/@result.fileLink">@result.relativePath</a>
+            <a href="src/@result.fileLink?query=@{Helper.buildRegex(query = query,
+                insensitive = insensitive, precise = precise)}&L=@{result.matchedLine + 1}#snippet.@{result.matchedLine + 1}">@result.relativePath</a>
             <pre data-start=@{result.numberOfFirstLine + 1}><code class="@("language-" + Helper.langByLink(result.fileLink, lang) +
                     " line-numbers")">@{
-                val re = {
-                    val regex = mutable.StringBuilder.newBuilder
-                    if (insensitive) {
-                        regex.append("(?i)")
-                    }
-                    regex.append {
-                        if (precise) {
-                            Helper.hideSymbols(query)
-                        } else {
-                            query
-                        }
-                    }
-                    regex.toString
-                }.r
+                val re = Helper.buildRegex(query = query, insensitive = insensitive, precise = precise)
 
                 val id = result.matchedLine - result.numberOfFirstLine
                 val hLine = result.ctxt(id)
                 val matches = re.findAllMatchIn(hLine)
-                var lastL = 0
-                var lastR = 0
 
                 val htmlBuilder: ListBuffer[Html] = mutable.ListBuffer.empty[Html]
 
@@ -57,27 +44,9 @@
                 }
                 htmlBuilder.append(HtmlFormat.escape(pref2))
 
-                matches.map(m => (m.start, m.end)).foreach { case (l, r) =>
-                    if(lastR <= l) {
-                        if (lastR != 0) {
-                            htmlBuilder.append(Html("</mark>"))
-                        }
-                        htmlBuilder.append(HtmlFormat.escape(hLine.substring(lastR, l)))
-                        htmlBuilder.append(Html("<mark>"))
-                        htmlBuilder.append(HtmlFormat.escape(hLine.substring(l, r)))
-                        lastL = l
-                        lastR = r
-                    } else {
-                        htmlBuilder.append(HtmlFormat.escape(hLine.substring(lastR, max(lastR, r))))
-                        lastR = max(lastR, r)
-                    }
-                }
-                if (lastR != 0) {
-                    htmlBuilder.append(Html("</mark>"))
-                }
-                htmlBuilder.append(HtmlFormat.escape(hLine.substring(lastR)))
+                htmlBuilder.append(SnippetHelper.markAllMatches(hLine, matches): _*)
 
-                htmlBuilder.append(HtmlFormat.escape("\n" ++ result.ctxt.drop(id + 1).mkString("\n")))
+                htmlBuilder.append(HtmlFormat.escape(result.ctxt.drop(id + 1).mkString("\n")))
 
                 HtmlFormat.fill(immutable.Seq(htmlBuilder: _*))
             }</code></pre>

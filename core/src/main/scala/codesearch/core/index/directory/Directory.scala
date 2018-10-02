@@ -15,22 +15,13 @@ object PathOps {
 
 @typeclass trait Directory[A] {
 
-  /** Defines root directory for sources storing
-    *
-    * @return root directory for sources storing
-    */
+  /** Defines root directory for sources storing */
   def sourcesDir: Path = Paths.get(s"./data")
 
-  /** Defines path to directory with source files
-    *
-    * @return path to directory with source files
-    */
+  /** Defines path to directory with source files */
   def packageDir(pack: A): Path
 
-  /** Defines extension of archive file
-    *
-    * @return extension of archive file
-    */
+  /** Defines extension of archive file */
   def extension: String = "tgz"
 
   /** Return path of archive file

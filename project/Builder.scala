@@ -59,13 +59,19 @@ object Builder {
       assemblyJarName in assembly := "codesearch-core.jar",
       assemblyOutputPath in assembly := baseDirectory.value / "../codesearch-core.jar",
       libraryDependencies ++= Seq(
-        "com.typesafe.slick"    %% "slick"                            % "3.2.3",
-        "com.typesafe.slick"    %% "slick-hikaricp"                   % "3.2.3",
-        "org.postgresql"        % "postgresql"                        % "42.2.2",
-        "com.softwaremill.sttp" %% "async-http-client-backend-future" % "1.3.0",
-        "com.github.pureconfig" %% "pureconfig" % "0.9.2",
-        "org.scalactic" %% "scalactic" % "3.0.5",
-        "org.scalatest" %% "scalatest" % "3.0.5" % "test"
+        "com.typesafe.slick"    %% "slick"                         % "3.2.3",
+        "com.typesafe.slick"    %% "slick-hikaricp"                % "3.2.3",
+        "org.postgresql"        % "postgresql"                     % "42.2.2",
+        "com.softwaremill.sttp" %% "async-http-client-backend-fs2" % "1.3.1",
+        "co.fs2"                %% "fs2-core"                      % "1.0.0-M1",
+        "co.fs2"                %% "fs2-io"                        % "1.0.0-M1",
+        "io.circe"              %% "circe-fs2"                     % "0.9.0",
+        "io.circe"              %% "circe-core"                    % "0.9.3",
+        "io.circe"              %% "circe-generic"                 % "0.9.3",
+        "io.circe"              %% "circe-parser"                  % "0.9.3",
+        "com.github.pureconfig" %% "pureconfig"                    % "0.9.2",
+        "org.scalactic"         %% "scalactic"                     % "3.0.5",
+        "org.scalatest"         %% "scalatest"                     % "3.0.5" % "test"
       ),
       assemblyMergeStrategy in assembly := {
         case PathList("META-INF", _ @_*) => MergeStrategy.discard
@@ -86,7 +92,7 @@ object Builder {
       fullClasspath in assembly += Attributed.blank(PlayKeys.playPackageAssets.value),
       assemblyMergeStrategy in assembly := {
         case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.concat
-        case manifest if manifest.contains("MANIFEST.MF") =>
+        case manifest if manifest.contains("MANIFEST.MF")         =>
           // We don't need manifest files since sbt-assembly will create
           // one with the given settings
           MergeStrategy.discard
