@@ -11,5 +11,5 @@ class JavascriptSearch extends Searcher {
   override protected def indexFile: String = ".npm_csearch_index"
 
   override protected def buildRepUrl(packageName: String, version: String): String =
-    s"https://rubygems.org/gems/$packageName/versions/$version"
+    s"https://www.npmjs.com/package/$packageName/v/$version"
 }

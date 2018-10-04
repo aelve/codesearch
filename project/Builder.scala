@@ -39,15 +39,16 @@ object Builder {
 
   lazy val commonDeps = Seq(
     libraryDependencies ++= Seq(
-      "com.github.scopt"     %% "scopt"          % "3.7.0",
-      "com.lihaoyi"          %% "ammonite-ops"   % "1.0.3",
-      "org.rauschig"         % "jarchivelib"     % "0.7.1",
-      "commons-io"           % "commons-io"      % "2.6",
-      "javax.inject"         % "javax.inject"    % "1",
-      "ch.qos.logback"       % "logback-classic" % "1.2.3",
-      "com.typesafe.play"    %% "play-json"      % "2.6.9",
-      "com.github.mpilquist" %% "simulacrum"     % "0.13.0",
-      "org.typelevel"        %% "cats-core"      % "1.2.0"
+      "com.github.scopt"     %% "scopt"            % "3.7.0",
+      "com.lihaoyi"          %% "ammonite-ops"     % "1.0.3",
+      "org.rauschig"         % "jarchivelib"       % "0.7.1",
+      "commons-io"           % "commons-io"        % "2.6",
+      "javax.inject"         % "javax.inject"      % "1",
+      "ch.qos.logback"       % "logback-classic"   % "1.2.3",
+      "com.typesafe.play"    %% "play-json"        % "2.6.9",
+      "com.github.mpilquist" %% "simulacrum"       % "0.13.0",
+      "org.typelevel"        %% "cats-core"        % "1.2.0",
+      "org.typelevel"        %% "shapeless-scalaz" % "0.4"
     )
   )
 

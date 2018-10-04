@@ -22,7 +22,7 @@ trait Searcher {
   protected def indexFile: String
   protected def indexPath: Path = pwd / 'data / indexFile
 
-  def search(args: SearchArguments, page: Int)(implicit snippetConfig: SnippetConfig): IO[CSearchPage] = {
+  def search(args: SearchRequest, page: Int)(implicit snippetConfig: SnippetConfig): IO[CSearchPage] = {
     for {
       answers <- runCsearch(args)
       searchResults <- answers
@@ -95,7 +95,7 @@ trait Searcher {
     }
   }
 
-  protected def runCsearch(arg: SearchArguments): IO[List[String]] = {
+  protected def runCsearch(arg: SearchRequest): IO[List[String]] = {
     val pathRegex     = if (arg.sourcesOnly) langExts else ".*"
     val query: String = if (arg.preciseMatch) Helper.hideSymbols(arg.query) else arg.query
 
