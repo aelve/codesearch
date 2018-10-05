@@ -5,7 +5,7 @@ import ammonite.ops.{Path, pwd}
 import cats.effect.IO
 import codesearch.core.config.{Config, SnippetConfig}
 import codesearch.core.index.repository.Extensions
-import codesearch.core.search.Searcher.{CSearchResult, CodeSnippet, Package}
+import codesearch.core.search.Searcher.{CSearchPage, CSearchResult, CodeSnippet, Package}
 import codesearch.core.util.Helper
 import cats.syntax.traverse._
 import cats.instances.option._
@@ -15,15 +15,28 @@ import codesearch.core.util.Helper.readFileAsync
 
 import scala.sys.process.Process
 
-private[search] class Search[A <: SearchRequest: Extensions: СSearchDirectory](args: A) {
+private[search] class Search[A <: SearchRequest: Extensions: СSearchDirectory](request: A) {
 
-  def search(): Unit = {
-    csearch(args)
+  def search: IO[CSearchPage] = {
+    csearch
   }
 
-  private def csearch(request: SearchRequest): IO[List[String]] = {
-    val extraEnv = ("CSEARCHINDEX", СSearchDirectory[A].indexDirAs[String])
-    IO((Process(arguments(request), None, extraEnv) #| Seq("head", "-1001")).!!.split('\n').toList)
+  /**
+    * Build package name and path to remote repository
+    *
+    * @param relativePath path to source code
+    * @return package name and url to repository
+    */
+  def packageName(relativePath: String): Option[Package] = relativePath.split('/').drop(2).toList match {
+    case libName :: version :: _ =>
+      val decodedName = URLDecoder.decode(libName, "UTF-8")
+      Some(Package(s"$decodedName-$version", ""))
+    case _ => None
+  }
+
+  private def csearch: IO[List[String]] = {
+    val env = ("CSEARCHINDEX", СSearchDirectory[A].indexDirAs[String])
+    IO((Process(arguments(request), None, env) #| Seq("head", "-1001")).!!.split('\n').toList)
   }
 
   private def arguments(request: SearchRequest): List[String] = {
@@ -41,7 +54,7 @@ private[search] class Search[A <: SearchRequest: Extensions: СSearchDirectory](
     * @param out csearch console out
     * @return search result
     */
-  protected def mapCSearchOutput(out: String): IO[Option[CSearchResult]] = {
+  private def mapCSearchOutput(out: String): IO[Option[CSearchResult]] = {
     out.split(':').toList match {
       case fullPath :: lineNumber :: _ => result(fullPath, lineNumber.toInt)
       case _                           => IO.pure(None)
@@ -65,19 +78,6 @@ private[search] class Search[A <: SearchRequest: Extensions: СSearchDirectory](
           )
       }
     }
-  }
-
-  /**
-    * Build package name and path to remote repository
-    *
-    * @param relativePath path to source code
-    * @return package name and url to repository
-    */
-  private def packageName(relativePath: String): Option[Package] = relativePath.split('/').drop(2).toList match {
-    case libName :: version :: _ =>
-      val decodedName = URLDecoder.decode(libName, "UTF-8")
-      Some(Package(s"$decodedName-$version", buildRepUrl(decodedName, version)))
-    case _ => None
   }
 
   /**

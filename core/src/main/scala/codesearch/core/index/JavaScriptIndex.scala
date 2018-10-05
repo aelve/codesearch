@@ -23,8 +23,7 @@ class JavaScriptIndex(javaScriptConfig: JavaScriptConfig)(
     val shift: ContextShift[IO]
 ) extends LanguageIndex[NpmTable] with NpmDB {
 
-  override protected val indexFile: String = ".npm_csearch_index"
-  override protected val langExts: String  = ".*\\.(js|json)$"
+  override type LanguageTag = JavaScript
 
   override protected def concurrentTasksCount: Int = javaScriptConfig.concurrentTasksCount
 

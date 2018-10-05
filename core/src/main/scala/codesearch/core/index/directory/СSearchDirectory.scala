@@ -3,11 +3,13 @@ package codesearch.core.index.directory
 import java.nio.file.{Path, Paths}
 
 import codesearch.core.index.{Haskell, JavaScript, Ruby, Rust}
+import codesearch.core.index.directory.PathOps._
 import simulacrum.typeclass
 
 @typeclass trait СSearchDirectory[A] {
   def packageManager: String
-  def indexDirAs[O: DirAs]: O = DirAs[O].dir(packageManager)
+  def indexDirAs[O](implicit D: DirAs[O]): O = D.dir(packageManager)
+  def tempIndexDirAs[O](implicit D: DirAs[O]): O = D.tempDir(packageManager)
 }
 
 object СSearchDirectory {
@@ -31,12 +33,19 @@ object СSearchDirectory {
 
 @typeclass trait DirAs[A] {
   def dir(packageManager: String): A
+  def tempDir(packageManager: String): A
 }
 
 object DirAs {
-  implicit def asString: DirAs[String] =
-    (packageManager: String) => DirAs[Path].dir(packageManager).toFile.getCanonicalPath
+  implicit def asString: DirAs[String] = new DirAs[String] {
+    override def dir(packageManager: String): String     = asPath.dir(packageManager).toFile.getCanonicalPath
+    override def tempDir(packageManager: String): String = asPath.tempDir(packageManager).toFile.getAbsolutePath
+  }
 
-  implicit def asPath: DirAs[Path] =
-    (packageManager: String) => Paths.get(s"./index/csearch/.${packageManager}_csearch_index")
+  implicit def asPath: DirAs[Path] = new DirAs[Path] {
+    private def root: Path                             = Paths.get(s"./index/csearch/")
+    private def index(packageManager: String): String  = s".${packageManager}_csearch_index"
+    override def dir(packageManager: String): Path     = root / index(packageManager)
+    override def tempDir(packageManager: String): Path = root / s"${index(packageManager)}.tmp"
+  }
 }

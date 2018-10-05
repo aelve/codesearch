@@ -27,8 +27,7 @@ class HaskellIndex(haskellConfig: HaskellConfig)(
     val shift: ContextShift[IO]
 ) extends LanguageIndex[HackageTable] with HackageDB {
 
-  override protected val indexFile: String = ".hackage_csearch_index"
-  override protected val langExts: String  = ".*\\.(hs|lhs|hsc|hs-boot|lhs-boot)$"
+  override type LanguageTag = Haskell
 
   private val INDEX_LINK: String     = "http://hackage.haskell.org/packages/index.tar.gz"
   private val INDEX_SOURCE_GZ: Path  = pwd / 'data / "index.tar.gz"

@@ -12,6 +12,6 @@ class NpmSearcher @Inject()(
     implicit override val executionContext: ExecutionContext
 ) extends InjectedController with SearchController[NpmTable, JavascriptSearch] {
   override def db: DefaultDB[NpmTable]            = NpmDB
-  override lazy val indexEngine: JavascriptSearch = new JavascriptSearch()
+  override lazy val searchEngine: JavascriptSearch = new JavascriptSearch()
   override def lang: String                       = "js"
 }

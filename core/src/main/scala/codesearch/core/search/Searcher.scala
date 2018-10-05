@@ -30,10 +30,7 @@ trait Searcher {
         .traverse(out => mapCSearchOutput(out, snippetConfig))
       data = searchResults.flatten
         .groupBy(_.pack)
-        .map {
-          case (pack, results) =>
-            PackageResult(pack, results.map(_.result))
-        }
+        .map { case (pack, results) => PackageResult(pack, results.map(_.result)) }
         .toSeq
         .sortBy(_.pack.name)
     } yield CSearchPage(data, answers.size)

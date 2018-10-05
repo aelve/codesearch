@@ -27,8 +27,7 @@ class RubyIndex(rubyConfig: RubyConfig)(
     val shift: ContextShift[IO]
 ) extends LanguageIndex[GemTable] with GemDB {
 
-  override protected val indexFile: String = ".gem_csearch_index"
-  override protected val langExts: String  = ".*\\.(rb)$"
+  override type LanguageTag = Ruby
 
   private val GEM_INDEX_URL     = "http://rubygems.org/latest_specs.4.8.gz"
   private val GEM_INDEX_ARCHIVE = pwd / 'data / 'ruby / "ruby_index.gz"

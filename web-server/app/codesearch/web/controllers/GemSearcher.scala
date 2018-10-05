@@ -12,7 +12,7 @@ class GemSearcher @Inject()(
     implicit override val executionContext: ExecutionContext
 ) extends InjectedController with SearchController[GemTable, RubySearch] {
   override def db: DefaultDB[GemTable]      = GemDB
-  override lazy val indexEngine: RubySearch = new RubySearch()
+  override lazy val searchEngine: RubySearch = new RubySearch()
   override def lang: String                 = "ruby"
 
 }

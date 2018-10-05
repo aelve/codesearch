@@ -11,6 +11,6 @@ import scala.concurrent.ExecutionContext
 class CratesSearcher @Inject()(implicit override val executionContext: ExecutionContext)
     extends InjectedController with SearchController[CratesTable, RustSearch] {
   override def db: DefaultDB[CratesTable]   = CratesDB
-  override lazy val indexEngine: RustSearch = new RustSearch()
+  override lazy val searchEngine: RustSearch = new RustSearch()
   override def lang: String                 = "rust"
 }

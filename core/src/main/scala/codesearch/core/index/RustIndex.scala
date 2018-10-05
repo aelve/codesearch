@@ -27,8 +27,7 @@ class RustIndex(rustConfig: RustConfig)(
     val shift: ContextShift[IO]
 ) extends LanguageIndex[CratesTable] with CratesDB {
 
-  override protected val indexFile: String = ".crates_csearch_index"
-  override protected val langExts: String  = ".*\\.(rs)$"
+  override type LanguageTag = Rust
 
   private val REPO_DIR = pwd / 'data / 'rust / "crates.io-index"
   private val IGNORE_FILES = Set(

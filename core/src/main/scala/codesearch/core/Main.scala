@@ -8,6 +8,7 @@ import codesearch.core.config.Config
 import codesearch.core.db._
 import codesearch.core.index._
 import codesearch.core.model._
+import codesearch.core.index.directory.СSearchDirectory._
 import com.softwaremill.sttp.SttpBackend
 import com.softwaremill.sttp.asynchttpclient.fs2.AsyncHttpClientFs2Backend
 import fs2.Stream
@@ -29,7 +30,7 @@ object Main extends IOApp {
       lang: String = "all"
   )
 
-  case class LangRep[T <: DefaultTable](db: DefaultDB[T], langIndex: LanguageIndex[T])
+  case class LangRep[A <: DefaultTable](db: DefaultDB[A], langIndex: LanguageIndex[A])
 
   def run(args: List[String]): IO[ExitCode] =
     for {
