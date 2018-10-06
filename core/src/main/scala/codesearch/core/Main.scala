@@ -8,7 +8,6 @@ import codesearch.core.config.Config
 import codesearch.core.db._
 import codesearch.core.index._
 import codesearch.core.model._
-import codesearch.core.index.directory.СSearchDirectory._
 import com.softwaremill.sttp.SttpBackend
 import com.softwaremill.sttp.asynchttpclient.fs2.AsyncHttpClientFs2Backend
 import fs2.Stream

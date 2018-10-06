@@ -20,15 +20,15 @@ import scala.sys.process._
 
 trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
 
-  protected implicit def executor: ExecutionContext
   protected implicit def shift: ContextShift[IO]
-  protected implicit def http: SttpBackend[IO, Stream[IO, ByteBuffer]]
 
   protected val logger = Slf4jLogger.unsafeCreate[IO]
 
   protected def concurrentTasksCount: Int
 
-  type LanguageTag
+  type Tag
+
+  def csearchDir: СSearchDirectory[Tag]
 
   /**
     * Download meta information about packages from remote repository
@@ -42,7 +42,7 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
     *
     * @return cindex exit code
     */
-  def buildIndex(implicit D: СSearchDirectory[LanguageTag]): IO[Int] = {
+  def buildIndex(implicit executionContext: ExecutionContext): IO[Int] = {
     def latestPackagePaths = verNames.map { versions =>
       versions.map {
         case (packageName, version) =>
@@ -50,15 +50,21 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
       }
     }
 
-    def dropTempIndexFile = IO(Files.deleteIfExists(D.indexDirAs[NioPath]))
+    def dropTempIndexFile = IO(Files.deleteIfExists(csearchDir.indexDirAs[NioPath]))
 
     def indexPackages(packageDirs: Seq[NioPath]) = IO {
-      val env  = Seq("CSEARCHINDEX" -> D.indexDirAs[String])
+      val env  = Seq("CSEARCHINDEX" -> csearchDir.indexDirAs[String])
       val args = "cindex" +: packageDirs.map(_.toString)
       Process(args, None, env: _*) !
     }
 
-    def replaceIndexFile = IO(Files.move(D.tempIndexDirAs[NioPath], D.indexDirAs[NioPath], REPLACE_EXISTING))
+    def replaceIndexFile = IO(
+      Files.move(
+        csearchDir.tempIndexDirAs[NioPath],
+        csearchDir.indexDirAs[NioPath],
+        REPLACE_EXISTING
+      )
+    )
 
     for {
       packageDirs <- latestPackagePaths
@@ -73,7 +79,7 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
     *
     * @return count of updated packages
     */
-  def updatePackages: IO[Int] = {
+  def updatePackages(implicit executionContext: ExecutionContext): IO[Int] = {
     for {
       _           <- logger.debug("UPDATE PACKAGES")
       packagesMap <- verNames.map(_.toMap)
@@ -109,7 +115,10 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
     */
   protected def buildFsUrl(packageName: String, version: String): NioPath
 
-  protected def archiveDownloadAndExtract[B <: SourcePackage: Extensions: Directory](pack: B): IO[Int] = {
+  protected def archiveDownloadAndExtract[B <: SourcePackage: Extensions: Directory](pack: B)(
+      implicit ec: ExecutionContext,
+      httpClient: SttpBackend[IO, Stream[IO, ByteBuffer]]
+  ): IO[Int] = {
     val repository = SourceRepository[B](new FileDownloader())
     val task = for {
       _         <- repository.downloadSources(pack)

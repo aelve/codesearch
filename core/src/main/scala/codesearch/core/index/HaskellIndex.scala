@@ -12,6 +12,7 @@ import codesearch.core.db.HackageDB
 import codesearch.core.index.repository.HackagePackage
 import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
+import codesearch.core.index.directory.СSearchDirectory
 import codesearch.core.index.repository.Extensions._
 import codesearch.core.model.{HackageTable, Version}
 import com.softwaremill.sttp.SttpBackend
@@ -27,7 +28,9 @@ class HaskellIndex(haskellConfig: HaskellConfig)(
     val shift: ContextShift[IO]
 ) extends LanguageIndex[HackageTable] with HackageDB {
 
-  override type LanguageTag = Haskell
+  override type Tag = Haskell
+
+  override def csearchDir: СSearchDirectory[Tag] = implicitly
 
   private val INDEX_LINK: String     = "http://hackage.haskell.org/packages/index.tar.gz"
   private val INDEX_SOURCE_GZ: Path  = pwd / 'data / "index.tar.gz"

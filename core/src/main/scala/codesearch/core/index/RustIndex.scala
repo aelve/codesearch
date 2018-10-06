@@ -10,6 +10,7 @@ import codesearch.core.db.CratesDB
 import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
 import codesearch.core.index.repository.CratesPackage
+import codesearch.core.index.directory.СSearchDirectory
 import codesearch.core.index.repository.Extensions._
 import codesearch.core.model
 import codesearch.core.model.{CratesTable, Version}
@@ -27,7 +28,9 @@ class RustIndex(rustConfig: RustConfig)(
     val shift: ContextShift[IO]
 ) extends LanguageIndex[CratesTable] with CratesDB {
 
-  override type LanguageTag = Rust
+  override type Tag = Rust
+
+  override def csearchDir: СSearchDirectory[Tag] = implicitly
 
   private val REPO_DIR = pwd / 'data / 'rust / "crates.io-index"
   private val IGNORE_FILES = Set(

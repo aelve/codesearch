@@ -11,6 +11,7 @@ import codesearch.core.config.{Config, RubyConfig}
 import codesearch.core.db.GemDB
 import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
+import codesearch.core.index.directory.СSearchDirectory
 import codesearch.core.index.repository.Extensions._
 import codesearch.core.index.repository.GemPackage
 import codesearch.core.model.{GemTable, Version}
@@ -27,7 +28,9 @@ class RubyIndex(rubyConfig: RubyConfig)(
     val shift: ContextShift[IO]
 ) extends LanguageIndex[GemTable] with GemDB {
 
-  override type LanguageTag = Ruby
+  override type Tag = Ruby
+
+  override def csearchDir: СSearchDirectory[Tag] = implicitly
 
   private val GEM_INDEX_URL     = "http://rubygems.org/latest_specs.4.8.gz"
   private val GEM_INDEX_ARCHIVE = pwd / 'data / 'ruby / "ruby_index.gz"

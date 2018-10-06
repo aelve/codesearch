@@ -10,6 +10,7 @@ import codesearch.core.index.details.NpmDetails
 import codesearch.core.index.repository.NpmPackage
 import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
+import codesearch.core.index.directory.СSearchDirectory
 import codesearch.core.index.repository.Extensions._
 import codesearch.core.model.{NpmTable, Version}
 import com.softwaremill.sttp.SttpBackend
@@ -23,7 +24,9 @@ class JavaScriptIndex(javaScriptConfig: JavaScriptConfig)(
     val shift: ContextShift[IO]
 ) extends LanguageIndex[NpmTable] with NpmDB {
 
-  override type LanguageTag = JavaScript
+  override type Tag = JavaScript
+
+  override def csearchDir: СSearchDirectory[Tag] = implicitly
 
   override protected def concurrentTasksCount: Int = javaScriptConfig.concurrentTasksCount
 
