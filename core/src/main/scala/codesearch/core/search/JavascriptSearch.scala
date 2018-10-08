@@ -1,15 +1,13 @@
 package codesearch.core.search
 
-import org.slf4j.{Logger, LoggerFactory}
+import codesearch.core.index.JavaScript
+import codesearch.core.index.directory.СSearchDirectory
+import codesearch.core.index.repository.Extensions
 
-class JavascriptSearch extends Searcher {
-
-  override protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
-
-  override protected def langExts: String = ".*\\.(js|json)$"
-
-  override protected def indexFile: String = ".npm_csearch_index"
-
+class JavascriptSearch extends Search {
+  override protected type Tag = JavaScript
+  override protected def csearchDir: СSearchDirectory[Tag] = implicitly
+  override protected def extensions: Extensions[Tag]       = implicitly
   override protected def buildRepUrl(packageName: String, version: String): String =
     s"https://www.npmjs.com/package/$packageName/v/$version"
 }

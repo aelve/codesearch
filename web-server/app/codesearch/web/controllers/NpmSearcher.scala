@@ -10,8 +10,8 @@ import scala.concurrent.ExecutionContext
 
 class NpmSearcher @Inject()(
     implicit override val executionContext: ExecutionContext
-) extends InjectedController with SearchController[NpmTable, JavascriptSearch] {
-  override def db: DefaultDB[NpmTable]            = NpmDB
+) extends InjectedController with SearchController[NpmTable] {
+  override def db: DefaultDB[NpmTable]             = NpmDB
   override lazy val searchEngine: JavascriptSearch = new JavascriptSearch()
-  override def lang: String                       = "js"
+  override def lang: String                        = "js"
 }

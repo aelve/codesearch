@@ -30,7 +30,7 @@ class RustIndex(rustConfig: RustConfig)(
 
   override type Tag = Rust
 
-  override def csearchDir: СSearchDirectory[Tag] = implicitly
+  override val csearchDir: СSearchDirectory[Tag] = implicitly
 
   private val REPO_DIR = pwd / 'data / 'rust / "crates.io-index"
   private val IGNORE_FILES = Set(
@@ -70,9 +70,6 @@ class RustIndex(rustConfig: RustConfig)(
       .toSeq
     Map(seq: _*)
   }
-
-  override protected def buildRepUrl(packageName: String, version: String): String =
-    s"https://docs.rs/crate/$packageName/$version"
 
   override protected def buildFsUrl(packageName: String, version: String): Path =
     CratesPackage(packageName, version).packageDir

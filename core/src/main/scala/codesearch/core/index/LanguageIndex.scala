@@ -28,7 +28,7 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
 
   type Tag
 
-  def csearchDir: СSearchDirectory[Tag]
+  val csearchDir: СSearchDirectory[Tag]
 
   /**
     * Download meta information about packages from remote repository
@@ -50,10 +50,10 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
       }
     }
 
-    def dropTempIndexFile = IO(Files.deleteIfExists(csearchDir.indexDirAs[NioPath]))
+    def dropTempIndexFile = IO(Files.deleteIfExists(csearchDir.tempIndexDirAs[NioPath]))
 
     def indexPackages(packageDirs: Seq[NioPath]) = IO {
-      val env  = Seq("CSEARCHINDEX" -> csearchDir.indexDirAs[String])
+      val env  = Seq("CSEARCHINDEX" -> csearchDir.tempIndexDirAs[String])
       val args = "cindex" +: packageDirs.map(_.toString)
       Process(args, None, env: _*) !
     }
@@ -96,15 +96,6 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
         .foldMonoid
     } yield packagesCount
   }
-
-  /**
-    * Create link to remote repository.
-    *
-    * @param packageName local package name
-    * @param version of package
-    * @return link
-    */
-  protected def buildRepUrl(packageName: String, version: String): String
 
   /**
     * Create path to package in file system

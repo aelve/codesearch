@@ -30,7 +30,7 @@ class HaskellIndex(haskellConfig: HaskellConfig)(
 
   override type Tag = Haskell
 
-  override def csearchDir: СSearchDirectory[Tag] = implicitly
+  override val csearchDir: СSearchDirectory[Tag] = implicitly
 
   private val INDEX_LINK: String     = "http://hackage.haskell.org/packages/index.tar.gz"
   private val INDEX_SOURCE_GZ: Path  = pwd / 'data / "index.tar.gz"
@@ -72,9 +72,6 @@ class HaskellIndex(haskellConfig: HaskellConfig)(
 
     lastVersions
   }
-
-  override protected def buildRepUrl(packageName: String, version: String): String =
-    s"https://hackage.haskell.org/package/$packageName-$version"
 
   override protected def buildFsUrl(packageName: String, version: String): NioPath =
     HackagePackage(packageName, version).packageDir

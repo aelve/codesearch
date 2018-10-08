@@ -3,7 +3,7 @@
 @import scala.collection.mutable.ListBuffer
 @import scala.collection.immutable
 @import play.twirl.api._
-@import codesearch.core.search.Searcher.PackageResult
+@import codesearch.core.search.Search.PackageResult
 @import codesearch.web.SnippetHelper
 
 @(lang: String, insensitive: Boolean, precise: Boolean, query: String, updated: String, packages: Seq[PackageResult], totalMatches: Int)

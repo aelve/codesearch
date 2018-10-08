@@ -30,7 +30,7 @@ class RubyIndex(rubyConfig: RubyConfig)(
 
   override type Tag = Ruby
 
-  override def csearchDir: СSearchDirectory[Tag] = implicitly
+  override val csearchDir: СSearchDirectory[Tag] = implicitly
 
   private val GEM_INDEX_URL     = "http://rubygems.org/latest_specs.4.8.gz"
   private val GEM_INDEX_ARCHIVE = pwd / 'data / 'ruby / "ruby_index.gz"
@@ -57,9 +57,6 @@ class RubyIndex(rubyConfig: RubyConfig)(
     stream.close()
     obj.map { case Seq(name, ver, _) => (name, Version(ver)) }.toMap
   }
-
-  override protected def buildRepUrl(packageName: String, version: String): String =
-    s"https://rubygems.org/gems/$packageName/versions/$version"
 
   override protected def buildFsUrl(packageName: String, version: String): Path =
     GemPackage(packageName, version).packageDir

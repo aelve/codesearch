@@ -10,9 +10,9 @@ import scala.concurrent.ExecutionContext
 
 class GemSearcher @Inject()(
     implicit override val executionContext: ExecutionContext
-) extends InjectedController with SearchController[GemTable, RubySearch] {
-  override def db: DefaultDB[GemTable]      = GemDB
+) extends InjectedController with SearchController[GemTable] {
+  override def db: DefaultDB[GemTable]       = GemDB
   override lazy val searchEngine: RubySearch = new RubySearch()
-  override def lang: String                 = "ruby"
+  override def lang: String                  = "ruby"
 
 }

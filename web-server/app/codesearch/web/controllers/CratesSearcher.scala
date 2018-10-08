@@ -8,9 +8,10 @@ import play.api.mvc.InjectedController
 
 import scala.concurrent.ExecutionContext
 
-class CratesSearcher @Inject()(implicit override val executionContext: ExecutionContext)
-    extends InjectedController with SearchController[CratesTable, RustSearch] {
-  override def db: DefaultDB[CratesTable]   = CratesDB
+class CratesSearcher @Inject()(
+    implicit override val executionContext: ExecutionContext
+) extends InjectedController with SearchController[CratesTable] {
+  override def db: DefaultDB[CratesTable]    = CratesDB
   override lazy val searchEngine: RustSearch = new RustSearch()
-  override def lang: String                 = "rust"
+  override def lang: String                  = "rust"
 }

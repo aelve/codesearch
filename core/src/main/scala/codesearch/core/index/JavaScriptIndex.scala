@@ -26,7 +26,7 @@ class JavaScriptIndex(javaScriptConfig: JavaScriptConfig)(
 
   override type Tag = JavaScript
 
-  override def csearchDir: СSearchDirectory[Tag] = implicitly
+  override val csearchDir: СSearchDirectory[Tag] = implicitly
 
   override protected def concurrentTasksCount: Int = javaScriptConfig.concurrentTasksCount
 
@@ -40,9 +40,6 @@ class JavaScriptIndex(javaScriptConfig: JavaScriptConfig)(
     archiveDownloadAndExtract(NpmPackage(name, version))
 
   override protected def getLastVersions: Map[String, Version] = NpmDetails().detailsMap.unsafeRunSync()
-
-  override protected def buildRepUrl(packageName: String, version: String): String =
-    s"https://www.npmjs.com/package/$packageName/v/$version"
 
   override protected def buildFsUrl(packageName: String, version: String): Path =
     NpmPackage(packageName, version).packageDir

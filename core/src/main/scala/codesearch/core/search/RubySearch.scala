@@ -1,15 +1,13 @@
 package codesearch.core.search
 
-import org.slf4j.{Logger, LoggerFactory}
+import codesearch.core.index.Ruby
+import codesearch.core.index.directory.СSearchDirectory
+import codesearch.core.index.repository.Extensions
 
-class RubySearch extends Searcher {
-
-  override protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
-
-  override protected def indexFile: String = ".gem_csearch_index"
-
-  override protected def langExts: String = ".*\\.(rb)$"
-
+class RubySearch extends Search {
+  override protected type Tag = Ruby
+  override protected def csearchDir: СSearchDirectory[Tag] = implicitly
+  override protected def extensions: Extensions[Tag]       = implicitly
   override protected def buildRepUrl(packageName: String, version: String): String =
     s"https://rubygems.org/gems/$packageName/versions/$version"
 }

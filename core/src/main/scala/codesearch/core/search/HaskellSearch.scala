@@ -1,15 +1,14 @@
 package codesearch.core.search
 
-import cats.effect.IO
-import codesearch.core.search.Searcher.CSearchPage
+import codesearch.core.index.Haskell
+import codesearch.core.index.directory.СSearchDirectory
 import codesearch.core.index.directory.СSearchDirectory._
+import codesearch.core.index.repository.Extensions
 
-class HaskellSearch extends S {
-  override def search(
-      query: String,
-      insensitive: Boolean,
-      precise: Boolean,
-      sources: Boolean,
-      page: Int
-  ): IO[CSearchPage] = new Search(HaskellSearchRequest(query, insensitive, precise, sources, page)).search
+class HaskellSearch extends Search {
+  override protected type Tag = Haskell
+  override protected def csearchDir: СSearchDirectory[Tag] = implicitly
+  override protected def extensions: Extensions[Tag]       = implicitly
+  override protected def buildRepUrl(packageName: String, version: String): String =
+    s"https://www.npmjs.com/package/$packageName/v/$version"
 }
