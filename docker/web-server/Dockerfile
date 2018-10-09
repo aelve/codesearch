@@ -1,5 +1,5 @@
 FROM anapsix/alpine-java:8 AS build
-COPY ../codesearch-server.jar /
+COPY codesearch-server.jar /
 RUN apk add git \
   go \
   musl-dev
