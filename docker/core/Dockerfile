@@ -3,9 +3,6 @@ COPY ../codesearch-core.jar /
 COPY Makefile /
 COPY ../scripts/update_index.rb /scripts/
 COPY ../scripts/update_npm_index.js /scripts/
-VOLUME /data/rust/crates.io-index
-WORKDIR /data/rust/crates.io-index
-RUN git clone https://github.com/rust-lang/crates.io-index
 WORKDIR "/"
 RUN apk update && apk upgrade
 RUN apk add make \
