@@ -1,4 +1,4 @@
-FROM anapsix/alpine-java:8 AS build
+FROM openjdk:8u171-jre-alpine3.8 AS build
 COPY codesearch-core.jar /
 COPY docker/core/Makefile /
 COPY scripts/update_index.rb /scripts/

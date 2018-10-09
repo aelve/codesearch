@@ -1,4 +1,4 @@
-FROM anapsix/alpine-java:8 AS build
+FROM openjdk:8u171-jre-alpine3.8 AS build
 COPY codesearch-server.jar /
 RUN apk add git \
   go \
