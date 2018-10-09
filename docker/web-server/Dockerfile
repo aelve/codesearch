@@ -1,8 +1,9 @@
 FROM anapsix/alpine-java:8 AS build
-COPY codesearch-server.jar /
-RUN apk add git
-RUN apk add go
-RUN apk add --no-cache musl-dev
+COPY ../codesearch-server.jar /
+RUN apk add git \
+  go \
+  musl-dev
 RUN go get github.com/google/codesearch/cmd/...
+RUN rm -rf /var/cache/apk/*
 ENV PATH /root/go/bin:$PATH
 CMD ["java", "-jar", "codesearch-server.jar"]
