@@ -1,12 +1,10 @@
-FROM anapsix/alpine-java:8 AS build
-COPY ../codesearch-core.jar / 
-COPY Makefile /
-COPY ../scripts/update_index.rb /scripts/
-COPY ../scripts/update_npm_index.js /scripts/
-VOLUME /data/rust/crates.io-index
-WORKDIR /data/rust/crates.io-index
-RUN git clone https://github.com/rust-lang/crates.io-index
-WORKDIR "/"
+FROM openjdk:8u171-jre-alpine3.8 AS build
+
+COPY codesearch-core.jar /
+COPY docker/core/Makefile /
+COPY scripts/update_index.rb /scripts/
+COPY scripts/update_npm_index.js /scripts/
+
 RUN apk update && apk upgrade
 RUN apk add make \
   git \
@@ -17,8 +15,9 @@ RUN apk add make \
   curl \
   wget \
   ruby \
-  ruby-json  
+  ruby-json
+
 RUN go get github.com/google/codesearch/cmd/...
 RUN rm -rf /var/cache/apk/*
+
 ENV PATH /root/go/bin:$PATH
-CMD ["make", "tables"]

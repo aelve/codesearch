@@ -45,3 +45,7 @@ index-%:
 .PHONY: serve
 serve:
   sbt web-server/run
+
+# Build a Docker image (the project must be built already)
+docker-%:
+  docker build -f "docker/$*/Dockerfile" -t "codesearch-$*" .

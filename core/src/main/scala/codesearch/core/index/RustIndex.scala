@@ -42,7 +42,13 @@ class RustIndex(
   )
 
   override def downloadMetaInformation(): Unit = {
-    s"git -C $REPO_DIR pull" !!
+    // See https://stackoverflow.com/a/41081908. Note that 'git init' and
+    // 'git remote add origin' are idempotent and it's safe to run them
+    // every time we want to download new packages.
+    s"git -C $REPO_DIR init" !!;
+    s"git -C $REPO_DIR remote add origin https://github.com/rust-lang/crates.io-index" !!;
+    s"git -C $REPO_DIR fetch --depth 1" !!;
+    s"git -C $REPO_DIR reset --hard origin/master" !!
   }
 
   override protected def updateSources(name: String, version: String): Future[Int] = {
