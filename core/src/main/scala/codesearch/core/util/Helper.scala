@@ -35,19 +35,6 @@ object Helper {
     these.filter(_.isFile) ++ these.filter(_.isDirectory).filter(_.getName != ".git").flatMap(recursiveListFiles)
   }
 
-  /**
-    * Returns index of first matched lines and lines of code
-    */
-  def extractRows(path: String, codeLine: Int, beforeLines: Int, afterLines: Int): IO[(Int, Seq[String])] = {
-    readFileAsync(path).map { lines =>
-      val (code, indexes) = lines.zipWithIndex.filter {
-        case (_, index) => index >= codeLine - beforeLines - 1 && index <= codeLine + afterLines
-      }.unzip
-
-      indexes.head -> code
-    }
-  }
-
   def readFileAsync(path: String): IO[List[String]] =
     IO(Source.fromFile(path, "UTF-8")).bracket(source => IO.pure(source.getLines.toList))(source => IO(source.close()))
 

@@ -21,7 +21,7 @@ object Main extends IOApp {
     .fromExecutorService(Executors.newFixedThreadPool(2 * Runtime.getRuntime.availableProcessors()))
   private implicit val fs2HttpClient: SttpBackend[IO, Stream[IO, ByteBuffer]] = AsyncHttpClientFs2Backend[IO]()
 
-  case class Params(
+  final case class Params(
       updatePackages: Boolean = false,
       downloadMeta: Boolean = false,
       initDB: Boolean = false,

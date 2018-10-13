@@ -3,7 +3,7 @@ package codesearch.core.index.directory
 import java.nio.file.{Path, Paths}
 
 import codesearch.core.index.{Haskell, JavaScript, Ruby, Rust}
-import codesearch.core.index.directory.PathOps._
+import codesearch.core.index.directory.Preamble._
 import simulacrum.typeclass
 
 @typeclass trait СSearchDirectory[A] {
@@ -27,7 +27,6 @@ import simulacrum.typeclass
 }
 
 object СSearchDirectory {
-
   implicit def haskellCSearchIndex[A <: Haskell]: СSearchDirectory[A] = new СSearchDirectory[A] {
     override def packageManager: String = "hackage"
   }
@@ -51,7 +50,8 @@ object СSearchDirectory {
 }
 
 object DirAs {
-  private val root: Path = Paths.get(s"./index/csearch/")
+
+  private val root: Path = Paths.get("./index/csearch/")
 
   implicit def asString: DirAs[String] = new DirAs[String] {
     override def dir(packageManager: String): String     = asPath.dir(packageManager).toFile.getCanonicalPath

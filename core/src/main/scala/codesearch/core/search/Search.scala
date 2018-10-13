@@ -97,7 +97,7 @@ trait Search {
   private def csearchResult(fullPath: String, lineNumber: Int): IO[Option[CSearchResult]] = {
     val relativePath = Path(fullPath).relativeTo(pwd).toString
     packageName(relativePath).traverse { p =>
-      Helper.extractRows(relativePath, lineNumber, snippetConfig.linesBefore, snippetConfig.linesAfter).map {
+      extractRows(relativePath, lineNumber, snippetConfig.linesBefore, snippetConfig.linesAfter).map {
         case (firstLine, rows) =>
           CSearchResult(
             p,
@@ -181,19 +181,6 @@ object Search {
     * @param packageLink to remote repository
     */
   final case class Package(name: String, packageLink: String)
-
-  /**
-    * @param query input regular expression
-    * @param insensitive insensitive flag
-    * @param preciseMatch precise match flag
-    * @param sourcesOnly sources only flag
-    */
-  final case class SearchArguments(
-      query: String,
-      insensitive: Boolean,
-      preciseMatch: Boolean,
-      sourcesOnly: Boolean
-  )
 
   /**
     *

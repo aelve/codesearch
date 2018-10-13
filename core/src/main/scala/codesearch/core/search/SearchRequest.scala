@@ -1,5 +1,12 @@
 package codesearch.core.search
 
+/**
+  * @param query input regular expression
+  * @param insensitive insensitive flag
+  * @param preciseMatch precise match flag
+  * @param sourcesOnly sources only flag
+  * @param page next pagination
+  */
 case class SearchRequest(
     query: String,
     insensitive: Boolean,

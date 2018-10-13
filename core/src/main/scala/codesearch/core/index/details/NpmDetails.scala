@@ -22,6 +22,8 @@ import io.circe.syntax._
 import io.circe.{Decoder, HCursor, Json}
 
 import scala.language.higherKinds
+import codesearch.core.index.directory.Preamble._
+import codesearch.core.index.details.NpmDetails.FsIndexRoot
 
 private final case class NpmRegistryPackage(name: String, version: String)
 private final case class NpmPackage(name: String, version: String)
