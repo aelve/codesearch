@@ -7,6 +7,7 @@ import java.nio.file.{Path => NioPath}
 import ammonite.ops.{Path, pwd}
 import cats.effect.{ContextShift, IO}
 import cats.syntax.flatMap._
+import codesearch.core.config.{Config, HaskellConfig}
 import codesearch.core.db.HackageDB
 import codesearch.core.index.repository.HackagePackage
 import codesearch.core.index.directory.Directory._
@@ -20,7 +21,7 @@ import org.rauschig.jarchivelib.{ArchiveFormat, ArchiverFactory, CompressionType
 import scala.concurrent.ExecutionContext
 import scala.sys.process._
 
-class HaskellIndex(
+class HaskellIndex(haskellConfig: HaskellConfig)(
     implicit val executor: ExecutionContext,
     val http: SttpBackend[IO, Stream[IO, ByteBuffer]],
     val shift: ContextShift[IO]
@@ -32,6 +33,8 @@ class HaskellIndex(
   private val INDEX_LINK: String     = "http://hackage.haskell.org/packages/index.tar.gz"
   private val INDEX_SOURCE_GZ: Path  = pwd / 'data / "index.tar.gz"
   private val INDEX_SOURCE_DIR: Path = pwd / 'data / 'index / "index"
+
+  override protected def concurrentTasksCount: Int = haskellConfig.concurrentTasksCount
 
   override protected def updateSources(name: String, version: String): IO[Int] = {
     logger.info(s"downloading package $name") >> archiveDownloadAndExtract(HackagePackage(name, version))
@@ -73,13 +76,12 @@ class HaskellIndex(
 
   override protected def buildFsUrl(packageName: String, version: String): NioPath =
     HackagePackage(packageName, version).packageDir
-
 }
 
 object HaskellIndex {
-  def apply()(
+  def apply(config: Config)(
       implicit ec: ExecutionContext,
       http: SttpBackend[IO, Stream[IO, ByteBuffer]],
       shift: ContextShift[IO]
-  ) = new HaskellIndex
+  ) = new HaskellIndex(config.languagesConfig.haskellConfig)
 }

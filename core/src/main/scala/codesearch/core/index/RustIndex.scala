@@ -5,6 +5,7 @@ import java.nio.file.Path
 
 import ammonite.ops.pwd
 import cats.effect.{ContextShift, IO}
+import codesearch.core.config.{Config, RustConfig}
 import codesearch.core.db.CratesDB
 import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
@@ -20,7 +21,7 @@ import play.api.libs.json.Json
 import scala.concurrent.ExecutionContext
 import scala.sys.process._
 
-class RustIndex(
+class RustIndex(rustConfig: RustConfig)(
     implicit val executor: ExecutionContext,
     val http: SttpBackend[IO, Stream[IO, ByteBuffer]],
     val shift: ContextShift[IO]
@@ -36,6 +37,8 @@ class RustIndex(
     "config.json",
     ".git"
   )
+
+  override protected def concurrentTasksCount: Int = rustConfig.concurrentTasksCount
 
   override def downloadMetaInformation: IO[Unit] = IO {
     // See https://stackoverflow.com/a/41081908. Note that 'git init' and
@@ -74,9 +77,9 @@ class RustIndex(
 }
 
 object RustIndex {
-  def apply()(
+  def apply(config: Config)(
       implicit ec: ExecutionContext,
       http: SttpBackend[IO, Stream[IO, ByteBuffer]],
       shift: ContextShift[IO]
-  ) = new RustIndex
+  ) = new RustIndex(config.languagesConfig.rustConfig)
 }

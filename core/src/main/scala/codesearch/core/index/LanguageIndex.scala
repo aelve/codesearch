@@ -9,7 +9,6 @@ import cats.effect.{ContextShift, IO}
 import cats.instances.int._
 import cats.syntax.functor._
 import codesearch.core.db.DefaultDB
-import codesearch.core.index.LanguageIndex.ConcurrentTasksCount
 import codesearch.core.index.directory.Directory
 import codesearch.core.index.repository._
 import codesearch.core.model.{DefaultTable, Version}
@@ -27,6 +26,8 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
   protected implicit def http: SttpBackend[IO, Stream[IO, ByteBuffer]]
 
   protected val logger = Slf4jLogger.unsafeCreate[IO]
+
+  protected def concurrentTasksCount: Int
 
   protected val langExts: String
   protected val indexFile: String
@@ -88,7 +89,7 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
           case (packageName, currentVersion) =>
             !packagesMap.get(packageName).contains(currentVersion)
         }
-        .mapAsyncUnordered(ConcurrentTasksCount)(updateSources _ tupled)
+        .mapAsyncUnordered(concurrentTasksCount)(updateSources _ tupled)
         .compile
         .foldMonoid
     } yield packagesCount
@@ -138,8 +139,4 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
     * @return count of downloaded files (source files)
     */
   protected def updateSources(name: String, version: String): IO[Int]
-}
-
-object LanguageIndex {
-  val ConcurrentTasksCount = 30
 }

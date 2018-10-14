@@ -70,6 +70,7 @@ object Builder {
         "io.circe"              %% "circe-generic"                 % "0.9.3",
         "io.circe"              %% "circe-parser"                  % "0.9.3",
         "com.github.pureconfig" %% "pureconfig"                    % "0.9.2",
+        "com.github.pureconfig" %% "pureconfig-cats-effect"        % "0.9.2",
         "io.chrisdavenport"     %% "log4cats-slf4j"                % "0.2.0-RC2",
         "org.scalactic"         %% "scalactic"                     % "3.0.5",
         "org.scalatest"         %% "scalatest"                     % "3.0.5" % "test"

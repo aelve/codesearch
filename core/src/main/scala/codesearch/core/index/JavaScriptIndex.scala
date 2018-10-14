@@ -4,6 +4,7 @@ import java.nio.file.Path
 import java.nio.ByteBuffer
 
 import cats.effect.{ContextShift, IO}
+import codesearch.core.config.{Config, JavaScriptConfig}
 import codesearch.core.db.NpmDB
 import codesearch.core.index.details.NpmDetails
 import codesearch.core.index.repository.NpmPackage
@@ -16,7 +17,7 @@ import fs2.Stream
 
 import scala.concurrent.ExecutionContext
 
-class JavaScriptIndex(
+class JavaScriptIndex(javaScriptConfig: JavaScriptConfig)(
     implicit val executor: ExecutionContext,
     val http: SttpBackend[IO, Stream[IO, ByteBuffer]],
     val shift: ContextShift[IO]
@@ -24,6 +25,8 @@ class JavaScriptIndex(
 
   override protected val indexFile: String = ".npm_csearch_index"
   override protected val langExts: String  = ".*\\.(js|json)$"
+
+  override protected def concurrentTasksCount: Int = javaScriptConfig.concurrentTasksCount
 
   override def downloadMetaInformation: IO[Unit] =
     for {
@@ -44,9 +47,9 @@ class JavaScriptIndex(
 }
 
 object JavaScriptIndex {
-  def apply()(
+  def apply(config: Config)(
       implicit ec: ExecutionContext,
       http: SttpBackend[IO, Stream[IO, ByteBuffer]],
       shift: ContextShift[IO]
-  ) = new JavaScriptIndex
+  ) = new JavaScriptIndex(config.languagesConfig.javaScriptConfig)
 }

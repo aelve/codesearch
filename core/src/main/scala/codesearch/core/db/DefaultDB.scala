@@ -60,8 +60,8 @@ trait DefaultDB[T <: DefaultTable] {
     db.run(act)
   }
 
-  def initDB(): Future[Unit] = {
-    db.run(table.schema.create)
+  def initDB: IO[Unit] = {
+    IO.fromFuture(IO(db.run(table.schema.create)))
   }
 }
 
