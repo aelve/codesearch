@@ -4,32 +4,28 @@ import java.nio.ByteBuffer
 import java.nio.file.Path
 
 import ammonite.ops.pwd
-import cats.effect.IO
+import cats.effect.{ContextShift, IO}
 import codesearch.core.db.CratesDB
-import codesearch.core.index.repository.CratesPackage
 import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
+import codesearch.core.index.repository.CratesPackage
 import codesearch.core.index.repository.Extensions._
 import codesearch.core.model
 import codesearch.core.model.{CratesTable, Version}
 import codesearch.core.util.Helper
 import com.softwaremill.sttp.SttpBackend
 import fs2.Stream
-import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json.Json
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.sys.process._
 
 class RustIndex(
-    private val ec: ExecutionContext,
-    private val httpClient: SttpBackend[IO, Stream[IO, ByteBuffer]]
+    implicit val executor: ExecutionContext,
+    val http: SttpBackend[IO, Stream[IO, ByteBuffer]],
+    val shift: ContextShift[IO]
 ) extends LanguageIndex[CratesTable] with CratesDB {
 
-  override protected implicit def executor: ExecutionContext                    = ec
-  override protected implicit def http: SttpBackend[IO, Stream[IO, ByteBuffer]] = httpClient
-
-  override protected val logger: Logger    = LoggerFactory.getLogger(this.getClass)
   override protected val indexFile: String = ".crates_csearch_index"
   override protected val langExts: String  = ".*\\.(rs)$"
 
@@ -41,7 +37,7 @@ class RustIndex(
     ".git"
   )
 
-  override def downloadMetaInformation(): Unit = {
+  override def downloadMetaInformation: IO[Unit] = IO {
     // See https://stackoverflow.com/a/41081908. Note that 'git init' and
     // 'git remote add origin' are idempotent and it's safe to run them
     // every time we want to download new packages.
@@ -51,7 +47,7 @@ class RustIndex(
     s"git -C $REPO_DIR reset --hard origin/master" !!
   }
 
-  override protected def updateSources(name: String, version: String): Future[Int] = {
+  override protected def updateSources(name: String, version: String): IO[Int] = {
     archiveDownloadAndExtract(CratesPackage(name, version))
   }
 
@@ -80,6 +76,7 @@ class RustIndex(
 object RustIndex {
   def apply()(
       implicit ec: ExecutionContext,
-      http: SttpBackend[IO, Stream[IO, ByteBuffer]]
-  ) = new RustIndex(ec, http)
+      http: SttpBackend[IO, Stream[IO, ByteBuffer]],
+      shift: ContextShift[IO]
+  ) = new RustIndex
 }

@@ -3,7 +3,9 @@ package codesearch.core
 import java.nio.ByteBuffer
 import java.util.concurrent.Executors
 
-import cats.effect.IO
+import cats.effect.{ExitCode, IO, IOApp}
+import cats.syntax.traverse._
+import cats.instances.list._
 import codesearch.core.index._
 import codesearch.core.db._
 import codesearch.core.model._
@@ -15,7 +17,7 @@ import org.slf4j.{Logger, LoggerFactory}
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.Duration
 
-object Main {
+object Main extends IOApp {
 
   private val logger: Logger = LoggerFactory.getLogger(Main.getClass)
 
@@ -64,7 +66,7 @@ object Main {
     "javascript" -> LangRep[NpmTable](NpmDB, JavaScriptIndex())
   )
 
-  def main(args: Array[String]): Unit = {
+  def run(args: List[String]): IO[ExitCode] = {
 
     parser.parse(args, Config()) foreach { c =>
       if (c.lang != "all" && !(langReps.keySet contains c.lang)) {
@@ -88,36 +90,37 @@ object Main {
       }
 
       if (c.downloadMeta) {
-        c.lang match {
+        val task = c.lang match {
           case "all" =>
-            langReps.values.foreach(_.langIndex.downloadMetaInformation())
+            langReps.values.toList.traverse(_.langIndex.downloadMetaInformation)
           case lang =>
-            langReps(lang).langIndex.downloadMetaInformation()
+            langReps(lang).langIndex.downloadMetaInformation
         }
+        task.unsafeRunSync()
       }
 
       if (c.updatePackages) {
-        val future = c.lang match {
+        val task = c.lang match {
           case "all" =>
-            Future
-              .sequence(langReps.values.map(_.langIndex.updatePackages()))
+            langReps.values.toList
+              .traverse(_.langIndex.updatePackages)
               .map(_.sum)
           case lang =>
-            langReps(lang).langIndex.updatePackages()
+            langReps(lang).langIndex.updatePackages
         }
-        val cntUpdated = Await.result(future, Duration.Inf)
+        val cntUpdated = task.unsafeRunSync()
 
         logger.info(s"updated: $cntUpdated")
       }
 
       if (c.buildIndex) {
-        val future = c.lang match {
+        val task = c.lang match {
           case "all" =>
-            Future.sequence(langReps.values.map(_.langIndex.buildIndex()))
+            langReps.values.toList.traverse(_.langIndex.buildIndex)
           case lang =>
-            langReps(lang).langIndex.buildIndex()
+            langReps(lang).langIndex.buildIndex
         }
-        Await.ready(future, Duration.Inf)
+        task.unsafeRunSync()
         logger.info(s"${c.lang} packages successfully indexed")
       }
     }

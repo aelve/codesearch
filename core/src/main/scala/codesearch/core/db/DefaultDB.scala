@@ -2,6 +2,7 @@ package codesearch.core.db
 
 import java.sql.Timestamp
 
+import cats.effect.IO
 import codesearch.core.index.repository.SourcePackage
 import codesearch.core.model._
 import slick.jdbc.PostgresProfile.api._
@@ -19,14 +20,14 @@ trait DefaultDB[T <: DefaultTable] {
   val table: TableQuery[T]
   lazy val db = DefaultDB.db
 
-  def insertOrUpdate[A <: SourcePackage](pack: A): Future[Int] = {
+  def insertOrUpdate[A <: SourcePackage](pack: A): IO[Int] = {
     val insOrUpdate = table.insertOrUpdate(
       (
         pack.name,
         pack.version,
         new Timestamp(System.currentTimeMillis())
       ))
-    db.run(insOrUpdate)
+    IO.fromFuture(IO(db.run(insOrUpdate)))
   }
 
   def updated: Future[Timestamp] = {
@@ -43,11 +44,11 @@ trait DefaultDB[T <: DefaultTable] {
     db.run(act)
   }
 
-  def verNames(): Future[Seq[(String, String)]] = {
+  def verNames: IO[Seq[(String, String)]] = {
     val act = table
       .map(row => (row.packageName, row.lastVersion))
       .result
-    db.run(act)
+    IO.fromFuture(IO(db.run(act)))
   }
 
   def verByName(packageName: String): Future[Option[String]] = {

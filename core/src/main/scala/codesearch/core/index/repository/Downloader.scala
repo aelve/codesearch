@@ -1,19 +1,20 @@
 package codesearch.core.index.repository
+
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption.{CREATE, TRUNCATE_EXISTING}
 
 import cats.effect.ExitCase.Error
-import cats.effect.IO
+import cats.effect.{ContextShift, IO}
 import cats.syntax.either.catsSyntaxEither
+import codesearch.core._
 import com.softwaremill.sttp.{SttpBackend, Uri, asStream, sttp}
 import fs2.io.file
 import fs2.{Chunk, Pipe, Sink, Stream}
 import org.apache.commons.io.FileUtils
 
 import scala.concurrent.duration.Duration
-import scala.concurrent.ExecutionContext
 
 private[index] trait Downloader[F[_], O] {
   def download(from: Uri, to: Path): F[O]
@@ -46,8 +47,8 @@ private[index] final class ByteStreamDownloader(
 }
 
 private[index] final class FileDownloader(
-    implicit ec: ExecutionContext,
-    http: SttpBackend[IO, Stream[IO, ByteBuffer]]
+    implicit http: SttpBackend[IO, Stream[IO, ByteBuffer]],
+    shift: ContextShift[IO]
 ) extends Downloader[IO, File] {
 
   /**
@@ -73,7 +74,7 @@ private[index] final class FileDownloader(
   }
 
   private def toFile(path: Path): Sink[IO, Byte] =
-    file.writeAllAsync(path, List(CREATE, TRUNCATE_EXISTING))
+    file.writeAll(path, BlockingEC, List(CREATE, TRUNCATE_EXISTING))
 }
 
 object FileDownloader {

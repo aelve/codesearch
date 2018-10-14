@@ -5,7 +5,8 @@ import java.nio.ByteBuffer
 import java.nio.file.Path
 
 import ammonite.ops.pwd
-import cats.effect.IO
+import cats.effect.{ContextShift, IO}
+import cats.syntax.flatMap._
 import codesearch.core.db.GemDB
 import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
@@ -14,21 +15,17 @@ import codesearch.core.index.repository.GemPackage
 import codesearch.core.model.{GemTable, Version}
 import com.softwaremill.sttp.SttpBackend
 import fs2.Stream
-import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json.Json
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.sys.process._
 
 class RubyIndex(
-    private val ec: ExecutionContext,
-    private val httpClient: SttpBackend[IO, Stream[IO, ByteBuffer]]
+    implicit val executor: ExecutionContext,
+    val http: SttpBackend[IO, Stream[IO, ByteBuffer]],
+    val shift: ContextShift[IO]
 ) extends LanguageIndex[GemTable] with GemDB {
 
-  override protected implicit def executor: ExecutionContext                    = ec
-  override protected implicit def http: SttpBackend[IO, Stream[IO, ByteBuffer]] = httpClient
-
-  override protected val logger: Logger    = LoggerFactory.getLogger(this.getClass)
   override protected val indexFile: String = ".gem_csearch_index"
   override protected val langExts: String  = ".*\\.(rb)$"
 
@@ -38,12 +35,11 @@ class RubyIndex(
 
   private val DESERIALIZER_PATH = pwd / 'scripts / "update_index.rb"
 
-  override protected def updateSources(name: String, version: String): Future[Int] = {
-    logger.info(s"downloading package $name")
-    archiveDownloadAndExtract(GemPackage(name, version))
+  override protected def updateSources(name: String, version: String): IO[Int] = {
+    logger.info(s"downloading package $name") >> archiveDownloadAndExtract(GemPackage(name, version))
   }
 
-  override def downloadMetaInformation(): Unit = {
+  override def downloadMetaInformation: IO[Unit] = IO {
     (pwd / 'data / 'ruby).toIO.mkdirs()
     Seq("curl", "-o", GEM_INDEX_ARCHIVE.toString, GEM_INDEX_URL) !!
 
@@ -67,6 +63,7 @@ class RubyIndex(
 object RubyIndex {
   def apply()(
       implicit ec: ExecutionContext,
-      http: SttpBackend[IO, Stream[IO, ByteBuffer]]
-  ) = new RubyIndex(ec, http)
+      http: SttpBackend[IO, Stream[IO, ByteBuffer]],
+      shift: ContextShift[IO]
+  ) = new RubyIndex
 }
