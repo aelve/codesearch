@@ -16,7 +16,8 @@ jobs:
 
       - run:
           command:
-            sbt compile exit
+            sbt compile
+            sbt assembly exit
 
       - run:
           command: |
