@@ -10,5 +10,5 @@ class HaskellSearch extends Search {
   override protected def csearchDir: СSearchDirectory[Tag] = implicitly
   override protected def extensions: Extensions[Tag]       = implicitly
   override protected def buildRepUrl(packageName: String, version: String): String =
-    s"https://www.npmjs.com/package/$packageName/v/$version"
+    s"https://hackage.haskell.org/package/$packageName-$version"
 }
