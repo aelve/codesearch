@@ -115,7 +115,7 @@ trait LanguageIndex[VTable <: DefaultTable] { self: DefaultDB[VTable] =>
     (for {
       _         <- repository.downloadSources(pack).unsafeToFuture()
       rowsCount <- insertOrUpdate(pack)
-    } yield rowsCount).recover { case ex => logger.error(ex.getMessage); 0 }
+    } yield rowsCount).recover { case ex => logger.error(s"Error while downloading $pack", ex); 0 }
   }
 
   /**
