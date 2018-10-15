@@ -20,7 +20,11 @@ jobs:
 
       - run:
           command:
-            sbt assembly
+            sbt core/assembly
+
+      - run:
+          command:
+            sbt web-server/assembly
 
       - run:
           command: |
