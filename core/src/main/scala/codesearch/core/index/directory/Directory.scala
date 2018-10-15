@@ -52,10 +52,10 @@ object Directory {
 
   implicit def npmDirectory: Directory[NpmPackage] = new Directory[NpmPackage] {
     override def archive(pack: NpmPackage): Path =
-      packageDir(pack) / s"${pack.name}-${pack.version}.$extension"
+      packageDir(pack) / s"${pack.encodedName}-${pack.version}.$extension"
 
     override def packageDir(pack: NpmPackage): Path =
-      sourcesDir / "npm" / pack.name / pack.version
+      sourcesDir / "npm" / pack.encodedName / pack.version
   }
 
   implicit def gemDirectory: Directory[GemPackage] = new Directory[GemPackage] {
