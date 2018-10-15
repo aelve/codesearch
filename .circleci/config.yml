@@ -16,7 +16,15 @@ jobs:
 
       - run:
           command:
-            sbt compile exit
+            sbt compile
+
+      - run:
+          command:
+            sbt core/assembly
+
+      - run:
+          command:
+            sbt web-server/assembly
 
       - run:
           command: |
