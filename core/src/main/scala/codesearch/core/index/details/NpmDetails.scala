@@ -6,7 +6,8 @@ import java.nio.file.StandardOpenOption.CREATE
 import java.nio.file.{Path, Paths}
 
 import cats.Semigroup
-import cats.effect.IO
+import cats.effect.{ContextShift, IO}
+import codesearch.core._
 import codesearch.core.index.repository.ByteStreamDownloader
 import codesearch.core.model.Version
 import com.softwaremill.sttp.SttpBackend
@@ -17,9 +18,8 @@ import io.circe.fs2._
 import io.circe.{Decoder, HCursor, Json}
 import io.circe.syntax._
 import io.circe.generic.auto._
-import cats.implicits._
+import cats.instances.map._
 
-import scala.concurrent.ExecutionContext
 import scala.language.higherKinds
 import codesearch.core.index.directory.PathOps._
 import codesearch.core.index.details.NpmDetails.FsIndexRoot
@@ -27,7 +27,7 @@ import codesearch.core.index.details.NpmDetails.FsIndexRoot
 private final case class NpmRegistryPackage(name: String, version: String)
 private final case class NpmPackage(name: String, version: String)
 
-private[index] final class NpmDetails(implicit ec: ExecutionContext, http: SttpBackend[IO, Stream[IO, ByteBuffer]]) {
+private[index] final class NpmDetails(implicit http: SttpBackend[IO, Stream[IO, ByteBuffer]], shift: ContextShift[IO]) {
 
   private val NpmRegistryUrl = uri"https://replicate.npmjs.com/_all_docs?include_docs=true"
   private val FsIndexPath    = FsIndexRoot / "npm_packages_index.json"
@@ -57,7 +57,7 @@ private[index] final class NpmDetails(implicit ec: ExecutionContext, http: SttpB
 
   def detailsMap: IO[Map[String, Version]] = {
     file
-      .readAllAsync[IO](FsIndexPath, chunkSize = 4096)
+      .readAll[IO](FsIndexPath, BlockingEC, chunkSize = 4096)
       .through(byteStreamParser[IO])
       .through(decoder[IO, NpmPackage])
       .through(toMap)
@@ -92,14 +92,14 @@ private[index] final class NpmDetails(implicit ec: ExecutionContext, http: SttpB
     input.flatMap(registryPackage => Stream.chunk(Chunk.array(registryPackage.asJson.noSpaces.getBytes :+ '\n'.toByte)))
   }
 
-  private def toFile: Sink[IO, Byte] = file.writeAllAsync(FsIndexPath, List(CREATE, TRUNCATE_EXISTING))
+  private def toFile: Sink[IO, Byte] = file.writeAll(FsIndexPath, BlockingEC, List(CREATE, TRUNCATE_EXISTING))
 
 }
 
 private[index] object NpmDetails {
   val FsIndexRoot: Path = Paths.get("./index/npm")
   def apply()(
-      implicit ec: ExecutionContext,
-      http: SttpBackend[IO, Stream[IO, ByteBuffer]]
+      implicit http: SttpBackend[IO, Stream[IO, ByteBuffer]],
+      shift: ContextShift[IO]
   ) = new NpmDetails()
 }

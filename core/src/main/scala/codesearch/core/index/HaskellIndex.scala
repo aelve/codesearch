@@ -5,7 +5,9 @@ import java.nio.ByteBuffer
 import java.nio.file.{Path => NioPath}
 
 import ammonite.ops.{Path, pwd}
-import cats.effect.IO
+import cats.effect.{ContextShift, IO}
+import cats.syntax.flatMap._
+import codesearch.core.config.{Config, HaskellConfig}
 import codesearch.core.db.HackageDB
 import codesearch.core.index.repository.HackagePackage
 import codesearch.core.index.directory.Directory._
@@ -15,20 +17,16 @@ import codesearch.core.model.{HackageTable, Version}
 import com.softwaremill.sttp.SttpBackend
 import fs2.Stream
 import org.rauschig.jarchivelib.{ArchiveFormat, ArchiverFactory, CompressionType}
-import org.slf4j.{Logger, LoggerFactory}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.sys.process._
 
-class HaskellIndex(
-    private val ec: ExecutionContext,
-    private val httpClient: SttpBackend[IO, Stream[IO, ByteBuffer]]
+class HaskellIndex(haskellConfig: HaskellConfig)(
+    implicit val executor: ExecutionContext,
+    val http: SttpBackend[IO, Stream[IO, ByteBuffer]],
+    val shift: ContextShift[IO]
 ) extends LanguageIndex[HackageTable] with HackageDB {
 
-  override protected implicit def executor: ExecutionContext                    = ec
-  override protected implicit def http: SttpBackend[IO, Stream[IO, ByteBuffer]] = httpClient
-
-  override protected val logger: Logger    = LoggerFactory.getLogger(this.getClass)
   override protected val indexFile: String = ".hackage_csearch_index"
   override protected val langExts: String  = ".*\\.(hs|lhs|hsc|hs-boot|lhs-boot)$"
 
@@ -36,25 +34,28 @@ class HaskellIndex(
   private val INDEX_SOURCE_GZ: Path  = pwd / 'data / "index.tar.gz"
   private val INDEX_SOURCE_DIR: Path = pwd / 'data / 'index / "index"
 
-  override protected def updateSources(name: String, version: String): Future[Int] = {
-    logger.info(s"downloading package $name")
-    archiveDownloadAndExtract(HackagePackage(name, version))
+  override protected def concurrentTasksCount: Int = haskellConfig.concurrentTasksCount
+
+  override protected def updateSources(name: String, version: String): IO[Int] = {
+    logger.info(s"downloading package $name") >> archiveDownloadAndExtract(HackagePackage(name, version))
   }
 
-  override def downloadMetaInformation(): Unit = {
-    logger.info("update index")
+  override def downloadMetaInformation: IO[Unit] =
+    for {
+      _ <- logger.info("update index")
+      _ <- IO {
+        val archive     = INDEX_SOURCE_GZ.toIO
+        val destination = INDEX_SOURCE_DIR.toIO
 
-    val archive     = INDEX_SOURCE_GZ.toIO
-    val destination = INDEX_SOURCE_DIR.toIO
+        archive.getParentFile.mkdirs()
+        destination.mkdirs()
 
-    archive.getParentFile.mkdirs()
-    destination.mkdirs()
+        new URL(INDEX_LINK) #> archive !!
 
-    new URL(INDEX_LINK) #> archive !!
-
-    val archiver = ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP)
-    archiver.extract(archive, destination)
-  }
+        val archiver = ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP)
+        archiver.extract(archive, destination)
+      }
+    } yield ()
 
   override protected def getLastVersions: Map[String, Version] = {
     val indexDir     = INDEX_SOURCE_DIR.toIO
@@ -75,12 +76,12 @@ class HaskellIndex(
 
   override protected def buildFsUrl(packageName: String, version: String): NioPath =
     HackagePackage(packageName, version).packageDir
-
 }
 
 object HaskellIndex {
-  def apply()(
+  def apply(config: Config)(
       implicit ec: ExecutionContext,
-      http: SttpBackend[IO, Stream[IO, ByteBuffer]]
-  ) = new HaskellIndex(ec, http)
+      http: SttpBackend[IO, Stream[IO, ByteBuffer]],
+      shift: ContextShift[IO]
+  ) = new HaskellIndex(config.languagesConfig.haskellConfig)
 }
