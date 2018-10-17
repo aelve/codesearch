@@ -70,14 +70,17 @@ private[index] final class NpmDetails(implicit http: SttpBackend[IO, Stream[IO, 
   }
 
   private def cutStream: Pipe[IO, Byte, Byte] = { input =>
-    var depth = 0
-    input.filter { byte =>
-      if (byte == '[') {
-        depth += 1; true
-      } else if (byte == ']') {
-        depth -= 1; true
-      } else depth > 0
-    }
+    var isOpen: Boolean    = false
+    var previousByte: Byte = Byte.MinValue
+    val excludedChars      = Set[Byte]('\t', '\r', '\n', '\u0000', '\b')
+    input
+      .filter(byte => !excludedChars.contains(byte))
+      .filter { byte =>
+        if (!isOpen) {
+          if (byte == '[') { isOpen = true; true } else false
+        } else if ((previousByte == ']') && byte == '}') false
+        else { previousByte = byte; true }
+      }
   }
 
   private def decoder[F[_], A](implicit decode: Decoder[A]): Pipe[F, Json, A] =
