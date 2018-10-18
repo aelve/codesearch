@@ -24,6 +24,8 @@ import scala.language.higherKinds
 import codesearch.core.index.directory.PathOps._
 import codesearch.core.index.details.NpmDetails.FsIndexRoot
 
+import scala.collection.mutable
+
 private final case class NpmRegistryPackage(name: String, version: String)
 private final case class NpmPackage(name: String, version: String)
 
@@ -70,17 +72,21 @@ private[index] final class NpmDetails(implicit http: SttpBackend[IO, Stream[IO, 
   }
 
   private def cutStream: Pipe[IO, Byte, Byte] = { input =>
-    var isOpen: Boolean    = false
-    var previousByte: Byte = Byte.MinValue
-    val excludedChars      = Set[Byte]('\t', '\r', '\n', '\u0000', '\b')
-    input
-      .filter(byte => !excludedChars.contains(byte))
-      .filter { byte =>
-        if (!isOpen) {
-          if (byte == '[') { isOpen = true; true } else false
-        } else if ((previousByte == ']') && byte == '}') false
-        else { previousByte = byte; true }
-      }
+    var isOpen: Boolean = false
+    val pattern         = Array[Byte]('}', '}', ']')
+    val queue           = mutable.Queue[Byte]()
+    input.filter { byte =>
+      if (!isOpen) {
+        if (byte == '[') { isOpen = true; true } else false
+      } else if (queue.size == 3) {
+        if (queue.containsSlice(pattern) && byte == '}') false
+        else {
+          queue.dequeue
+          queue.enqueue(byte)
+          true
+        }
+      } else { queue.enqueue(byte); true }
+    }
   }
 
   private def decoder[F[_], A](implicit decode: Decoder[A]): Pipe[F, Json, A] =
