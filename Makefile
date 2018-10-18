@@ -44,8 +44,17 @@ index-%:
 # Run the server
 .PHONY: serve
 serve:
-  sbt web-server/run
+  java -jar codesearch-server.jar
 
 # Build a Docker image (the project must be built already)
 docker-%:
-  docker build -f "docker/$*/Dockerfile" -t "codesearch-$*" .
+  docker build \
+    -f "docker/$*/Dockerfile" \
+    -t "quay.io/aelve/codesearch-$*:local" .
+  docker tag \
+    "quay.io/aelve/codesearch-$*:local" \
+    "quay.io/aelve/codesearch-$*:latest"
+
+# Push a Docker image to Quay
+docker-push-%:
+  docker push "quay.io/aelve/codesearch-$*:latest"

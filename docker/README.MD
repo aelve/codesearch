@@ -1,42 +1,52 @@
-# note
+# Note
 
 We use several volumes for storing packages, indices and so on. In the
-commands below they are mounted into `vol/` in the current directory.
+commands below we use the working directory for storing those volumes.
 
-# start database
+# Build Docker images
+
+From the repository root:
+
+```
+make build
+make docker-core docker-web-server
+```
+
+# Start the database
 
 ```
 docker run -d -p 5432:5432 \
-  -v $(pwd)/vol/postgres:/var/lib/postgresql \
+  -v $(pwd)/postgres:/var/lib/postgresql \
   -e POSTGRES_DB='sourcesdb' \
   -e POSTGRES_USER='postgres' \
   -e POSTGRES_PASSWORD='postgres' \
   --name codesearch-db postgres
 ```
 
-# create tables
+# Create tables
 
 ```
 docker run -d \
   --link codesearch-db:postgres \
-  codesearch-core make tables
+  quay.io/aelve/codesearch-core make tables
 ```
 
-# download packages (e.g. Haskell)
+# Download packages (e.g. Haskell)
 
 ```
 docker run -d \
-  -v $(pwd)/vol/packages:/data \
-  -v $(pwd)/vol/npm:/index/npm \
+  -v $(pwd)/packages:/data \
+  -v $(pwd)/npm:/index/npm \
   --link codesearch-db:postgres \
-  codesearch-core make download-haskell
+  quay.io/aelve/codesearch-core make download-haskell
 ```
 
-# start server
+# Start the server
 
 ```
 docker run -p 9000:80 -d \
-  -v $(pwd)/vol/packages:/data \
+  -v $(pwd)/packages:/data \
   --link codesearch-db:postgres \
-  --name codesearch-web-server codesearch-web-server
+  --name codesearch-web-server \
+  quay.io/aelve/codesearch-web-server make serve
 ```
