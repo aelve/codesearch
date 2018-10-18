@@ -1,30 +1,27 @@
 package codesearch.core.index.details
 
 import java.nio.ByteBuffer
-import java.nio.file.StandardOpenOption.TRUNCATE_EXISTING
-import java.nio.file.StandardOpenOption.CREATE
+import java.nio.file.StandardOpenOption.{CREATE, TRUNCATE_EXISTING}
 import java.nio.file.{Path, Paths}
 
 import cats.Semigroup
 import cats.effect.{ContextShift, IO}
+import cats.instances.map._
 import codesearch.core._
+import codesearch.core.index.details.NpmDetails.FsIndexRoot
+import codesearch.core.index.directory.PathOps._
 import codesearch.core.index.repository.ByteStreamDownloader
 import codesearch.core.model.Version
-import com.softwaremill.sttp.SttpBackend
-import com.softwaremill.sttp._
-import fs2.{Chunk, Pipe, Sink, Stream}
+import com.softwaremill.sttp.{SttpBackend, _}
 import fs2.io._
+import fs2json._
+import fs2.{Chunk, Pipe, Sink, Stream}
 import io.circe.fs2._
-import io.circe.{Decoder, HCursor, Json}
-import io.circe.syntax._
 import io.circe.generic.auto._
-import cats.instances.map._
+import io.circe.syntax._
+import io.circe.{Decoder, HCursor, Json}
 
 import scala.language.higherKinds
-import codesearch.core.index.directory.PathOps._
-import codesearch.core.index.details.NpmDetails.FsIndexRoot
-
-import scala.collection.mutable
 
 private final case class NpmRegistryPackage(name: String, version: String)
 private final case class NpmPackage(name: String, version: String)
@@ -45,11 +42,39 @@ private[index] final class NpmDetails(implicit http: SttpBackend[IO, Stream[IO, 
     } yield NpmRegistryPackage(name, tag)
   }
 
+  private val excludeFields =
+    Set(
+      "_id",
+      "_rev",
+      "versions",
+      "description",
+      "maintainers",
+      "homepage",
+      "keywords",
+      "readme",
+      "author",
+      "bugs",
+      "license",
+      "readmeFilename"
+    )
+
+  private def tokenFilter[F[_]]: Pipe[F, JsonToken, JsonToken] =
+    TokenFilter.downObject
+      .downField("rows")
+      .downArray
+      .downObject
+      .downField("doc")
+      .downObject
+      .removeFields(excludeFields)
+
   def index: IO[Unit] =
     new ByteStreamDownloader()
       .download(NpmRegistryUrl)
       .flatMap(
-        _.through(cutStream)
+        _.through(tokenParser[IO])
+          .through(tokenFilter)
+          .through(prettyPrinter())
+          .through(cutStream)
           .through(byteArrayParser[IO])
           .through(decoder[IO, NpmRegistryPackage])
           .through(packageToString)
@@ -67,26 +92,19 @@ private[index] final class NpmDetails(implicit http: SttpBackend[IO, Stream[IO, 
       .foldMonoid
   }
 
-  private def toMap[F[_]]: Pipe[IO, NpmPackage, Map[String, Version]] = { input =>
-    input.map(npmPackage => Map(npmPackage.name -> Version(npmPackage.version)))
+  private def cutStream: Pipe[IO, Byte, Byte] = { input =>
+    var depth = 0
+    input.filter { byte =>
+      if (byte == '[') {
+        depth += 1; true
+      } else if (byte == ']') {
+        depth -= 1; true
+      } else depth > 0
+    }
   }
 
-  private def cutStream: Pipe[IO, Byte, Byte] = { input =>
-    var isOpen: Boolean = false
-    val pattern         = Array[Byte]('}', '}', ']')
-    val queue           = mutable.Queue[Byte]()
-    input.filter { byte =>
-      if (!isOpen) {
-        if (byte == '[') { isOpen = true; true } else false
-      } else if (queue.size == 3) {
-        if (queue.containsSlice(pattern) && byte == '}') false
-        else {
-          queue.dequeue
-          queue.enqueue(byte)
-          true
-        }
-      } else { queue.enqueue(byte); true }
-    }
+  private def toMap[F[_]]: Pipe[IO, NpmPackage, Map[String, Version]] = { input =>
+    input.map(npmPackage => Map(npmPackage.name -> Version(npmPackage.version)))
   }
 
   private def decoder[F[_], A](implicit decode: Decoder[A]): Pipe[F, Json, A] =
