@@ -30,8 +30,7 @@ db-kill:
 # Build the project
 .PHONY: build
 build:
-  sbt core/assembly
-  sbt web-server/assembly
+  sbt core/assembly web-server/assembly
 
 # Download packages. Acceptable values: {haskell, rust, ruby, javascript}
 download-%:
