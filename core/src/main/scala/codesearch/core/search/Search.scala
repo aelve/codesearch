@@ -134,7 +134,7 @@ object Search {
       .load()
       .toOption
       .map(_.snippetConfig)
-      .getOrElse(SnippetConfig(30, 3, 5))
+      .getOrElse(SnippetConfig(pageSize = 30, linesBefore = 3, linesAfter = 5))
 
   /**
     * result of searching

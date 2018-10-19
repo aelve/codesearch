@@ -8,39 +8,39 @@ import simulacrum.typeclass
 
 @typeclass trait СSearchDirectory[A] {
 
-  /** Defines package manager name */
-  def packageManager: String
+  /** Defines package repository name */
+  def packageRepository: String
 
   /** Function returns index directory in representation depending from type parameter
     *
     * @param D is implicit instance of [[DirAs]] trait
     * @tparam O is return type
     */
-  def indexDirAs[O](implicit D: DirAs[O]): O = D.dir(packageManager)
+  def indexDirAs[O](implicit D: DirAs[O]): O = D.dir(packageRepository)
 
   /** Function returns temporary index directory in representation depending from type parameter
     *
     * @param D is implicit instance of [[DirAs]] trait
     * @tparam O is return type
     */
-  def tempIndexDirAs[O](implicit D: DirAs[O]): O = D.tempDir(packageManager)
+  def tempIndexDirAs[O](implicit D: DirAs[O]): O = D.tempDir(packageRepository)
 }
 
 object СSearchDirectory {
   implicit def haskellCSearchIndex[A <: Haskell]: СSearchDirectory[A] = new СSearchDirectory[A] {
-    override def packageManager: String = "hackage"
+    override def packageRepository: String = "hackage"
   }
 
   implicit def javaScriptCSearchIndex[A <: JavaScript]: СSearchDirectory[A] = new СSearchDirectory[A] {
-    override def packageManager: String = "npm"
+    override def packageRepository: String = "npm"
   }
 
   implicit def rubyCSearchIndex[A <: Ruby]: СSearchDirectory[A] = new СSearchDirectory[A] {
-    override def packageManager: String = "gem"
+    override def packageRepository: String = "gem"
   }
 
   implicit def rustCSearchIndex[A <: Rust]: СSearchDirectory[A] = new СSearchDirectory[A] {
-    override def packageManager: String = "crates"
+    override def packageRepository: String = "crates"
   }
 }
 

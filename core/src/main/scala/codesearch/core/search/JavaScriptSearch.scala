@@ -4,7 +4,7 @@ import codesearch.core.index.JavaScript
 import codesearch.core.index.directory.СSearchDirectory
 import codesearch.core.index.repository.Extensions
 
-class JavascriptSearch extends Search {
+class JavaScriptSearch extends Search {
   override protected type Tag = JavaScript
   override protected def csearchDir: СSearchDirectory[Tag] = implicitly
   override protected def extensions: Extensions[Tag]       = implicitly
