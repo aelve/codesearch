@@ -55,7 +55,6 @@ object Builder {
     .settings(commonSettings ++ commonDeps)
     .settings(name := "codesearch-core")
     .settings(
-      excludeDependencies ++= Seq(ExclusionRule("io.netty:netty-handler:4.1.13.Final")),
       assemblyJarName in assembly := "codesearch-core.jar",
       assemblyOutputPath in assembly := baseDirectory.value / "../codesearch-core.jar",
       libraryDependencies ++= Seq(
@@ -66,9 +65,10 @@ object Builder {
         "co.fs2"                %% "fs2-core"                      % "1.0.0",
         "co.fs2"                %% "fs2-io"                        % "1.0.0",
         "io.circe"              %% "circe-fs2"                     % "0.10.0",
-        "io.circe"              %% "circe-core"                    % "0.9.3",
-        "io.circe"              %% "circe-generic"                 % "0.9.3",
-        "io.circe"              %% "circe-parser"                  % "0.9.3",
+        "io.circe"              %% "circe-core"                    % "0.10.0",
+        "io.circe"              %% "circe-generic"                 % "0.10.0",
+        "io.circe"              %% "circe-parser"                  % "0.10.0",
+        "com.github.derekjw"    %% "fs2json-core"                  % "0.8.0",
         "com.github.pureconfig" %% "pureconfig"                    % "0.9.2",
         "com.github.pureconfig" %% "pureconfig-cats-effect"        % "0.9.2",
         "io.chrisdavenport"     %% "log4cats-slf4j"                % "0.2.0-RC2",
@@ -125,5 +125,4 @@ object Builder {
       assemblyJarName in assembly := "codesearch.jar",
       assemblyOutputPath in assembly := baseDirectory.value / "../codesearch.jar"
     )
-
 }
