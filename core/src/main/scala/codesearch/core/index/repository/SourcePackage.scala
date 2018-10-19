@@ -48,11 +48,11 @@ private[index] final case class CratesPackage(
 }
 
 private[index] final case class NpmPackage(
-    rawName: String,
+    name: String,
     version: String
 ) extends SourcePackage with JavaScript {
-  private val urlString = s"https://registry.npmjs.org/$rawName/-/$rawName-$version.tgz"
+  private val urlString = s"https://registry.npmjs.org/$name/-/$name-$version.tgz"
   //Because package name can look like: react>>=native@@router!!v2.1.123(refactored:-))
-  val name: String = URLEncoder.encode(rawName, "UTF-8")
-  val url: Uri     = uri"$urlString"
+  val encodedName: String = URLEncoder.encode(name, "UTF-8")
+  val url: Uri            = uri"$urlString"
 }
