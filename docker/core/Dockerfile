@@ -1,21 +1,21 @@
 FROM openjdk:8u171-jre-alpine3.8 AS build
 
-COPY codesearch-core.jar /
-COPY docker/core/Makefile /
-COPY scripts/update_index.rb /scripts/
-COPY scripts/update_npm_index.js /scripts/
-
-RUN apk update && apk upgrade
-RUN apk add make \
+RUN apk --no-cache add \
+  make \
   git \
   nodejs \
   nodejs-npm \
   go \
-  --no-cache musl-dev \
+  musl-dev \
   curl \
   wget \
   ruby \
   ruby-json
+
+COPY codesearch-core.jar /
+COPY docker/core/Makefile /
+COPY scripts/update_index.rb /scripts/
+COPY scripts/update_npm_index.js /scripts/
 
 RUN go get github.com/google/codesearch/cmd/...
 RUN rm -rf /var/cache/apk/*

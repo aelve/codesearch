@@ -1,13 +1,15 @@
 FROM openjdk:8u171-jre-alpine3.8 AS build
 
-COPY codesearch-server.jar /
-
-RUN apk add git \
+RUN apk --no-cache add \
+  make \
+  git \
   go \
   musl-dev
+
+COPY codesearch-server.jar /
+COPY docker/web-server/Makefile /
 
 RUN go get github.com/google/codesearch/cmd/...
 RUN rm -rf /var/cache/apk/*
 
 ENV PATH /root/go/bin:$PATH
-CMD ["java", "-jar", "codesearch-server.jar"]
