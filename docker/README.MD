@@ -40,6 +40,15 @@ docker run -d \
   --link codesearch-db:postgres \
   quay.io/aelve/codesearch-core make download-haskell
 ```
+# Index packages (e.g. Haskell)
+
+```
+docker run -d \
+  -v $(pwd)/packages:/data \
+  -v $(pwd)/npm:/index/npm \
+  --link codesearch-db:postgres \
+  quay.io/aelve/codesearch-core make index-haskell
+```
 
 # Start the server
 
