@@ -36,12 +36,7 @@
         <footer>
             <div class="container-fluid" style="margin-bottom: 1em;">
                 <div class="col" style="margin: 0 auto; width: 17em;">
-                    <div class="row-sm" style="margin-bottom: 0.3em">
-                        © 2018 Aelve
-                    </div>
-                    <div class="row-sm" style="margin-bottom: 0.3em">
-                        Created by <a href="https://artyom.me">Artyom</a>
-                        and <a href="https://github.com/vlad107">Vlad</a>
+                    <div class="row-sm year-authorship" style="margin-bottom: 0.3em">
                     </div>
                     <div class="row-sm">
                         <a href="https://github.com/aelve/codesearch">Source at GitHub</a>
@@ -49,5 +44,9 @@
                 </div>
             </div>
         </footer>
+    <script>
+        const year = (new Date()).getFullYear()
+        document.getElementsByClassName("year-authorship")[0].innerHTML = `© ${year} <a href="https://github.com/aelve"> Aelve </a>`
+    </script>
     </body>
 </html>
