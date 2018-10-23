@@ -13,6 +13,7 @@ import codesearch.core.index.repository._
 import codesearch.core.model.{DefaultTable, Version}
 import com.softwaremill.sttp.SttpBackend
 import fs2.Stream
+import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
 import scala.concurrent.ExecutionContext
@@ -22,7 +23,7 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
 
   protected implicit def shift: ContextShift[IO]
 
-  protected val logger = Slf4jLogger.unsafeCreate[IO]
+  protected val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.unsafeCreate[IO]
 
   protected def concurrentTasksCount: Int
 

@@ -130,11 +130,10 @@ trait Search {
 object Search {
 
   private[search] val snippetConfig: SnippetConfig =
-    Config
-      .load()
-      .toOption
+    Config.load
       .map(_.snippetConfig)
-      .getOrElse(SnippetConfig(pageSize = 30, linesBefore = 3, linesAfter = 5))
+      .handleErrorWith(_ => IO(SnippetConfig(pageSize = 30, linesBefore = 3, linesAfter = 5)))
+      .unsafeRunSync()
 
   /**
     * result of searching

@@ -68,14 +68,14 @@ class Program(
   def updatePackages(params: Params): IO[Unit] =
     for {
       languages <- findRepositories(params.lang)
-      updated   <- languages.traverse(_.langIndex.updatePackages)
+      updated   <- languages.traverse(_.langIndex.updatePackages(ec))
       _         <- logger.info(s"Updated: ${updated.sum}")
     } yield ()
 
   def buildIndex(params: Params): IO[Unit] =
     for {
       languages <- findRepositories(params.lang)
-      _         <- languages.traverse_(_.langIndex.buildIndex)
+      _         <- languages.traverse_(_.langIndex.buildIndex(ec))
       _         <- logger.info(s"${params.lang} packages successfully indexed")
     } yield ()
 }
