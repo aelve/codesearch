@@ -12,6 +12,7 @@ import codesearch.core.db.HackageDB
 import codesearch.core.index.repository.HackagePackage
 import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
+import codesearch.core.index.directory.СSearchDirectory
 import codesearch.core.index.repository.Extensions._
 import codesearch.core.model.{HackageTable, Version}
 import com.softwaremill.sttp.SttpBackend
@@ -27,12 +28,13 @@ class HaskellIndex(haskellConfig: HaskellConfig)(
     val shift: ContextShift[IO]
 ) extends LanguageIndex[HackageTable] with HackageDB {
 
-  override protected val indexFile: String = ".hackage_csearch_index"
-  override protected val langExts: String  = ".*\\.(hs|lhs|hsc|hs-boot|lhs-boot)$"
-
   private val INDEX_LINK: String     = "http://hackage.haskell.org/packages/index.tar.gz"
   private val INDEX_SOURCE_GZ: Path  = pwd / 'data / "index.tar.gz"
   private val INDEX_SOURCE_DIR: Path = pwd / 'data / 'index / "index"
+
+  override protected type Tag = Haskell
+
+  override protected val csearchDir: СSearchDirectory[Tag] = implicitly
 
   override protected def concurrentTasksCount: Int = haskellConfig.concurrentTasksCount
 
@@ -70,9 +72,6 @@ class HaskellIndex(haskellConfig: HaskellConfig)(
 
     lastVersions
   }
-
-  override protected def buildRepUrl(packageName: String, version: String): String =
-    s"https://hackage.haskell.org/package/$packageName-$version"
 
   override protected def buildFsUrl(packageName: String, version: String): NioPath =
     HackagePackage(packageName, version).packageDir

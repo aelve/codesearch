@@ -2,21 +2,14 @@ package codesearch.core.index.directory
 
 import java.nio.file.{Path, Paths}
 
-import codesearch.core.index.directory.PathOps._
+import codesearch.core.index.directory.Preamble._
 import codesearch.core.index.repository._
 import simulacrum.typeclass
-
-object PathOps {
-  implicit final class RichPath(val parent: Path) {
-    def /(child: Path): Path   = Paths.get(parent.toFile.getPath, child.toFile.getPath)
-    def /(child: String): Path = Paths.get(parent.toFile.getPath, child)
-  }
-}
 
 @typeclass trait Directory[A] {
 
   /** Defines root directory for sources storing */
-  def sourcesDir: Path = Paths.get(s"./data")
+  def sourcesDir: Path = Paths.get("./data")
 
   /** Defines path to directory with source files */
   def packageDir(pack: A): Path

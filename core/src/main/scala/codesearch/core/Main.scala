@@ -21,7 +21,7 @@ object Main extends IOApp {
     .fromExecutorService(Executors.newFixedThreadPool(2 * Runtime.getRuntime.availableProcessors()))
   private implicit val fs2HttpClient: SttpBackend[IO, Stream[IO, ByteBuffer]] = AsyncHttpClientFs2Backend[IO]()
 
-  case class Params(
+  final case class Params(
       updatePackages: Boolean = false,
       downloadMeta: Boolean = false,
       initDB: Boolean = false,
@@ -29,7 +29,7 @@ object Main extends IOApp {
       lang: String = "all"
   )
 
-  case class LangRep[T <: DefaultTable](db: DefaultDB[T], langIndex: LanguageIndex[T])
+  case class LangRep[A <: DefaultTable](db: DefaultDB[A], langIndex: LanguageIndex[A])
 
   def run(args: List[String]): IO[ExitCode] =
     for {

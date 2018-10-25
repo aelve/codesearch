@@ -11,6 +11,7 @@ import codesearch.core.config.{Config, RubyConfig}
 import codesearch.core.db.GemDB
 import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
+import codesearch.core.index.directory.СSearchDirectory
 import codesearch.core.index.repository.Extensions._
 import codesearch.core.index.repository.GemPackage
 import codesearch.core.model.{GemTable, Version}
@@ -27,14 +28,14 @@ class RubyIndex(rubyConfig: RubyConfig)(
     val shift: ContextShift[IO]
 ) extends LanguageIndex[GemTable] with GemDB {
 
-  override protected val indexFile: String = ".gem_csearch_index"
-  override protected val langExts: String  = ".*\\.(rb)$"
-
   private val GEM_INDEX_URL     = "http://rubygems.org/latest_specs.4.8.gz"
   private val GEM_INDEX_ARCHIVE = pwd / 'data / 'ruby / "ruby_index.gz"
   private val GEM_INDEX_JSON    = pwd / 'data / 'ruby / "ruby_index.json"
-
   private val DESERIALIZER_PATH = pwd / 'scripts / "update_index.rb"
+
+  override protected type Tag = Ruby
+
+  override protected val csearchDir: СSearchDirectory[Tag] = implicitly
 
   override protected def concurrentTasksCount: Int = rubyConfig.concurrentTasksCount
 
@@ -55,9 +56,6 @@ class RubyIndex(rubyConfig: RubyConfig)(
     stream.close()
     obj.map { case Seq(name, ver, _) => (name, Version(ver)) }.toMap
   }
-
-  override protected def buildRepUrl(packageName: String, version: String): String =
-    s"https://rubygems.org/gems/$packageName/versions/$version"
 
   override protected def buildFsUrl(packageName: String, version: String): Path =
     GemPackage(packageName, version).packageDir

@@ -9,13 +9,13 @@ import cats.effect.{ContextShift, IO}
 import cats.instances.map._
 import codesearch.core._
 import codesearch.core.index.details.NpmDetails.FsIndexRoot
-import codesearch.core.index.directory.PathOps._
+import codesearch.core.index.directory.Preamble._
 import codesearch.core.index.repository.ByteStreamDownloader
 import codesearch.core.model.Version
 import com.softwaremill.sttp.{SttpBackend, _}
 import fs2.io._
-import fs2json._
 import fs2.{Chunk, Pipe, Sink, Stream}
+import fs2json._
 import io.circe.fs2._
 import io.circe.generic.auto._
 import io.circe.syntax._

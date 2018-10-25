@@ -10,6 +10,7 @@ import codesearch.core.db.CratesDB
 import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
 import codesearch.core.index.repository.CratesPackage
+import codesearch.core.index.directory.СSearchDirectory
 import codesearch.core.index.repository.Extensions._
 import codesearch.core.model
 import codesearch.core.model.{CratesTable, Version}
@@ -27,9 +28,6 @@ class RustIndex(rustConfig: RustConfig)(
     val shift: ContextShift[IO]
 ) extends LanguageIndex[CratesTable] with CratesDB {
 
-  override protected val indexFile: String = ".crates_csearch_index"
-  override protected val langExts: String  = ".*\\.(rs)$"
-
   private val REPO_DIR = pwd / 'data / 'rust / "crates.io-index"
   private val IGNORE_FILES = Set(
     "test-max-version-example-crate",
@@ -38,7 +36,15 @@ class RustIndex(rustConfig: RustConfig)(
     ".git"
   )
 
+  override protected type Tag = Rust
+
+  override protected val csearchDir: СSearchDirectory[Tag] = implicitly
+
   override protected def concurrentTasksCount: Int = rustConfig.concurrentTasksCount
+
+  override protected def updateSources(name: String, version: String): IO[Int] = {
+    archiveDownloadAndExtract(CratesPackage(name, version))
+  }
 
   override def downloadMetaInformation: IO[Unit] = IO {
     // See https://stackoverflow.com/a/41081908. Note that 'git init' and
@@ -48,10 +54,6 @@ class RustIndex(rustConfig: RustConfig)(
     s"git -C $REPO_DIR remote add origin https://github.com/rust-lang/crates.io-index" !!;
     s"git -C $REPO_DIR fetch --depth 1" !!;
     s"git -C $REPO_DIR reset --hard origin/master" !!
-  }
-
-  override protected def updateSources(name: String, version: String): IO[Int] = {
-    archiveDownloadAndExtract(CratesPackage(name, version))
   }
 
   override protected def getLastVersions: Map[String, Version] = {
@@ -68,9 +70,6 @@ class RustIndex(rustConfig: RustConfig)(
       .toSeq
     Map(seq: _*)
   }
-
-  override protected def buildRepUrl(packageName: String, version: String): String =
-    s"https://docs.rs/crate/$packageName/$version"
 
   override protected def buildFsUrl(packageName: String, version: String): Path =
     CratesPackage(packageName, version).packageDir

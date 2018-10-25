@@ -1,15 +1,14 @@
 package codesearch.core.search
 
-import org.slf4j.{Logger, LoggerFactory}
+import codesearch.core.index.Haskell
+import codesearch.core.index.directory.СSearchDirectory
+import codesearch.core.index.directory.СSearchDirectory._
+import codesearch.core.index.repository.Extensions
 
-class HaskellSearch extends Searcher {
-
-  override protected val logger: Logger = LoggerFactory.getLogger(this.getClass)
-
-  override protected def langExts: String = ".*\\.(hs|lhs|hsc|hs-boot|lhs-boot)$"
-
-  override protected def indexFile: String = ".hackage_csearch_index"
-
+class HaskellSearch extends Search {
+  override protected type Tag = Haskell
+  override protected def csearchDir: СSearchDirectory[Tag] = implicitly
+  override protected def extensions: Extensions[Tag]       = implicitly
   override protected def buildRepUrl(packageName: String, version: String): String =
     s"https://hackage.haskell.org/package/$packageName-$version"
 }
