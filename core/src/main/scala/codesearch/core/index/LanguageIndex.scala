@@ -16,7 +16,6 @@ import fs2.Stream
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
-import scala.concurrent.ExecutionContext
 import scala.sys.process._
 
 trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
@@ -43,7 +42,7 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
     *
     * @return cindex exit code
     */
-  def buildIndex(implicit executionContext: ExecutionContext): IO[Int] = {
+  def buildIndex: IO[Int] = {
     def latestPackagePaths = verNames.map { versions =>
       versions.map {
         case (packageName, version) =>
@@ -80,7 +79,7 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
     *
     * @return count of updated packages
     */
-  def updatePackages(implicit executionContext: ExecutionContext): IO[Int] = {
+  def updatePackages: IO[Int] = {
     for {
       _           <- logger.debug("UPDATE PACKAGES")
       packagesMap <- verNames.map(_.toMap)
@@ -108,8 +107,7 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
   protected def buildFsUrl(packageName: String, version: String): NioPath
 
   protected def archiveDownloadAndExtract[B <: SourcePackage: Extensions: Directory](pack: B)(
-      implicit ec: ExecutionContext,
-      httpClient: SttpBackend[IO, Stream[IO, ByteBuffer]]
+      implicit httpClient: SttpBackend[IO, Stream[IO, ByteBuffer]]
   ): IO[Int] = {
     val repository = SourceRepository[B](new FileDownloader())
     val task = for {
