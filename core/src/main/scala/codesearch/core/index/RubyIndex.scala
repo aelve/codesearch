@@ -28,15 +28,14 @@ class RubyIndex(rubyConfig: RubyConfig)(
     val shift: ContextShift[IO]
 ) extends LanguageIndex[GemTable] with GemDB {
 
-  override type Tag = Ruby
-
-  override val csearchDir: СSearchDirectory[Tag] = implicitly
-
   private val GEM_INDEX_URL     = "http://rubygems.org/latest_specs.4.8.gz"
   private val GEM_INDEX_ARCHIVE = pwd / 'data / 'ruby / "ruby_index.gz"
   private val GEM_INDEX_JSON    = pwd / 'data / 'ruby / "ruby_index.json"
-
   private val DESERIALIZER_PATH = pwd / 'scripts / "update_index.rb"
+
+  override protected type Tag = Ruby
+
+  override protected val csearchDir: СSearchDirectory[Tag] = implicitly
 
   override protected def concurrentTasksCount: Int = rubyConfig.concurrentTasksCount
 

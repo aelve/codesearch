@@ -132,7 +132,6 @@ object Search {
   private[search] val snippetConfig: SnippetConfig =
     Config.load
       .map(_.snippetConfig)
-      .handleErrorWith(_ => IO(SnippetConfig(pageSize = 30, linesBefore = 3, linesAfter = 5)))
       .unsafeRunSync()
 
   /**

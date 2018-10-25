@@ -28,13 +28,13 @@ class HaskellIndex(haskellConfig: HaskellConfig)(
     val shift: ContextShift[IO]
 ) extends LanguageIndex[HackageTable] with HackageDB {
 
-  override type Tag = Haskell
-
-  override val csearchDir: СSearchDirectory[Tag] = implicitly
-
   private val INDEX_LINK: String     = "http://hackage.haskell.org/packages/index.tar.gz"
   private val INDEX_SOURCE_GZ: Path  = pwd / 'data / "index.tar.gz"
   private val INDEX_SOURCE_DIR: Path = pwd / 'data / 'index / "index"
+
+  override protected type Tag = Haskell
+
+  override protected val csearchDir: СSearchDirectory[Tag] = implicitly
 
   override protected def concurrentTasksCount: Int = haskellConfig.concurrentTasksCount
 

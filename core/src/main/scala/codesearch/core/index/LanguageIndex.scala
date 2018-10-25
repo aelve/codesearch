@@ -24,11 +24,11 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
 
   protected val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.unsafeCreate[IO]
 
+  protected type Tag
+
+  protected def csearchDir: СSearchDirectory[Tag]
+
   protected def concurrentTasksCount: Int
-
-  type Tag
-
-  val csearchDir: СSearchDirectory[Tag]
 
   /**
     * Download meta information about packages from remote repository

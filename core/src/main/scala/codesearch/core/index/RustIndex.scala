@@ -28,10 +28,6 @@ class RustIndex(rustConfig: RustConfig)(
     val shift: ContextShift[IO]
 ) extends LanguageIndex[CratesTable] with CratesDB {
 
-  override type Tag = Rust
-
-  override val csearchDir: СSearchDirectory[Tag] = implicitly
-
   private val REPO_DIR = pwd / 'data / 'rust / "crates.io-index"
   private val IGNORE_FILES = Set(
     "test-max-version-example-crate",
@@ -40,7 +36,15 @@ class RustIndex(rustConfig: RustConfig)(
     ".git"
   )
 
+  override protected type Tag = Rust
+
+  override protected val csearchDir: СSearchDirectory[Tag] = implicitly
+
   override protected def concurrentTasksCount: Int = rustConfig.concurrentTasksCount
+
+  override protected def updateSources(name: String, version: String): IO[Int] = {
+    archiveDownloadAndExtract(CratesPackage(name, version))
+  }
 
   override def downloadMetaInformation: IO[Unit] = IO {
     // See https://stackoverflow.com/a/41081908. Note that 'git init' and
@@ -50,10 +54,6 @@ class RustIndex(rustConfig: RustConfig)(
     s"git -C $REPO_DIR remote add origin https://github.com/rust-lang/crates.io-index" !!;
     s"git -C $REPO_DIR fetch --depth 1" !!;
     s"git -C $REPO_DIR reset --hard origin/master" !!
-  }
-
-  override protected def updateSources(name: String, version: String): IO[Int] = {
-    archiveDownloadAndExtract(CratesPackage(name, version))
   }
 
   override protected def getLastVersions: Map[String, Version] = {

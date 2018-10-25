@@ -24,20 +24,21 @@ class JavaScriptIndex(javaScriptConfig: JavaScriptConfig)(
     val shift: ContextShift[IO]
 ) extends LanguageIndex[NpmTable] with NpmDB {
 
-  override type Tag = JavaScript
+  override protected type Tag = JavaScript
 
-  override val csearchDir: СSearchDirectory[Tag] = implicitly
+  override protected val csearchDir: СSearchDirectory[Tag] = implicitly
 
   override protected def concurrentTasksCount: Int = javaScriptConfig.concurrentTasksCount
+
+  override protected def updateSources(name: String, version: String): IO[Int] = {
+    archiveDownloadAndExtract(NpmPackage(name, version))
+  }
 
   override def downloadMetaInformation: IO[Unit] =
     for {
       _     <- IO(NpmDetails.FsIndexRoot.toFile.mkdirs())
       index <- NpmDetails().index
     } yield index
-
-  override protected def updateSources(name: String, version: String): IO[Int] =
-    archiveDownloadAndExtract(NpmPackage(name, version))
 
   override protected def getLastVersions: Map[String, Version] = NpmDetails().detailsMap.unsafeRunSync()
 
