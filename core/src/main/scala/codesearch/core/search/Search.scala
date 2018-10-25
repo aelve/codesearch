@@ -97,7 +97,7 @@ trait Search {
   private def csearchResult(fullPath: String, lineNumber: Int): IO[Option[CSearchResult]] = {
     val relativePath = Path(fullPath).relativeTo(pwd).toString
     packageName(relativePath).traverse { p =>
-      extractRows(relativePath, lineNumber, snippetConfig.linesBefore, snippetConfig.linesAfter).map {
+      extractRows(relativePath, lineNumber).map {
         case (firstLine, rows) =>
           CSearchResult(
             p,
@@ -116,10 +116,12 @@ trait Search {
   /**
     * Returns index of first matched lines and lines of code
     */
-  private def extractRows(path: String, codeLine: Int, beforeLines: Int, afterLines: Int): IO[(Int, Seq[String])] = {
+  private def extractRows(path: String, codeLine: Int): IO[(Int, Seq[String])] = {
+    val from = codeLine - snippetConfig.linesBefore - 1
+    val to   = codeLine + snippetConfig.linesAfter
     readFileAsync(path).map { lines =>
       val (code, indexes) = lines.zipWithIndex.filter {
-        case (_, index) => index >= codeLine - beforeLines - 1 && index <= codeLine + afterLines
+        case (_, index) => index >= from && index <= to
       }.unzip
       indexes.head -> code
     }

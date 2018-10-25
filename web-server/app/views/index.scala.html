@@ -5,7 +5,7 @@
     <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/index.css")">
 }
 
-@wrapper("Codesearch", headExtra, headerLink = false){
+@wrapper("Codesearch", headExtra, headerLink = false) {
     <div class="list">
         <div class="item">
             <div class="lang">
@@ -15,8 +15,12 @@
                 </div>
             </div>
             <div class="info">
-                @{hackageInfo.totalPackages} packages<br>
-                Last updated: @{hackageInfo.updatedAgo}
+                @{
+                    hackageInfo.totalPackages
+                } packages<br>
+                Last updated: @{
+                hackageInfo.updatedAgo
+            }
             </div>
         </div>
         <div class="item">
@@ -27,8 +31,12 @@
                 </div>
             </div>
             <div class="info">
-                @{cratesInfo.totalPackages} packages<br>
-                Last updated: @{cratesInfo.updatedAgo}
+                @{
+                    cratesInfo.totalPackages
+                } packages<br>
+                Last updated: @{
+                cratesInfo.updatedAgo
+            }
             </div>
         </div>
         <div class="item">
@@ -39,8 +47,12 @@
                 </div>
             </div>
             <div class="info">
-                @{gemInfo.totalPackages} packages<br>
-                Last updated: @{gemInfo.updatedAgo}
+                @{
+                    gemInfo.totalPackages
+                } packages<br>
+                Last updated: @{
+                gemInfo.updatedAgo
+            }
             </div>
         </div>
         <div class="item">
@@ -52,8 +64,12 @@
                 </div>
             </div>
             <div class="info">
-                @{npmInfo.totalPackages} packages<br>
-                Last updated: @{npmInfo.updatedAgo}
+                @{
+                    npmInfo.totalPackages
+                } packages<br>
+                Last updated: @{
+                npmInfo.updatedAgo
+            }
             </div>
         </div>
     </div>

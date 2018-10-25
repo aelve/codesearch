@@ -6,7 +6,15 @@
 @import codesearch.core.search.Search.PackageResult
 @import codesearch.web.SnippetHelper
 
-@(lang: String, insensitive: Boolean, precise: Boolean, query: String, updated: String, packages: Seq[PackageResult], totalMatches: Int)
+@(
+        lang: String,
+        insensitive: Boolean,
+        precise: Boolean,
+        query: String,
+        updated: String,
+        packages: Seq[PackageResult],
+        totalMatches: Int
+)
 
 <section class="container">
     <span class="text-secondary">Index updated @updated</span> <br>

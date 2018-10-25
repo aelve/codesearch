@@ -2,7 +2,6 @@ package codesearch.web.controllers
 
 import cats.data.OptionT
 import cats.instances.future._
-import codesearch.core.config.{Config, SnippetConfig}
 import codesearch.core.db.DefaultDB
 import codesearch.core.model.DefaultTable
 import codesearch.core.search.Search.CSearchPage
@@ -35,10 +34,17 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
     )
   }
 
-  def search(query: String, insensitive: String, precise: String, sources: String, page: String): Action[AnyContent] =
+  def search(
+      query: String,
+      insensitive: String,
+      precise: String,
+      sources: String,
+      linesBefore: String,
+      linesAfter: String,
+      page: String
+  ): Action[AnyContent] =
     Action.async { implicit request =>
-      val request = SearchRequest.applyRaw(query, insensitive, precise, sources, page)
-      val callURI = s"/$lang/search?query=$query&insensitive=$insensitive&precise=$precise&sources=$sources"
+      val request = SearchRequest.applyRaw(query, insensitive, precise, sources, linesBefore, linesAfter, page)
       db.updated.flatMap { updated =>
         searchEngine.search(request) map {
           case CSearchPage(results, total) =>
@@ -50,15 +56,34 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
                 insensitive = request.insensitive,
                 precise = request.preciseMatch,
                 sources = request.sourcesOnly,
+                linesBefore = request.linesBefore,
+                linesAfter = request.linesAfter,
                 page = request.page,
                 totalMatches = total,
-                callURI = callURI,
+                callUri = callUri(query, insensitive, precise, sources, linesBefore, linesAfter),
                 lang = lang
               )
             )
         } unsafeToFuture
       }
     }
+
+  private def callUri(
+      query: String,
+      insensitive: String,
+      precise: String,
+      sources: String,
+      linesBefore: String,
+      linesAfter: String
+  ): String = s"""
+        |/$lang/search
+        |?query=$query
+        |&insensitive=$insensitive
+        |&precise=$precise
+        |&sources=$sources
+        |&linesBefore=$linesBefore
+        |&linesAfter=$linesAfter
+     """
 
   def source(relativePath: String, query: String, L: Int): Action[AnyContent] =
     Action.async { implicit request =>
@@ -81,10 +106,4 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
         }
         .getOrElse(NotFound.apply("Not found"))
     }
-}
-
-object SearchController {
-  lazy implicit val snippetConfig: SnippetConfig = Config.load
-    .map(_.snippetConfig)
-    .unsafeRunSync() //TODO: pass config here as parameter
 }

@@ -4,7 +4,12 @@ import cats.effect.IO
 import pureconfig.module.catseffect._
 import pureconfig.{CamelCase, ConfigFieldMapping, ProductHint}
 
-case class Config(db: DatabaseConfig, snippetConfig: SnippetConfig, languagesConfig: LanguagesConfig)
+case class Config(
+    db: DatabaseConfig,
+    snippetConfig: SnippetConfig,
+    languagesConfig: LanguagesConfig
+)
+
 case class DatabaseConfig(
     dataSourceClass: String,
     port: Int,
@@ -12,7 +17,11 @@ case class DatabaseConfig(
     user: String,
     password: String
 )
-case class SnippetConfig(pageSize: Int, linesBefore: Int, linesAfter: Int)
+case class SnippetConfig(
+    pageSize: Int,
+    linesBefore: Int,
+    linesAfter: Int
+)
 
 case class LanguagesConfig(
     haskellConfig: HaskellConfig,

@@ -1,10 +1,18 @@
 @(updated: String, lang: String)
 
-@headExtra = {
-    <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/search.css")">
-}
+    @headExtra = {
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/search.css")">
+    }
 
-@wrapper(s"Codesearch | $lang", headExtra){
-    @searchBox(s"/$lang/search", "", insensitive = false, precise = false, sources = true)
-    @docFrame()
-}
+    @wrapper(s"Codesearch | $lang", headExtra) {
+        @searchBox(
+            s"/$lang/search",
+            query = "",
+            insensitive = false,
+            precise = false,
+            sources = true,
+            linesBefore = 3,
+            linesAfter = 5
+        )
+        @docFrame()
+    }

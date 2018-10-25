@@ -12,6 +12,8 @@ case class SearchRequest(
     insensitive: Boolean,
     preciseMatch: Boolean,
     sourcesOnly: Boolean,
+    linesBefore: Int,
+    linesAfter: Int,
     page: Int
 )
 
@@ -21,12 +23,16 @@ object SearchRequest {
       insensitive: String,
       preciseMatch: String,
       sourcesOnly: String,
+      linesBefore: String,
+      linesAfter: String,
       page: String
   ): SearchRequest = SearchRequest(
     query,
     isEnabled(insensitive),
     isEnabled(preciseMatch),
     isEnabled(sourcesOnly),
+    linesBefore.toInt,
+    linesAfter.toInt,
     page.toInt
   )
   private def isEnabled(param: String): Boolean = param == "on"

@@ -17,15 +17,17 @@
 }
 
 @wrapper("Codesearch", headExtra) {
-    <h5 class="display-7" style="margin-bottom: 0em; margin-top: 1em;"><a href=@pack.packageLink>@pack.name</a></h5>
+    <h5 class="display-7" style="margin-bottom: 0em;
+        margin-top: 1em;"><a href=@pack.packageLink>@pack.name</a></h5>
     <a href="#">@relativePath</a>
     <br/>
-    <pre data-start="1" id="snippet" @if(firstMatch > 0){ data-line="@firstMatch" } else {}><code class="@("language-" + lang + " line-numbers")">@{
+    <pre data-start="1" id="snippet" @if(firstMatch > 0) {
+        data-line="@firstMatch" } else {}><code class="@("language-" + lang + " line-numbers")">@{
         val re = query.r
         val htmlBuilder: ListBuffer[Html] = mutable.ListBuffer.empty[Html]
         for(line <- sourceCode) {
             val matches = re.findAllMatchIn(line)
-            if (matches.isEmpty) {
+            if(matches.isEmpty) {
                 htmlBuilder.append(HtmlFormat.escape(line + "\n"))
             } else {
                 htmlBuilder.append(SnippetHelper.markAllMatches(line, matches): _*)

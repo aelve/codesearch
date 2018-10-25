@@ -1,4 +1,12 @@
-@(actSearch: String, query: String, insensitive: Boolean, precise: Boolean, sources: Boolean)
+@(
+        actSearch: String,
+        query: String,
+        insensitive: Boolean,
+        precise: Boolean,
+        sources: Boolean,
+        linesBefore: Int,
+        linesAfter: Int
+)
 
 <section class="container-fluid">
     <div class="col-lg-6 mx-auto p-3 h7 justify-content-center">
@@ -10,11 +18,11 @@
                 </span>
             </div>
             <div class="form-check form-check-inline">
-                <input type="checkbox" class="form-check-input" name="insensitive" id="insensitive-search" @(if (insensitive) "checked")>
+                <input type="checkbox" class="form-check-input" name="insensitive" id="insensitive-search" @(if(insensitive) "checked")>
                 <label class="form-check-label" for="insensitive-search">Case-insensitive search</label>
             </div>
             <div class="form-check form-check-inline">
-                <input type="checkbox" class="form-check-input" name="precise" id="precise-match" @(if (precise) "checked")>
+                <input type="checkbox" class="form-check-input" name="precise" id="precise-match" @(if(precise) "checked")>
                 <label class="form-check-label" for="precise-match">Precise match</label>
             </div>
 
@@ -28,9 +36,9 @@
                         }
                     }
             </script>
-            <input type="hidden" name="sources" id="sources-only-hidden" value=@(if (sources) "on" else "off")>
+            <input type="hidden" name="sources" id="sources-only-hidden" value=@(if(sources) "on" else "off")>
             <div class="form-check form-check-inline">
-                <input type="checkbox" class="form-check-input" id="sources-only" onclick="changeSourcesOnly()" @(if (sources) "checked")>
+                <input type="checkbox" class="form-check-input" id="sources-only" onclick="changeSourcesOnly()" @(if(sources) "checked")>
                 <label class="form-check-label" for="sources-only">Sources only</label>
             </div>
         </form>

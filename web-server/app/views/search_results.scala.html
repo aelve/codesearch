@@ -1,19 +1,31 @@
 @import codesearch.core.search.Search.PackageResult
 
-@(updated: String, packages: Seq[PackageResult], query: String, insensitive: Boolean,
-        precise: Boolean, sources: Boolean, page: Int, totalMatches: Int, callURI: String, lang: String)
+@(
+        updated: String,
+        packages: Seq[PackageResult],
+        query: String,
+        insensitive: Boolean,
+        precise: Boolean,
+        sources: Boolean,
+        linesBefore: Int,
+        linesAfter: Int,
+        page: Int,
+        totalMatches: Int,
+        callUri: String,
+        lang: String
+)
 
-@headExtra = {
-    <meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval' http://www.google.com">
+    @headExtra = {
+        <meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval' http://www.google.com">
 
-    <script src="@routes.Assets.versioned("prismjs.js")"></script>
-    <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/prismjs.css")">
+        <script src="@routes.Assets.versioned("prismjs.js")"></script>
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/prismjs.css")">
 
-    <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/search.css")">
-}
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("css/search.css")">
+    }
 
-@wrapper(s"Codesearch | $lang", headExtra){
-    @searchBox(s"/$lang/search", query, insensitive, precise, sources)
-    @resultFrame(lang, insensitive, precise, query, updated, packages, totalMatches)
-    @pagination(page, totalMatches, callURI)
-}
+    @wrapper(s"Codesearch | $lang", headExtra) {
+        @searchBox(s"/$lang/search", query, insensitive, precise, sources, linesBefore, linesAfter)
+        @resultFrame(lang, insensitive, precise, query, updated, packages, totalMatches)
+        @pagination(page, totalMatches, callUri)
+    }
