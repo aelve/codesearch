@@ -61,7 +61,6 @@ docker run -p 9000:80 -d \
 ```
 Note: If you starting the web-server in production, you should start the server with parameter -e APPLICATION_SECRET={code}. 
 Where in {code} you should type code generated from command sbt playGenerateSecret | grep -i 'generated'. 
-And you should add  -e DATABASE_HOST=postgres, because by default it connecting to localhost
 It should look like this:
 ```
 docker run -p 9000:80 -d \
@@ -69,6 +68,5 @@ docker run -p 9000:80 -d \
   --link codesearch-db:postgres \
   --name codesearch-web-server \
   -e APPLICATION_SECRET=f:D5ROEXEDLBI24hcbi9PuHdE \
-   -e DATABASE_HOST=postgres \
   quay.io/aelve/codesearch-web-server make serve
 ```
