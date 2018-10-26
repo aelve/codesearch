@@ -103,6 +103,7 @@ object Builder {
         case referenceOverrides if referenceOverrides.contains("reference-overrides.conf") =>
           MergeStrategy.concat
         case "application.conf" => MergeStrategy.concat
+        case "production.conf"  => MergeStrategy.first
         case "logback.xml"      => MergeStrategy.first
         case x =>
           val oldStrategy = (assemblyMergeStrategy in assembly).value
