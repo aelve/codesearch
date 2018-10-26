@@ -3,7 +3,7 @@
 # Create tables
 .PHONY: tables
 tables:
-  java -jar codesearch-core.jar -i
+  java -Dconfig.resource=production.conf -jar codesearch-core.jar -i
 
 # Download packages. Acceptable values: {haskell, rust, ruby, javascript}
 download-%:
