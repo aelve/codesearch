@@ -54,8 +54,9 @@ object DirAs {
   private val root: Path = Paths.get("./index/csearch/")
 
   implicit def asString: DirAs[String] = new DirAs[String] {
-    override def dir(packageManager: String): String     = asPath.dir(packageManager).toFile.getCanonicalPath
-    override def tempDir(packageManager: String): String = asPath.tempDir(packageManager).toFile.getAbsolutePath
+    private def fullPath(relativePath: Path): String     = relativePath.toFile.getCanonicalPath
+    override def dir(packageManager: String): String     = fullPath(asPath.dir(packageManager))
+    override def tempDir(packageManager: String): String = fullPath(asPath.tempDir(packageManager))
   }
 
   implicit def asPath: DirAs[Path] = new DirAs[Path] {
