@@ -52,6 +52,11 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
 
     def dropTempIndexFile = IO(Files.deleteIfExists(csearchDir.tempIndexDirAs[NioPath]))
 
+    def createCSearchDir = IO(
+      if (Files.notExists(СSearchDirectory.root))
+        Files.createDirectory(СSearchDirectory.root)
+    )
+
     def indexPackages(packageDirs: Seq[NioPath]) = IO {
       val env  = Seq("CSEARCHINDEX" -> csearchDir.tempIndexDirAs[String])
       val args = "cindex" +: packageDirs.map(_.toString)
@@ -68,6 +73,7 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
 
     for {
       packageDirs <- latestPackagePaths
+      _           <- createCSearchDir
       _           <- dropTempIndexFile
       exitCode    <- indexPackages(packageDirs)
       _           <- replaceIndexFile
