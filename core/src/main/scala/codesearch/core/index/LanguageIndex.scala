@@ -54,7 +54,7 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
 
     def createCSearchDir = IO(
       if (Files.notExists(СSearchDirectory.root))
-        Files.createDirectory(СSearchDirectory.root)
+        Files.createDirectories(СSearchDirectory.root)
     )
 
     def indexPackages(packageDirs: Seq[NioPath]) = IO {
