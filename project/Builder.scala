@@ -58,6 +58,7 @@ object Builder {
       assemblyJarName in assembly := "codesearch-core.jar",
       assemblyOutputPath in assembly := baseDirectory.value / "../codesearch-core.jar",
       libraryDependencies ++= Seq(
+        "com.lihaoyi"           %% "fastparse"                     % "2.0.4",
         "com.typesafe.slick"    %% "slick"                         % "3.2.3",
         "com.typesafe.slick"    %% "slick-hikaricp"                % "3.2.3",
         "org.postgresql"        % "postgresql"                     % "42.2.2",
