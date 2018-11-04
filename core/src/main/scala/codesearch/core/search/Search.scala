@@ -13,7 +13,7 @@ import codesearch.core.index.directory.СSearchDirectory
 import codesearch.core.search.Search.{CSearchPage, CSearchResult, CodeSnippet, Package, PackageResult, snippetConfig}
 import codesearch.core.util.Helper.readFileAsync
 import codesearch.core.lexer.tokens.Token
-import codesearch.core.lexer.{Tokenizer, StringsCollector}
+import codesearch.core.lexer.{StringBuilder, Tokenizer}
 
 import scala.sys.process.Process
 
@@ -58,9 +58,15 @@ trait Search {
     IO((Process(arguments(request), None, env) #| Seq("head", "-1001")).!!.split('\n').toList)
   }
 
+  private def tokenizerAndBuilder(query: String): String = {
+    val tokens: Seq[Token] = Tokenizer.parseStringWithSpecialSymbols(query)
+    StringBuilder.buildStringFromTokens(tokens)
+  }
+
   private def arguments(request: SearchRequest): List[String] = {
     val forExtensions = if (request.sourcesOnly) extensionsRegex else ".*"
-    val query         = if (request.preciseMatch) Helper.hideSymbols(request.query) else request.query
+    val queryFromTokens = tokenizerAndBuilder(request.query)
+    val query         = if (request.preciseMatch) Helper.hideSymbols(queryFromTokens) else queryFromTokens
     val insensitive   = if (request.insensitive) "-i" else new String()
     List("csearch", "-n", insensitive, "-f", forExtensions, query)
   }

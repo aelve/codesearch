@@ -18,7 +18,7 @@ class TokenizerSpec extends WordSpec {
     """"Hello World + ?"""" should {
       """Decompose in tokens -- Seq(Content("Hello"), SpecialSymbol(' '), Content("World"), SpecialSymbol(' '), SpecialSymbol('+'),  SpecialSymbol(' '),  SpecialSymbol('?))""" in {
         val tokens = Tokenizer.parseStringWithSpecialSymbols("Hello World + ?")
-        assert(tokens == Seq(Content("Hello"), SpecialSymbol(' '), Content("World"), SpecialSymbol(' '), SpecialSymbol('+'),  SpecialSymbol(' '),  SpecialSymbol('?')))
+        assert(tokens == Seq(Content("Hello"), SpecialSymbol(' '), Content("World"), SpecialSymbol(' '), SpecialSymbol('+'), SpecialSymbol(' '), SpecialSymbol('?')))
       }
     }
 
@@ -26,6 +26,13 @@ class TokenizerSpec extends WordSpec {
       """Decompose in tokens -- Seq(Content("Hello"), SpecialSymbol(' '), Content("World"), SpecialSymbol(' '), Other("[^Gared]")""" in {
         val tokens = Tokenizer.parseStringWithSpecialSymbols("Hello World [^Gared]")
         assert(tokens == Seq(Content("Hello"), SpecialSymbol(' '), Content("World"), SpecialSymbol(' '), Other("[^Gared]")))
+      }
+    }
+
+    """Hello World [^Gared] (Bale)""" should {
+      """Decompose in tokens -- Seq(Content("Hello"), SpecialSymbol(' '), Content("World"), SpecialSymbol(' '), Other("[^Gared]"), SpecialSymbol(' '), Other("(Bale)")""" in {
+        val tokens = Tokenizer.parseStringWithSpecialSymbols("Hello World [^Gared] (Bale)")
+        assert(tokens == Seq(Content("Hello"), SpecialSymbol(' '), Content("World"), SpecialSymbol(' '), Other("[^Gared]"), SpecialSymbol(' '), Other("(Bale)")))
       }
     }
   }

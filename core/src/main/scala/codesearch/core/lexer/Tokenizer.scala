@@ -5,9 +5,9 @@ import NoWhitespace._
 import codesearch.core.lexer.tokens._
 
 sealed trait TokenizerMethods {
-  protected def leftForOtherSymbols[_: P] = P(CharIn("[", "[^")).!
+  protected def leftForOtherSymbols[_: P] = P(CharIn("(", "[", "[^")).!
 
-  protected def rightForOtherSymbols[_: P] = P(CharIn("]")).!
+  protected def rightForOtherSymbols[_: P] = P(CharIn(")", "]")).!
 
   protected def specialSymbols[_: P] = P(CharIn(" ", "$", "%", "^", "&", "*", "+", "?", "!", "")).!
 
