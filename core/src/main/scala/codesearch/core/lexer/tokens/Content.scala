@@ -1,3 +1,3 @@
 package codesearch.core.lexer.tokens
 
-case class Content(value: String) extends Token
+final case class Content(value: String) extends Token

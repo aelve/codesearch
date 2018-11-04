@@ -1,3 +1,3 @@
 package codesearch.core.lexer.tokens
 
-case class Other(value: String) extends Token
+final case class Other(value: String) extends Token

@@ -5,7 +5,7 @@ import NoWhitespace._
 import codesearch.core.lexer.tokens._
 
 sealed trait TokenizerMethods {
-  protected def leftForOtherSymbols[_: P] = P(CharIn("/P{", "[", "[^")).!
+  protected def leftForOtherSymbols[_: P] = P(CharIn("\\P{", "[", "[^")).!
 
   protected def rightForOtherSymbols[_: P] = P(CharIn("}", "]")).!
 
