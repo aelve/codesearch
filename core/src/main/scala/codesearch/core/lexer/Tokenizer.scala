@@ -5,9 +5,9 @@ import NoWhitespace._
 import codesearch.core.lexer.tokens._
 
 sealed trait TokenizerMethods {
-  protected def leftForOtherSymbols[_: P] = P(CharIn("\\P{", "[", "[^")).!
+  protected def leftForOtherSymbols[_: P] = P(CharIn("[", "[^")).!
 
-  protected def rightForOtherSymbols[_: P] = P(CharIn("}", "]")).!
+  protected def rightForOtherSymbols[_: P] = P(CharIn("]")).!
 
   protected def specialSymbols[_: P] = P(CharIn(" ", "$", "%", "^", "&", "*", "+", "?", "!", "")).!
 
@@ -18,8 +18,13 @@ sealed trait TokenizerMethods {
   protected def parserSpecialSymbol[_: P] = P(specialSymbols.map(specialSymbolInString => SpecialSymbol(specialSymbolInString.charAt(0))))
 
   protected def parserAnyStringToSpecialSymbol[_: P] = P((!specialSymbols ~ AnyChar).rep(1).!.map(Content(_)))
+
+  protected def parseStringWithSpecialSymbols[_: P] = P(parserOtherSymbols | parserAnyStringToSpecialSymbol | parserSpecialSymbol).rep
 }
 
 object Tokenizer extends TokenizerMethods {
-  def parseStringWithSpecialSymbols[_: P] = P(parserOtherSymbols | parserAnyStringToSpecialSymbol | parserSpecialSymbol).rep
+  def parseStringWithSpecialSymbols(query: String): Seq[Token] = {
+    val Parsed.Success(tokens, _) = parse(query, parseStringWithSpecialSymbols(_))
+    tokens
+  }
 }

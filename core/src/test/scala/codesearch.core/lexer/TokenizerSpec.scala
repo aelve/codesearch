@@ -10,22 +10,22 @@ class TokenizerSpec extends WordSpec {
   "String" when {
     """"Hello World"""" should {
       """Decompose in tokens -- Seq(Content("Hello"), SpecialSymbol(' '), Content("World"))""" in {
-        val Parsed.Success(value, _) = parse("Hello World", Tokenizer.parseStringWithSpecialSymbols(_))
-        assert(value == Seq(Content("Hello"), SpecialSymbol(' '), Content("World")))
+        val tokens = Tokenizer.parseStringWithSpecialSymbols("Hello World")
+        assert(tokens == Seq(Content("Hello"), SpecialSymbol(' '), Content("World")))
       }
     }
 
     """"Hello World + ?"""" should {
       """Decompose in tokens -- Seq(Content("Hello"), SpecialSymbol(' '), Content("World"), SpecialSymbol(' '), SpecialSymbol('+'),  SpecialSymbol(' '),  SpecialSymbol('?))""" in {
-        val Parsed.Success(value, _) = parse("Hello World + ?", Tokenizer.parseStringWithSpecialSymbols(_))
-        assert(value == Seq(Content("Hello"), SpecialSymbol(' '), Content("World"), SpecialSymbol(' '), SpecialSymbol('+'),  SpecialSymbol(' '),  SpecialSymbol('?')))
+        val tokens = Tokenizer.parseStringWithSpecialSymbols("Hello World + ?")
+        assert(tokens == Seq(Content("Hello"), SpecialSymbol(' '), Content("World"), SpecialSymbol(' '), SpecialSymbol('+'),  SpecialSymbol(' '),  SpecialSymbol('?')))
       }
     }
 
-    """Hello World \\P{Gare}""" should {
-      """Decompose in tokens -- Seq(Content("Hello"), SpecialSymbol(' '), Content("World"), SpecialSymbol(' '), Other("\\P{Gared}")""" in {
-        val Parsed.Success(value, _) = parse("Hello World + ?", Tokenizer.parseStringWithSpecialSymbols(_))
-        assert(value == Seq(Content("Hello"), SpecialSymbol(' '), Content("World"), SpecialSymbol(' '), SpecialSymbol('+'),  SpecialSymbol(' '),  SpecialSymbol('?')))
+    """Hello World [^Gared]""" should {
+      """Decompose in tokens -- Seq(Content("Hello"), SpecialSymbol(' '), Content("World"), SpecialSymbol(' '), Other("[^Gared]")""" in {
+        val tokens = Tokenizer.parseStringWithSpecialSymbols("Hello World [^Gared]")
+        assert(tokens == Seq(Content("Hello"), SpecialSymbol(' '), Content("World"), SpecialSymbol(' '), Other("[^Gared]")))
       }
     }
   }
