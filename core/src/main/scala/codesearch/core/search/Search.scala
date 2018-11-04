@@ -64,10 +64,10 @@ trait Search {
   }
 
   private def arguments(request: SearchRequest): List[String] = {
-    val forExtensions = if (request.sourcesOnly) extensionsRegex else ".*"
+    val forExtensions   = if (request.sourcesOnly) extensionsRegex else ".*"
     val queryFromTokens = tokenizerAndBuilder(request.query)
-    val query         = if (request.preciseMatch) Helper.hideSymbols(queryFromTokens) else queryFromTokens
-    val insensitive   = if (request.insensitive) "-i" else new String()
+    val query           = if (request.preciseMatch) Helper.hideSymbols(queryFromTokens) else queryFromTokens
+    val insensitive     = if (request.insensitive) "-i" else new String()
     List("csearch", "-n", insensitive, "-f", forExtensions, query)
   }
 
