@@ -39,7 +39,7 @@ object Builder {
 
   lazy val commonDeps = Seq(
     libraryDependencies ++= Seq(
-      "com.lihaoyi"          %% "fastparse"     % "2.0.4",
+      "com.lihaoyi"          %% "fastparse"      % "2.0.4",
       "com.github.scopt"     %% "scopt"          % "3.7.0",
       "com.lihaoyi"          %% "ammonite-ops"   % "1.0.3",
       "org.rauschig"         % "jarchivelib"     % "0.7.1",
@@ -59,7 +59,6 @@ object Builder {
       assemblyJarName in assembly := "codesearch-core.jar",
       assemblyOutputPath in assembly := baseDirectory.value / "../codesearch-core.jar",
       libraryDependencies ++= Seq(
-        "com.lihaoyi"           %% "fastparse"                     % "2.0.4",
         "com.typesafe.slick"    %% "slick"                         % "3.2.3",
         "com.typesafe.slick"    %% "slick-hikaricp"                % "3.2.3",
         "org.postgresql"        % "postgresql"                     % "42.2.2",
