@@ -12,8 +12,8 @@ import cats.instances.list._
 import codesearch.core.index.directory.СSearchDirectory
 import codesearch.core.search.Search.{CSearchPage, CSearchResult, CodeSnippet, Package, PackageResult, snippetConfig}
 import codesearch.core.util.Helper.readFileAsync
-import codesearch.core.index.regex.lexer.tokens.Token
-import codesearch.core.index.regex.lexer.{RowPicker, Tokenizer}
+import codesearch.core.regex.lexer.tokens.Token
+import codesearch.core.regex.lexer.{RowPicker, Tokenizer}
 
 import scala.sys.process.Process
 
@@ -67,7 +67,7 @@ trait Search {
     val forExtensions   = if (request.sourcesOnly) extensionsRegex else ".*"
     val queryFromTokens = tokenizerAndBuilder(request.query)
     val query           = if (request.preciseMatch) Helper.hideSymbols(queryFromTokens) else queryFromTokens
-    val insensitive     = if (request.insensitive) "-i" else new String()
+    val insensitive     = if (request.insensitive) "-i" else ""
     List("csearch", "-n", insensitive, "-f", forExtensions, query)
   }
 

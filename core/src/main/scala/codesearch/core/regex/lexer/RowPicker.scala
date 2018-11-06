@@ -1,8 +1,9 @@
-package codesearch.core.index.regex.lexer
+package codesearch.core.regex.lexer
 
-import codesearch.core.index.regex.lexer.tokens.Token
+import codesearch.core.regex.lexer.tokens.Token
 
 object RowPicker {
+
   /**
     * String builder from tokens
     *
