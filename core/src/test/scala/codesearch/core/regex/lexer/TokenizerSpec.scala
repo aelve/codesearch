@@ -7,19 +7,19 @@ import codesearch.core.regex.lexer.Tokenizer
 class TokenizerSpec extends WordSpec {
   "String" when {
     """"Hello World"""" should {
-      """Decompose into tokens -- Seq(Content("Hello"), SpecialSymbol(' '), Content("World"))""" in {
+      """Decompose into tokens -- Seq(Literal("Hello"), SpecialSymbol(' '), Literal("World"))""" in {
         val tokens = Tokenizer.parseStringWithSpecialSymbols("Hello World")
-        assert(tokens == Seq(Content("Hello"), SpecialSymbol(' '), Content("World")))
+        assert(tokens == Seq(Literal("Hello"), SpecialSymbol(' '), Literal("World")))
       }
     }
 
     """"Hello World + ?"""" should {
-      """Decompose into tokens -- Seq(Content("Hello"), SpecialSymbol(' '), Content("World"), SpecialSymbol(' '), SpecialSymbol('+'),  SpecialSymbol(' '),  SpecialSymbol('?))""" in {
+      """Decompose into tokens -- Seq(Literal("Hello"), SpecialSymbol(' '), Literal("World"), SpecialSymbol(' '), SpecialSymbol('+'),  SpecialSymbol(' '),  SpecialSymbol('?))""" in {
         val tokens = Tokenizer.parseStringWithSpecialSymbols("Hello World + ?")
         assert(
-          tokens == Seq(Content("Hello"),
+          tokens == Seq(Literal("Hello"),
                         SpecialSymbol(' '),
-                        Content("World"),
+                        Literal("World"),
                         SpecialSymbol(' '),
                         SpecialSymbol('+'),
                         SpecialSymbol(' '),
@@ -28,28 +28,54 @@ class TokenizerSpec extends WordSpec {
     }
 
     """Hello World [^Gared]""" should {
-      """Decompose into tokens -- Seq(Content("Hello"), SpecialSymbol(' '), Content("World"), SpecialSymbol(' '), Other("[^Gared]")""" in {
+      """Decompose into tokens -- Seq(Literal("Hello"), SpecialSymbol(' '), Literal("World"), SpecialSymbol(' '), Other("[^Gared]")""" in {
         val tokens = Tokenizer.parseStringWithSpecialSymbols("Hello World [^Gared]")
         assert(
-          tokens == Seq(Content("Hello"), SpecialSymbol(' '), Content("World"), SpecialSymbol(' '), Other("[^Gared]")))
+          tokens == Seq(Literal("Hello"), SpecialSymbol(' '), Literal("World"), SpecialSymbol(' '), Other("[^Gared]")))
       }
     }
 
-    """Hello World [^Gared] (Bale) /Symbol""" should {
-      """Decompose into tokens -- Seq(Content("Hello"), SpecialSymbol(' '), Content("World"), SpecialSymbol(' '), Other("[^Gared]"), SpecialSymbol(' '), Other("(Bale)", SpecialSymbol(' '), SpecialSymbol('/'), Content("Symbol"))""" in {
-        val tokens = Tokenizer.parseStringWithSpecialSymbols("Hello World [^Gared] (Bale) /Symbol")
+    """Hello World(Kek) [^Gared] (Bale) \Symbol""" should {
+      """Decompose into tokens -- Seq(Literal("Hello"), SpecialSymbol(' '), Literal("World"), Other("Kek"), SpecialSymbol(' '), Other("[^Gared]"), SpecialSymbol(' '), Other("(Bale)", SpecialSymbol(' '), Escaped('S'), Literal("ymbol"))""" in {
+        val tokens = Tokenizer.parseStringWithSpecialSymbols("Hello World [^Gared] (Bale) \\Symbol")
         assert(
           tokens == Seq(
-            Content("Hello"),
+            Literal("Hello"),
             SpecialSymbol(' '),
-            Content("World"),
+            Literal("World"),
             SpecialSymbol(' '),
             Other("[^Gared]"),
             SpecialSymbol(' '),
             Other("(Bale)"),
             SpecialSymbol(' '),
-            SpecialSymbol('/'),
-            Content("Symbol")
+            Escaped('S'),
+            Literal("ymbol")
+          ))
+      }
+    }
+
+    """Hello World\(Kek\) [^Gared] (Bale) \Symbol \Kek+""" should {
+      """Decompose into tokens -- Seq(Literal("Hello"), SpecialSymbol(' '), Literal("World"), Escaped('('), Literal("Kek"), Escaped(')'), SpecialSymbol(' '), Other("[^Gared]"), SpecialSymbol(' '), Other("(Bale)", SpecialSymbol(' '), Escaped('S'), Literal("ymbol"), SpecialSymbol(' '), Escaped('K'), Literal("ek"), SpecialSymbol('+'))""" in {
+        val tokens = Tokenizer.parseStringWithSpecialSymbols("Hello World\\(Kek\\) [^Gared] (Bale) \\Symbol \\Kek+")
+        assert(
+          tokens == Seq(
+            Literal("Hello"),
+            SpecialSymbol(' '),
+            Literal("World"),
+            Escaped('('),
+            Literal("Kek"),
+            Escaped(')'),
+            SpecialSymbol(' '),
+            Other("[^Gared]"),
+            SpecialSymbol(' '),
+            Other("(Bale)"),
+            SpecialSymbol(' '),
+            Escaped('S'),
+            Literal("ymbol"),
+            SpecialSymbol(' '),
+            Escaped('K'),
+            Literal("ek"),
+            SpecialSymbol('+')
           ))
       }
     }

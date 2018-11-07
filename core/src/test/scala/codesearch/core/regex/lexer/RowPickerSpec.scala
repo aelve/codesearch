@@ -6,28 +6,42 @@ import codesearch.core.regex.lexer.RowPicker
 
 class RowPickerSpec extends WordSpec {
   "Any Sequnce of Tokens" when {
-    """Seq(Content("Hello"), SpecialSymbol(' '), Content("World"))""" should {
+    """Seq(Literal("Hello"), SpecialSymbol(' '), Literal("World"))""" should {
       """Tokens are collected into string -- "Hello World"""" in {
-        val strFromTokens = RowPicker.buildStringFromTokens(Seq(Content("Hello"), SpecialSymbol(' '), Content("World")))
+        val strFromTokens = RowPicker.buildStringFromTokens(Seq(Literal("Hello"), SpecialSymbol(' '), Literal("World")))
         assert(strFromTokens == "Hello World")
       }
     }
-    """Seq(Content("Hello"), SpecialSymbol(' '), Content("World"), SpecialSymbol(' '), Other("[^Gared]"), SpecialSymbol(' '), Other("(Bale), SpecialSymbol(' '), SpecialSymbol('/'), Content("Symbol")")""" should {
-      """Tokens are collected into string -- "Hello World [^Gared] (Bale) /Symbol"""" in {
+    """Seq(Literal("Hello"), SpecialSymbol(' '), Literal("World"), SpecialSymbol(' '), Other("[^Gared]"), SpecialSymbol(' '), Other("(Bale), SpecialSymbol(' '), Escaped('S'), Literal("ymbol")")""" should {
+      """Tokens are collected into string -- "Hello World [^Gared] (Bale) \Symbol"""" in {
         val strFromTokens = RowPicker.buildStringFromTokens(
           Seq(
-            Content("Hello"),
+            Literal("Hello"),
             SpecialSymbol(' '),
-            Content("World"),
+            Literal("World"),
             SpecialSymbol(' '),
             Other("[^Gared]"),
             SpecialSymbol(' '),
             Other("(Bale)"),
             SpecialSymbol(' '),
-            SpecialSymbol('/'),
-            Content("Symbol")
+            Escaped('S'),
+            Literal("ymbol")
           ))
-        assert(strFromTokens == "Hello World [^Gared] (Bale) /Symbol")
+        assert(strFromTokens == "Hello World [^Gared] (Bale) \\Symbol")
+      }
+    }
+
+    """Seq(Literal("Hello"), SpecialSymbol(' '), Literal("World"), Escaped('('), Literal("Kek"), Escaped(')'))""" should {
+      """Tokens are collected into string -- "Hello World \(Kek\)"""" in {
+        val strFromTokens = RowPicker.buildStringFromTokens(
+          Seq(Literal("Hello"),
+              SpecialSymbol(' '),
+              Literal("World"),
+              SpecialSymbol(' '),
+              Escaped('('),
+              Literal("Kek"),
+              Escaped(')')))
+        assert(strFromTokens == "Hello World \\(Kek\\)")
       }
     }
   }

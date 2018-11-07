@@ -9,7 +9,9 @@ trait TokenizerMethods {
 
   def rightForOtherSymbols[_: P] = P(CharIn(")", "]")).!
 
-  def specialSymbols[_: P] = P(CharIn("/", " ", "$", "%", "^", "&", "*", "+", "?", "!")).!
+  def specialSymbols[_: P] = P(CharIn("\\\\", " ", "$", "%", "^", "&", "*", "+", "?", "!", "]", ")", "[", "[^", "(")).!
+
+  def parserEscaped[_: P] = P(CharIn("\\\\") ~ AnyChar.!).map(a => Escaped(a.charAt(0)))
 
   def parserAnyStringInOtherSymbols[_: P] = P(!rightForOtherSymbols ~ AnyChar).rep.!
 
@@ -19,10 +21,10 @@ trait TokenizerMethods {
   def parserSpecialSymbol[_: P] =
     P(specialSymbols.map(specialSymbolInString => SpecialSymbol(specialSymbolInString.charAt(0))))
 
-  def parserAnyStringToSpecialSymbol[_: P] = P((!specialSymbols ~ AnyChar).rep(1).!.map(Content(_)))
+  def parserAnyStringToSpecialSymbol[_: P] = P((!specialSymbols ~ AnyChar).rep(1).!.map(Literal(_)))
 
   def parseStringWithSpecialSymbols[_: P] =
-    P(parserOtherSymbols | parserAnyStringToSpecialSymbol | parserSpecialSymbol).rep
+    P(parserEscaped | parserOtherSymbols | parserAnyStringToSpecialSymbol | parserSpecialSymbol).rep
 }
 
 object Tokenizer extends TokenizerMethods {
