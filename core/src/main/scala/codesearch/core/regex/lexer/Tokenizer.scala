@@ -4,30 +4,28 @@ import fastparse._
 import NoWhitespace._
 import codesearch.core.regex.lexer.tokens._
 
-trait TokenizerMethods {
-  def leftForOtherSymbols[_: P] = P(CharIn("(", "[", "[^")).!
+object Tokenizer {
 
-  def rightForOtherSymbols[_: P] = P(CharIn(")", "]")).!
+  private def leftForOtherSymbols[_: P] = P(CharIn("(", "[", "[^")).!
 
-  def specialSymbols[_: P] = P(CharIn("\\\\", " ", "$", "%", "^", "&", "*", "+", "?", "!", "]", ")", "[", "[^", "(")).!
+  private def rightForOtherSymbols[_: P] = P(CharIn(")", "]")).!
 
-  def parserEscaped[_: P] = P(CharIn("\\\\") ~ AnyChar.!).map(a => Escaped(a.charAt(0)))
+  private def specialSymbols[_: P] = P(CharIn("\\\\", " ", "$", "%", "^", "&", "*", "+", "?", "!", "]", ")", "[", "[^", "(")).!
 
-  def parserAnyStringInOtherSymbols[_: P] = P(!rightForOtherSymbols ~ AnyChar).rep.!
+  private def parserEscaped[_: P] = P(CharIn("\\\\") ~ AnyChar.!).map(a => Escaped(a.charAt(0)))
 
-  def parserOtherSymbols[_: P] =
+  private def parserAnyStringInOtherSymbols[_: P] = P(!rightForOtherSymbols ~ AnyChar).rep.!
+
+  private def parserOtherSymbols[_: P] =
     P(leftForOtherSymbols ~ parserAnyStringInOtherSymbols ~ rightForOtherSymbols).rep(1).!.map(Other(_))
 
-  def parserSpecialSymbol[_: P] =
+  private def parserSpecialSymbol[_: P] =
     P(specialSymbols.map(specialSymbolInString => SpecialSymbol(specialSymbolInString.charAt(0))))
 
-  def parserAnyStringToSpecialSymbol[_: P] = P((!specialSymbols ~ AnyChar).rep(1).!.map(Literal(_)))
+  private def parserAnyStringToSpecialSymbol[_: P] = P((!specialSymbols ~ AnyChar).rep(1).!.map(Literal(_)))
 
-  def parseStringWithSpecialSymbols[_: P] =
+  private def parseStringWithSpecialSymbols[_: P] =
     P(parserEscaped | parserOtherSymbols | parserAnyStringToSpecialSymbol | parserSpecialSymbol).rep
-}
-
-object Tokenizer extends TokenizerMethods {
 
   /**
     * Parse string into a Tokens

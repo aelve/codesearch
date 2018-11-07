@@ -2,10 +2,10 @@ package codesearch.core.regex.lexer.tokens
 
 sealed trait Token {
   def repr: String = this match {
-    case Other(valueToken)         => valueToken.toString
+    case Other(valueToken)         => valueToken
     case SpecialSymbol(valueToken) => valueToken.toString
-    case Literal(valueToken)       => valueToken.toString
-    case Escaped(valueToken)       => s"\\${valueToken.toString}"
+    case Literal(valueToken)       => valueToken
+    case Escaped(valueToken)       => s"\\${valueToken}"
   }
 }
 

@@ -58,14 +58,14 @@ trait Search {
     IO((Process(arguments(request), None, env) #| Seq("head", "-1001")).!!.split('\n').toList)
   }
 
-  private def tokenizerAndBuilder(query: String): String = {
+  private def tokenizerAndBuild(query: String): String = {
     val tokens: Seq[Token] = Tokenizer.parseStringWithSpecialSymbols(query)
     RowPicker.buildStringFromTokens(tokens)
   }
 
   private def arguments(request: SearchRequest): List[String] = {
     val forExtensions   = if (request.sourcesOnly) extensionsRegex else ".*"
-    val queryFromTokens = tokenizerAndBuilder(request.query)
+    val queryFromTokens = tokenizerAndBuild(request.query)
     val query           = if (request.preciseMatch) Helper.hideSymbols(queryFromTokens) else queryFromTokens
     val insensitive     = if (request.insensitive) "-i" else ""
     List("csearch", "-n", insensitive, "-f", forExtensions, query)

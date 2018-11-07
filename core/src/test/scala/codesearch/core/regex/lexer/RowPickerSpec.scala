@@ -1,15 +1,15 @@
 package codesearch.core.regex.lexer
 
-import org.scalatest.WordSpec
+import org.scalatest.{Matchers, WordSpec}
 import codesearch.core.regex.lexer.tokens._
 import codesearch.core.regex.lexer.RowPicker
 
-class RowPickerSpec extends WordSpec {
+class RowPickerSpec extends WordSpec with Matchers {
   "Any Sequnce of Tokens" when {
     """Seq(Literal("Hello"), SpecialSymbol(' '), Literal("World"))""" should {
       """Tokens are collected into string -- "Hello World"""" in {
         val strFromTokens = RowPicker.buildStringFromTokens(Seq(Literal("Hello"), SpecialSymbol(' '), Literal("World")))
-        assert(strFromTokens == "Hello World")
+        strFromTokens shouldBe "Hello World"
       }
     }
     """Seq(Literal("Hello"), SpecialSymbol(' '), Literal("World"), SpecialSymbol(' '), Other("[^Gared]"), SpecialSymbol(' '), Other("(Bale), SpecialSymbol(' '), Escaped('S'), Literal("ymbol")")""" should {
@@ -27,7 +27,7 @@ class RowPickerSpec extends WordSpec {
             Escaped('S'),
             Literal("ymbol")
           ))
-        assert(strFromTokens == "Hello World [^Gared] (Bale) \\Symbol")
+        strFromTokens shouldBe "Hello World [^Gared] (Bale) \\Symbol"
       }
     }
 
@@ -41,7 +41,7 @@ class RowPickerSpec extends WordSpec {
               Escaped('('),
               Literal("Kek"),
               Escaped(')')))
-        assert(strFromTokens == "Hello World \\(Kek\\)")
+        strFromTokens shouldBe "Hello World \\(Kek\\)"
       }
     }
   }
