@@ -10,7 +10,8 @@ object Tokenizer {
 
   private def rightForOtherSymbols[_: P] = P(CharIn(")", "]")).!
 
-  private def specialSymbols[_: P] = P(CharIn("\\\\", " ", "$", "%", "^", "&", "*", "+", "?", "!", "]", ")", "[", "[^", "(")).!
+  private def specialSymbols[_: P] =
+    P(CharIn("\\\\", " ", "$", "%", "^", "&", "*", "+", "?", "!", "]", ")", "[", "[^", "(")).!
 
   private def parserEscaped[_: P] = P(CharIn("\\\\") ~ AnyChar.!).map(a => Escaped(a.charAt(0)))
 
