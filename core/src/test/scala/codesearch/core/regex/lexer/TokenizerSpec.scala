@@ -5,7 +5,7 @@ import codesearch.core.regex.lexer.tokens._
 
 class TokenizerSpec extends WordSpec with Matchers {
 
-  def testParseAndRender(value: String, tokens: Seq[Token]):Unit = {
+  def testParseAndRender(value: String, tokens: Seq[Token]): Unit = {
     Tokenizer.parseStringWithSpecialSymbols(value) shouldBe tokens
     StringAssembler.buildStringFromTokens(tokens) shouldBe value
   }
