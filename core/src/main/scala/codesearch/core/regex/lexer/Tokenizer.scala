@@ -15,13 +15,13 @@ object Tokenizer {
 
   private def parserEscaped[_: P] = P(CharIn("\\\\") ~ AnyChar.!).map(a => Escaped(a.charAt(0)))
 
-  private def parserAnyStringInOtherSymbols[_: P] = P(!rightForOtherSymbols ~ AnyChar).rep.!
+  private def parserAnyStringInOtherSymbols[_: P] = P(!"\\" ~ !rightForOtherSymbols ~ AnyChar).rep.!
 
   private def parserOtherSymbols[_: P] =
     P(leftForOtherSymbols ~ parserAnyStringInOtherSymbols ~ rightForOtherSymbols).rep(1).!.map(Other(_))
 
   private def parserSpecialSymbol[_: P] =
-    P(specialSymbols.map(specialSymbolInString => SpecialSymbol(specialSymbolInString.charAt(0))))
+    P(specialSymbols.map(specialSymbolInString => SpecialSymbol(specialSymbolInString)))
 
   private def parserAnyStringToSpecialSymbol[_: P] = P((!specialSymbols ~ AnyChar).rep(1).!.map(Literal(_)))
 

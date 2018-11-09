@@ -2,78 +2,82 @@ package codesearch.core.regex.lexer
 
 import org.scalatest.{Matchers, WordSpec}
 import codesearch.core.regex.lexer.tokens._
-import codesearch.core.regex.lexer.Tokenizer
 
-class TokenizerSpec extends WordSpec with Matchers{
+class TokenizerSpec extends WordSpec with Matchers {
+
+  def testParseAndRender(value: String, tokens: Seq[Token]):Unit = {
+    Tokenizer.parseStringWithSpecialSymbols(value) shouldBe tokens
+    StringAssembler.buildStringFromTokens(tokens) shouldBe value
+  }
+
   "String" when {
     """"Hello World"""" should {
-      """Decompose into tokens -- Seq(Literal("Hello"), SpecialSymbol(' '), Literal("World"))""" in {
-        val tokens = Tokenizer.parseStringWithSpecialSymbols("Hello World")
-        tokens shouldBe Seq(Literal("Hello"), SpecialSymbol(' '), Literal("World"))
+      """Decompose into tokens -- Seq(Literal("Hello"), SpecialSymbol(" "), Literal("World"))""" in {
+        testParseAndRender("Hello World", Seq(Literal("Hello"), SpecialSymbol(" "), Literal("World")))
       }
     }
 
     """"Hello World + ?"""" should {
-      """Decompose into tokens -- Seq(Literal("Hello"), SpecialSymbol(' '), Literal("World"), SpecialSymbol(' '), SpecialSymbol('+'),  SpecialSymbol(' '),  SpecialSymbol('?))""" in {
-        val tokens = Tokenizer.parseStringWithSpecialSymbols("Hello World + ?")
-        tokens shouldBe Seq(Literal("Hello"),
-                      SpecialSymbol(' '),
-                      Literal("World"),
-                      SpecialSymbol(' '),
-                      SpecialSymbol('+'),
-                      SpecialSymbol(' '),
-                      SpecialSymbol('?'))
-      }
-    }
-
-    """Hello World [^Gared]""" should {
-      """Decompose into tokens -- Seq(Literal("Hello"), SpecialSymbol(' '), Literal("World"), SpecialSymbol(' '), Other("[^Gared]")""" in {
-        val tokens = Tokenizer.parseStringWithSpecialSymbols("Hello World [^Gared]")
-        tokens shouldBe Seq(Literal("Hello"), SpecialSymbol(' '), Literal("World"), SpecialSymbol(' '), Other("[^Gared]"))
-      }
-    }
-
-    """Hello World(Kek) [^Gared] (Bale) \Symbol""" should {
-      """Decompose into tokens -- Seq(Literal("Hello"), SpecialSymbol(' '), Literal("World"), Other("Kek"), SpecialSymbol(' '), Other("[^Gared]"), SpecialSymbol(' '), Other("(Bale)", SpecialSymbol(' '), Escaped('S'), Literal("ymbol"))""" in {
-        val tokens = Tokenizer.parseStringWithSpecialSymbols("Hello World [^Gared] (Bale) \\Symbol")
-        tokens shouldBe Seq(
-          Literal("Hello"),
-          SpecialSymbol(' '),
-          Literal("World"),
-          SpecialSymbol(' '),
-          Other("[^Gared]"),
-          SpecialSymbol(' '),
-          Other("(Bale)"),
-          SpecialSymbol(' '),
-          Escaped('S'),
-          Literal("ymbol")
+      """Decompose into tokens -- Seq(Literal("Hello"), SpecialSymbol(" "), Literal("World"), SpecialSymbol(" "), SpecialSymbol("+"),  SpecialSymbol(" "),  SpecialSymbol("?"))""" in {
+        testParseAndRender(
+          "Hello World + ?",
+          Seq(Literal("Hello"),
+              SpecialSymbol(" "),
+              Literal("World"),
+              SpecialSymbol(" "),
+              SpecialSymbol("+"),
+              SpecialSymbol(" "),
+              SpecialSymbol("?"))
         )
       }
     }
 
-    """Hello World\(Kek\) [^Gared] (Bale) \Symbol \Kek+""" should {
-      """Decompose into tokens -- Seq(Literal("Hello"), SpecialSymbol(' '), Literal("World"), Escaped('('), Literal("Kek"), Escaped(')'), SpecialSymbol(' '), Other("[^Gared]"), SpecialSymbol(' '), Other("(Bale)", SpecialSymbol(' '), Escaped('S'), Literal("ymbol"), SpecialSymbol(' '), Escaped('K'), Literal("ek"), SpecialSymbol('+'))""" in {
-        val tokens = Tokenizer.parseStringWithSpecialSymbols("Hello World\\(Kek\\) [^Gared] (Bale) \\Symbol \\Kek+")
-        tokens shouldBe Seq(
-          Literal("Hello"),
-          SpecialSymbol(' '),
-          Literal("World"),
-          Escaped('('),
-          Literal("Kek"),
-          Escaped(')'),
-          SpecialSymbol(' '),
-          Other("[^Gared]"),
-          SpecialSymbol(' '),
-          Other("(Bale)"),
-          SpecialSymbol(' '),
-          Escaped('S'),
-          Literal("ymbol"),
-          SpecialSymbol(' '),
-          Escaped('K'),
-          Literal("ek"),
-          SpecialSymbol('+')
+    """"strings""" should {
+      """be parsed as a whole""" in {
+        testParseAndRender(
+          "Hello World [^Gared]",
+          Seq(Literal("Hello"), SpecialSymbol(" "), Literal("World"), SpecialSymbol(" "), Other("[^Gared]")))
+
+        testParseAndRender(
+          "Hello World [^Gared] (Bale) \\Symbol",
+          Seq(
+            Literal("Hello"),
+            SpecialSymbol(" "),
+            Literal("World"),
+            SpecialSymbol(" "),
+            Other("[^Gared]"),
+            SpecialSymbol(" "),
+            Other("(Bale)"),
+            SpecialSymbol(" "),
+            Escaped('S'),
+            Literal("ymbol")
+          )
+        )
+
+        testParseAndRender(
+          "\\(Kek\\) [^Gared] (Bale) \\Symbol \\Kek+",
+          Seq(
+            Escaped('('),
+            Literal("Kek"),
+            Escaped(')'),
+            SpecialSymbol(" "),
+            Other("[^Gared]"),
+            SpecialSymbol(" "),
+            Other("(Bale)"),
+            SpecialSymbol(" "),
+            Escaped('S'),
+            Literal("ymbol"),
+            SpecialSymbol(" "),
+            Escaped('K'),
+            Literal("ek"),
+            SpecialSymbol("+")
+          )
         )
       }
+    }
+
+    """Correctly parses escaped bracket in character set""" in {
+      testParseAndRender("[\\]]", Seq(SpecialSymbol("["), Escaped(']'), SpecialSymbol("]")))
     }
   }
 }

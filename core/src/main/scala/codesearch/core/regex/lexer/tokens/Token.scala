@@ -13,6 +13,6 @@ final case class Other(value: String) extends Token
 
 final case class Literal(value: String) extends Token
 
-final case class SpecialSymbol(value: Char) extends Token
+final case class SpecialSymbol(value: String) extends Token
 
 final case class Escaped(value: Char) extends Token

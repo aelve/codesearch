@@ -13,7 +13,7 @@ import codesearch.core.index.directory.СSearchDirectory
 import codesearch.core.search.Search.{CSearchPage, CSearchResult, CodeSnippet, Package, PackageResult, snippetConfig}
 import codesearch.core.util.Helper.readFileAsync
 import codesearch.core.regex.lexer.tokens.Token
-import codesearch.core.regex.lexer.{RowPicker, Tokenizer}
+import codesearch.core.regex.lexer.{StringAssembler, Tokenizer}
 
 import scala.sys.process.Process
 
@@ -60,7 +60,7 @@ trait Search {
 
   private def tokenizerAndBuild(query: String): String = {
     val tokens: Seq[Token] = Tokenizer.parseStringWithSpecialSymbols(query)
-    RowPicker.buildStringFromTokens(tokens)
+    StringAssembler.buildStringFromTokens(tokens)
   }
 
   private def arguments(request: SearchRequest): List[String] = {
