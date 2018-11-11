@@ -8,7 +8,7 @@ object Tokenizer {
 
   private def leftForOtherSymbols[_: P] = P(CharIn("[", "[^")).!
 
-  private def rightForOtherSymbols[_: P] = P(CharIn("]")).!
+  private def rightForOtherSymbols[_: P] = P(CharIn("]") ~ CharIn("]") | CharIn("]")).!
 
   private def specialSymbols[_: P] =
     P(CharIn("\\\\", " ", ".", "|", "$", "%", "^", "&", "*", "+", "?", "!", "[", "]", "{", "}", "(", ")")).!
