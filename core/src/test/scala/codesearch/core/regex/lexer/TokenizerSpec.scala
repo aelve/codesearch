@@ -131,7 +131,7 @@ class TokenizerSpec extends FreeSpec with Matchers {
     }
 
     "Character sets" - {
-      testParseAndRender("[^a-z]", Seq(SpecialSymbol("["), SpecialSymbol("^"), Literal("a-z"), SpecialSymbol("[")))
+      testParseAndRender("[^a-z]", Seq(Other("[^a-z]")))
       // Parsed as set('[')
       testParseAndRender("[[]", Seq(Other("[[]")))
       // Parsed as set(']')
