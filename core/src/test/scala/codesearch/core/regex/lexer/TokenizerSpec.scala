@@ -41,7 +41,9 @@ class TokenizerSpec extends FreeSpec with Matchers {
           SpecialSymbol(" "),
           Other("[^Gared]"),
           SpecialSymbol(" "),
-          Other("(Bale)"),
+          SpecialSymbol("("),
+          Literal("Bale"),
+          SpecialSymbol(")"),
           SpecialSymbol(" "),
           Escaped('S'),
           Literal("ymbol")
@@ -57,7 +59,9 @@ class TokenizerSpec extends FreeSpec with Matchers {
           SpecialSymbol(" "),
           Other("[^Gared]"),
           SpecialSymbol(" "),
-          Other("(Bale)"),
+          SpecialSymbol("("),
+          Literal("Bale"),
+          SpecialSymbol(")"),
           SpecialSymbol(" "),
           Escaped('S'),
           Literal("ymbol"),
@@ -96,7 +100,8 @@ class TokenizerSpec extends FreeSpec with Matchers {
                          Seq(Literal("ax"), SpecialSymbol("."), Literal(","), SpecialSymbol("."), Literal("c")))
       testParseAndRender("a|^", Seq(Literal("a"), SpecialSymbol("|"), SpecialSymbol("^")))
       testParseAndRender("a|b", Seq(Literal("a"), SpecialSymbol("|"), Literal("b")))
-      testParseAndRender("(a)|b", Seq(SpecialSymbol("("), Literal("a"), SpecialSymbol(")"), Literal("b")))
+      testParseAndRender("(a)|b",
+                         Seq(SpecialSymbol("("), Literal("a"), SpecialSymbol(")"), SpecialSymbol("|"), Literal("b")))
       testParseAndRender("a*", Seq(Literal("a"), SpecialSymbol("*")))
       testParseAndRender("a??", Seq(Literal("a"), SpecialSymbol("?"), SpecialSymbol("?")))
     }

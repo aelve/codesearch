@@ -6,12 +6,12 @@ import codesearch.core.regex.lexer.tokens._
 
 object Tokenizer {
 
-  private def leftForOtherSymbols[_: P] = P(CharIn("(", "[", "[^")).!
+  private def leftForOtherSymbols[_: P] = P(CharIn("[", "[^")).!
 
-  private def rightForOtherSymbols[_: P] = P(CharIn(")", "]")).!
+  private def rightForOtherSymbols[_: P] = P(CharIn("]")).!
 
   private def specialSymbols[_: P] =
-    P(CharIn("\\\\", " ", ".", "|", "$", "%", "^", "&", "*", "+", "?", "!", "]", ")", "}", "[", "[^", "(", "{")).!
+    P(CharIn("\\\\", " ", ".", "|", "$", "%", "^", "&", "*", "+", "?", "!", "[", "]", "{", "}", "(", ")")).!
 
   private def parserEscaped[_: P] = P(CharIn("\\\\") ~ AnyChar.!).map(a => Escaped(a.charAt(0)))
 
