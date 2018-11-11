@@ -39,6 +39,7 @@ object Builder {
 
   lazy val commonDeps = Seq(
     libraryDependencies ++= Seq(
+      "com.lihaoyi"          %% "fastparse"      % "2.0.4",
       "com.github.scopt"     %% "scopt"          % "3.7.0",
       "com.lihaoyi"          %% "ammonite-ops"   % "1.0.3",
       "org.rauschig"         % "jarchivelib"     % "0.7.1",
