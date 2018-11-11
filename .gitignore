@@ -31,4 +31,5 @@ out
 *.DS_Store
 
 data/
+./index/
 vol/
