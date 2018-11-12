@@ -136,6 +136,8 @@ class TokenizerSpec extends FreeSpec with Matchers {
       testParseAndRender("[[]", Seq(Other("[[]")))
       // Parsed as set(']')
       testParseAndRender("[]]", Seq(Other("[]]")))
+      // Parsed as set('[a]')
+      testParseAndRender("[a]]", Seq(Other("[a]"), SpecialSymbol("]")))
       // Parsed as set('[', ']')
       testParseAndRender("[][]", Seq(Other("[][]")))
       // Parsed as two sets

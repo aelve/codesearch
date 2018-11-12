@@ -6,9 +6,9 @@ import codesearch.core.regex.lexer.tokens._
 
 object Tokenizer {
 
-  private def leftForOtherSymbols[_: P] = P(CharIn("[", "[^")).!
+  private def leftForOtherSymbols[_: P] = P(CharIn("[") ~ CharIn("]", "[^") | CharIn("[", "[^")).!
 
-  private def rightForOtherSymbols[_: P] = P(CharIn("]") ~ CharIn("]") | CharIn("]")).!
+  private def rightForOtherSymbols[_: P] = P(CharIn("]")).!
 
   private def specialSymbols[_: P] =
     P(CharIn("\\\\", " ", ".", "|", "$", "%", "^", "&", "*", "+", "?", "!", "[", "]", "{", "}", "(", ")")).!
