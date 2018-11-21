@@ -12,7 +12,7 @@ import cats.instances.list._
 import codesearch.core.index.directory.СSearchDirectory
 import codesearch.core.search.Search.{CSearchPage, CSearchResult, CodeSnippet, Package, PackageResult, snippetConfig}
 import codesearch.core.util.Helper.readFileAsync
-import codesearch.core.regex.lexer.tokens.Token
+import codesearch.core.regex.lexer.tokens.{SpecialSymbol, Token}
 import codesearch.core.regex.lexer.{StringAssembler, Tokenizer}
 
 import scala.sys.process.Process
@@ -58,15 +58,22 @@ trait Search {
     IO((Process(arguments(request), None, env) #| Seq("head", "-1001")).!!.split('\n').toList)
   }
 
-  private def tokenizerAndBuild(query: String): String = {
+  private def SpaceInsensitive(query: String): String = {
     val tokens: Seq[Token] = Tokenizer.parseStringWithSpecialSymbols(query)
+    val addedRegexForSpaceInsensitive = tokens.foldLeft(List.empty[Token]) {
+        case (result @ SpecialSymbol(" ") :: SpecialSymbol(" ") :: _, current) => current :: result
+        case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol("+"))  => current :: result
+        case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol("*"))  => current :: result
+        case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol(" "))  => current :: result
+        case (result @ SpecialSymbol(" ") :: _, current)                       => current :: SpecialSymbol("+") :: result
+        case (result, current)                                                 => current :: result
+      }.reverse
     StringAssembler.buildStringFromTokens(tokens)
   }
 
   private def arguments(request: SearchRequest): List[String] = {
     val forExtensions   = if (request.sourcesOnly) extensionsRegex else ".*"
-    val queryFromTokens = tokenizerAndBuild(request.query)
-    val query           = if (request.preciseMatch) Helper.hideSymbols(queryFromTokens) else queryFromTokens
+    val query           = if (request.preciseMatch) Helper.hideSymbols(request.query) else request.query
     val insensitive     = if (request.insensitive) "-i" else ""
     List("csearch", "-n", insensitive, "-f", forExtensions, query)
   }
