@@ -58,12 +58,13 @@ trait Search {
     IO((Process(arguments(request), None, env) #| Seq("head", "-1001")).!!.split('\n').toList)
   }
 
-  private def SpaceInsensitive(query: String): String = {
+  private def spaceInsensitive(query: String): String = {
     val tokens: Seq[Token] = Tokenizer.parseStringWithSpecialSymbols(query)
     val addedRegexForSpaceInsensitive = tokens.foldLeft(List.empty[Token]) {
         case (result @ SpecialSymbol(" ") :: SpecialSymbol(" ") :: _, current) => current :: result
         case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol("+"))  => current :: result
         case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol("*"))  => current :: result
+        case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol("?"))  => current :: SpecialSymbol(")") :: SpecialSymbol("+") :: SpecialSymbol(" ") :: SpecialSymbol("(") :: result.tail
         case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol(" "))  => current :: result
         case (result @ SpecialSymbol(" ") :: _, current)                       => current :: SpecialSymbol("+") :: result
         case (result, current)                                                 => current :: result
