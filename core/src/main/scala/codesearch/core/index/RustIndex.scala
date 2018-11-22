@@ -32,11 +32,12 @@ class RustIndex(rustConfig: RustConfig)(
 ) extends LanguageIndex[CratesTable] with CratesDB {
 
   private val GithubUrl = uri"https://github.com/rust-lang/crates.io-index/archive/master.zip"
-  private val RepoDir   = new File("./data/rust")
+  private val RepoDir   = new File("./data/meta/rust")
   private val IgnoreFiles = Set(
     "test-max-version-example-crate",
     "version-length-checking-is-overrated",
-    "config.json"
+    "config.json",
+    "archive.zip"
   )
 
   override protected type Tag = Rust
