@@ -60,22 +60,25 @@ trait Search {
 
   private def spaceInsensitive(query: String): String = {
     val tokens: Seq[Token] = Tokenizer.parseStringWithSpecialSymbols(query)
-    val addedRegexForSpaceInsensitive = tokens.foldLeft(List.empty[Token]) {
+    val addedRegexForSpaceInsensitive = tokens
+      .foldLeft(List.empty[Token]) {
         case (result @ SpecialSymbol(" ") :: SpecialSymbol(" ") :: _, current) => current :: result
         case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol("+"))  => current :: result
         case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol("*"))  => current :: result
-        case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol("?"))  => current :: SpecialSymbol(")") :: SpecialSymbol("+") :: SpecialSymbol(" ") :: SpecialSymbol("(") :: result.tail
-        case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol(" "))  => current :: result
-        case (result @ SpecialSymbol(" ") :: _, current)                       => current :: SpecialSymbol("+") :: result
-        case (result, current)                                                 => current :: result
-      }.reverse
+        case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol("?")) =>
+          current :: SpecialSymbol(")") :: SpecialSymbol("+") :: SpecialSymbol(" ") :: SpecialSymbol("(") :: result.tail
+        case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol(" ")) => current :: result
+        case (result @ SpecialSymbol(" ") :: _, current)                      => current :: SpecialSymbol("+") :: result
+        case (result, current)                                                => current :: result
+      }
+      .reverse
     StringAssembler.buildStringFromTokens(tokens)
   }
 
   private def arguments(request: SearchRequest): List[String] = {
-    val forExtensions   = if (request.sourcesOnly) extensionsRegex else ".*"
-    val query           = if (request.preciseMatch) Helper.hideSymbols(request.query) else request.query
-    val insensitive     = if (request.insensitive) "-i" else ""
+    val forExtensions = if (request.sourcesOnly) extensionsRegex else ".*"
+    val query         = if (request.preciseMatch) Helper.hideSymbols(request.query) else request.query
+    val insensitive   = if (request.insensitive) "-i" else ""
     List("csearch", "-n", insensitive, "-f", forExtensions, query)
   }
 
