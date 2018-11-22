@@ -12,8 +12,7 @@ import cats.instances.list._
 import codesearch.core.index.directory.СSearchDirectory
 import codesearch.core.search.Search.{CSearchPage, CSearchResult, CodeSnippet, Package, PackageResult, snippetConfig}
 import codesearch.core.util.Helper.readFileAsync
-import codesearch.core.regex.lexer.tokens.{SpecialSymbol, Token}
-import codesearch.core.regex.lexer.{StringAssembler, Tokenizer}
+import codesearch.core.regex.space.SpaceInsensitive
 
 import scala.sys.process.Process
 
@@ -56,23 +55,6 @@ trait Search {
   private def csearch(request: SearchRequest): IO[List[String]] = {
     val env = ("CSEARCHINDEX", csearchDir.indexDirAs[String])
     IO((Process(arguments(request), None, env) #| Seq("head", "-1001")).!!.split('\n').toList)
-  }
-
-  private def spaceInsensitive(query: String): String = {
-    val tokens: Seq[Token] = Tokenizer.parseStringWithSpecialSymbols(query)
-    val addedRegexForSpaceInsensitive = tokens
-      .foldLeft(List.empty[Token]) {
-        case (result @ SpecialSymbol(" ") :: SpecialSymbol(" ") :: _, current) => current :: result
-        case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol("+"))  => current :: result
-        case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol("*"))  => current :: result
-        case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol("?")) =>
-          current :: SpecialSymbol(")") :: SpecialSymbol("+") :: SpecialSymbol(" ") :: SpecialSymbol("(") :: result.tail
-        case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol(" ")) => current :: result
-        case (result @ SpecialSymbol(" ") :: _, current)                      => current :: SpecialSymbol("+") :: result
-        case (result, current)                                                => current :: result
-      }
-      .reverse
-    StringAssembler.buildStringFromTokens(tokens)
   }
 
   private def arguments(request: SearchRequest): List[String] = {
