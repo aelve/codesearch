@@ -73,7 +73,7 @@ class TokenizerSpec extends FreeSpec with Matchers {
       )
     }
 
-    "Empty lexer" - {
+    "Empty regex" - {
       testParseAndRender("", Seq())
     }
 

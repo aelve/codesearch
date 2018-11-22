@@ -30,6 +30,6 @@ object SpaceInsensitive {
       }
       .reverse
 
-    StringAssembler.buildStringFromTokens(tokens)
+    StringAssembler.buildStringFromTokens(addedRegexForSpaceInsensitive)
   }
 }
