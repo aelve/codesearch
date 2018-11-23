@@ -22,6 +22,8 @@ object SpaceInsensitive {
         case (result @ SpecialSymbol(" ") :: SpecialSymbol(" ") :: _, current) => current :: result
         case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol("+"))  => current :: result
         case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol("*"))  => current :: result
+        case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol("{"))  => current :: result
+        case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol("}"))  => current :: result
         case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol("?")) =>
           current :: (selectMoreSpaces ::: result.tail)
         case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol(" ")) => current :: result

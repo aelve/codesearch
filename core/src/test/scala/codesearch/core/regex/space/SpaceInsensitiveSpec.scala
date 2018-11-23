@@ -18,6 +18,8 @@ class SpaceInsensitiveSpec extends FreeSpec with Matchers {
       addingSpaceInsensitive("foo +bar", "foo +bar")
 
       addingSpaceInsensitive("foo ?bar", "foo( +)?bar")
+
+      addingSpaceInsensitive("foo {bar}", "foo {bar}")
     }
   }
 }
