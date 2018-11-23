@@ -10,16 +10,34 @@ class SpaceInsensitiveSpec extends FreeSpec with Matchers {
   }
 
   "Space Insensitive tests" - {
-    "Test" - {
+    "Simple strings" - {
       addingSpaceInsensitive("Hello world", "Hello +world")
 
-      addingSpaceInsensitive("foo  bar", "foo  bar")
+      addingSpaceInsensitive("Hello    world", "Hello    world")
+    }
 
+    "Strings with regexp" - {
       addingSpaceInsensitive("foo +bar", "foo +bar")
 
       addingSpaceInsensitive("foo ?bar", "foo( +)?bar")
 
+      addingSpaceInsensitive("foo *bar", "foo *bar")
+    }
+
+    "Strings with other cases" - {
+      addingSpaceInsensitive("foo [bar]", "foo +[bar]")
+
       addingSpaceInsensitive("foo {bar}", "foo {bar}")
+
+      addingSpaceInsensitive("foo [b ar]", "foo +[b ar]")
+    }
+
+    "Strings with other cases and regex" - {
+      addingSpaceInsensitive("foo *[bar]", "foo *[bar]")
+
+      addingSpaceInsensitive("foo +{bar}", "foo +{bar}")
+
+      addingSpaceInsensitive("foo   [bar]", "foo   [bar]")
     }
   }
 }
