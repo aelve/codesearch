@@ -14,6 +14,8 @@ import codesearch.core.search.Search.{CSearchPage, CSearchResult, CodeSnippet, P
 import codesearch.core.util.Helper.readFileAsync
 import codesearch.core.regex.lexer.tokens.Token
 import codesearch.core.regex.lexer.{StringAssembler, Tokenizer}
+import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
+import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
 import scala.sys.process.Process
 
@@ -22,6 +24,7 @@ trait Search {
   protected type Tag
   protected def csearchDir: СSearchDirectory[Tag]
   protected def extensions: Extensions[Tag]
+  protected val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.unsafeCreate[IO]
 
   def search(request: SearchRequest): IO[CSearchPage] = {
     for {
@@ -55,6 +58,7 @@ trait Search {
 
   private def csearch(request: SearchRequest): IO[List[String]] = {
     val env = ("CSEARCHINDEX", csearchDir.indexDirAs[String])
+    logger.debug(s"running CSEARCHINDEX=${csearchDir.indexDirAs[String]} ${arguments(request).mkString(" ")}")
     IO((Process(arguments(request), None, env) #| Seq("head", "-1001")).!!.split('\n').toList)
   }
 
