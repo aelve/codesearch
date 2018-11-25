@@ -14,6 +14,8 @@ class SpaceInsensitiveSpec extends FreeSpec with Matchers {
       addingSpaceInsensitive("Hello world", "Hello +world")
 
       addingSpaceInsensitive("Hello    world", "Hello    world")
+
+      addingSpaceInsensitive("foo\\ bar", "foo\\ bar")
     }
 
     "Strings with regexp" - {

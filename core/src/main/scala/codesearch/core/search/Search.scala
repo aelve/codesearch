@@ -12,7 +12,6 @@ import cats.instances.list._
 import codesearch.core.index.directory.СSearchDirectory
 import codesearch.core.search.Search.{CSearchPage, CSearchResult, CodeSnippet, Package, PackageResult, snippetConfig}
 import codesearch.core.util.Helper.readFileAsync
-import codesearch.core.regex.space.SpaceInsensitive
 
 import scala.sys.process.Process
 
