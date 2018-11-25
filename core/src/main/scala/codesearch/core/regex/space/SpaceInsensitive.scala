@@ -16,8 +16,8 @@ object SpaceInsensitive {
   def spaceInsensitiveString(query: String): String = {
     val tokens: Seq[Token] = Tokenizer.parseStringWithSpecialSymbols(query)
 
-    val selectMoreSpaces: List[Token] =
-      List(SpecialSymbol(")"), SpecialSymbol("+"), SpecialSymbol(" "), SpecialSymbol("("))
+    val allocatedOneOrMoreSpaces: List[Token] =
+      List(SpecialSymbol("("), SpecialSymbol(" "), SpecialSymbol("+"), SpecialSymbol(")")).reverse
 
     val addedRegexForSpaceInsensitive: Seq[Token] = tokens
       .foldLeft(List.empty[Token]) { (result, current) =>
@@ -29,7 +29,7 @@ object SpaceInsensitive {
               case SpecialSymbol("+") => current :: result
               case SpecialSymbol("*") => current :: result
               case SpecialSymbol("{") => current :: result
-              case SpecialSymbol("?") => current :: (selectMoreSpaces ::: result.tail)
+              case SpecialSymbol("?") => current :: (allocatedOneOrMoreSpaces ::: result.tail)
               case SpecialSymbol(" ") => current :: result
               case _                  => current :: SpecialSymbol("+") :: result
             }
