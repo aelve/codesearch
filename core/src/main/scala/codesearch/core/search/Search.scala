@@ -6,17 +6,18 @@ import cats.effect.IO
 import codesearch.core.config.{Config, SnippetConfig}
 import codesearch.core.index.repository.Extensions
 import codesearch.core.util.Helper
-import codesearch.core.regex.lexer.tokens.Token
-import codesearch.core.regex.lexer.{StringAssembler, Tokenizer}
 import cats.syntax.traverse._
 import cats.instances.option._
 import cats.instances.list._
 import codesearch.core.index.directory.СSearchDirectory
 import codesearch.core.search.Search.{CSearchPage, CSearchResult, CodeSnippet, Package, PackageResult, snippetConfig}
 import codesearch.core.util.Helper.readFileAsync
-import scala.sys.process.Process
+import codesearch.core.regex.lexer.tokens.Token
+import codesearch.core.regex.lexer.{StringAssembler, Tokenizer}
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+
+import scala.sys.process.Process
 
 trait Search {
 
