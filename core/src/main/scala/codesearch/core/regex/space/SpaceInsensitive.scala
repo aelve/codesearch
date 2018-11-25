@@ -20,17 +20,22 @@ object SpaceInsensitive {
       List(SpecialSymbol(")"), SpecialSymbol("+"), SpecialSymbol(" "), SpecialSymbol("("))
 
     val addedRegexForSpaceInsensitive: Seq[Token] = tokens
-      .foldLeft(List.empty[Token]) {
-        case (result @ SpecialSymbol(" ") :: SpecialSymbol(" ") :: _, current) => current :: result
-        case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol("+"))  => current :: result
-        case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol("*"))  => current :: result
-        case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol("{"))  => current :: result
-        case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol("}"))  => current :: result
-        case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol("?")) =>
-          current :: (selectMoreSpaces ::: result.tail)
-        case (result @ SpecialSymbol(" ") :: _, current @ SpecialSymbol(" ")) => current :: result
-        case (result @ SpecialSymbol(" ") :: _, current)                      => current :: SpecialSymbol("+") :: result
-        case (result, current)                                                => current :: result
+      .foldLeft(List.empty[Token]) { (result, current) =>
+        result match {
+          case SpecialSymbol(" ") :: SpecialSymbol(" ") :: _ =>
+            current :: result
+          case SpecialSymbol(" ") :: _ =>
+            current match {
+              case SpecialSymbol("+") => current :: result
+              case SpecialSymbol("*") => current :: result
+              case SpecialSymbol("{") => current :: result
+              case SpecialSymbol("?") => current :: (selectMoreSpaces ::: result.tail)
+              case SpecialSymbol(" ") => current :: result
+              case _                  => current :: SpecialSymbol("+") :: result
+            }
+          case _ =>
+            current :: result
+        }
       }
       .reverse
 

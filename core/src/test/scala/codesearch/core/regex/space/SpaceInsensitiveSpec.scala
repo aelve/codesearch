@@ -29,9 +29,13 @@ class SpaceInsensitiveSpec extends FreeSpec with Matchers {
     "Strings with other cases" - {
       addingSpaceInsensitive("foo [bar]", "foo +[bar]")
 
-      addingSpaceInsensitive("foo {bar}", "foo {bar}")
+      addingSpaceInsensitive("foo {1,3}", "foo {1,3}")
 
       addingSpaceInsensitive("foo [b ar]", "foo +[b ar]")
+    }
+
+    "*Not valid tests*" - {
+      addingSpaceInsensitive("foo {bar}", "foo {bar}")
     }
 
     "Strings with other cases and regex" - {
