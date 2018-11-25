@@ -6,7 +6,9 @@ import codesearch.core.regex.lexer.tokens.{SpecialSymbol, Token}
 object SpaceInsensitive {
 
   /**
-    * Will make string insensitive to space
+    * Make a regex space-insensitive in places where one space is used.
+    *
+    * Only single spaces are affected, everything else (e.g. "  " or "\ ") is left as-is.
     *
     * @param query string query. Example: "hello world   kek ?"
     * @return string with added symbols "+" for insensitive of spaces. Example: "hello +world   kek( +)?"
