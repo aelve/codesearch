@@ -35,6 +35,10 @@ class SpaceInsensitiveSpec extends FreeSpec with Matchers {
     }
 
     "*Not valid tests*" - {
+
+      /**
+        * A vot i net, this should actually become foo +{bar} because not everything in curly braces is parsed as a range.
+        */
       addingSpaceInsensitive("foo {bar}", "foo {bar}")
     }
 
