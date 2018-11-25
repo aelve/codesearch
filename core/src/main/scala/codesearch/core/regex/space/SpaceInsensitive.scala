@@ -11,7 +11,7 @@ object SpaceInsensitive {
     * Only single spaces are affected, everything else (e.g. "  " or "\ ") is left as-is.
     *
     * @param query regex to transform. Example: "hello world   kek ?"
-    * @return string with added symbols "+" for insensitive of spaces. Example: "hello +world   kek( +)?"
+    * @return regex with added symbols "+" for space-insensitivity. Example: "hello +world   kek( +)?"
     */
   def spaceInsensitiveString(query: String): String = {
     val tokens: Seq[Token] = Tokenizer.parseStringWithSpecialSymbols(query)
