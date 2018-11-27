@@ -58,9 +58,8 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
     )
 
     def indexPackages(packageDirs: Seq[NioPath]) = IO {
-      val env  = Seq("CSEARCHINDEX" -> csearchDir.tempIndexDirAs[String])
-      val args = "cindex" +: packageDirs.map(_.toString)
-      Process(args, None, env: _*) !
+      val args = s"zoekt-index -index ${csearchDir.tempIndexDirAs[NioPath].toAbsolutePath}" +: packageDirs.map(_.toString)
+      Process(args, None) !
     }
 
     def replaceIndexFile = IO(

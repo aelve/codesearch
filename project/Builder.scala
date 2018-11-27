@@ -9,10 +9,15 @@ import sbtassembly.AssemblyPlugin.autoImport.{assemblyJarName, assemblyOutputPat
 import sbtassembly._
 
 object Builder {
+
+  object Version {
+    val circe = "0.10.0"
+  }
+
   lazy val commonSettings = Seq(
     organization := "org.aelve",
     version := "0.1",
-    scalaVersion := "2.12.4",
+    scalaVersion := "2.12.3",
     resolvers += Resolver.sbtPluginRepo("releases"),
     scalacOptions := Seq(
       "-encoding",
@@ -64,10 +69,10 @@ object Builder {
         "com.softwaremill.sttp" %% "async-http-client-backend-fs2" % "1.3.8",
         "co.fs2"                %% "fs2-core"                      % "1.0.0",
         "co.fs2"                %% "fs2-io"                        % "1.0.0",
-        "io.circe"              %% "circe-fs2"                     % "0.10.0",
-        "io.circe"              %% "circe-core"                    % "0.10.0",
-        "io.circe"              %% "circe-generic"                 % "0.10.0",
-        "io.circe"              %% "circe-parser"                  % "0.10.0",
+        "io.circe"              %% "circe-fs2"                     % Version.circe,
+        "io.circe"              %% "circe-core"                    % Version.circe,
+        "io.circe"              %% "circe-generic"                 % Version.circe,
+        "io.circe"              %% "circe-parser"                  % Version.circe,
         "com.github.derekjw"    %% "fs2json-core"                  % "0.8.0",
         "com.github.pureconfig" %% "pureconfig"                    % "0.9.2",
         "com.github.pureconfig" %% "pureconfig-cats-effect"        % "0.9.2",

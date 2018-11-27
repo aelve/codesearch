@@ -1,5 +1,6 @@
 package codesearch.core.search
 import java.net.URLDecoder
+import java.nio.file.Paths
 
 import ammonite.ops.{Path, pwd}
 import cats.effect.IO
@@ -12,6 +13,9 @@ import cats.instances.list._
 import codesearch.core.index.directory.СSearchDirectory
 import codesearch.core.search.Search.{CSearchPage, CSearchResult, CodeSnippet, Package, PackageResult, snippetConfig}
 import codesearch.core.util.Helper.readFileAsync
+import io.circe.Decoder
+import io.circe.parser._
+import io.circe.generic.semiauto._
 
 import scala.sys.process.Process
 
@@ -52,15 +56,14 @@ trait Search {
   protected def buildRepUrl(packageName: String, version: String): String
 
   private def csearch(request: SearchRequest): IO[List[String]] = {
-    val env = ("CSEARCHINDEX", csearchDir.indexDirAs[String])
-    IO((Process(arguments(request), None, env) #| Seq("head", "-1001")).!!.split('\n').toList)
+    IO((Process(arguments(request), None) #| Seq("head", "-1001")).!!.split('\n').toList)
   }
 
   private def arguments(request: SearchRequest): List[String] = {
-    val forExtensions = if (request.sourcesOnly) extensionsRegex else ".*"
+//    val forExtensions = if (request.sourcesOnly) extensionsRegex else ".*"
     val query         = if (request.preciseMatch) Helper.hideSymbols(request.query) else request.query
-    val insensitive   = if (request.insensitive) "-i" else new String()
-    List("csearch", "-n", insensitive, "-f", forExtensions, query)
+//    val insensitive   = if (request.insensitive) "-i" else new String()
+    List("zoekt", "-index", csearchDir.indexDirAs[String], "-json=true",  query)
   }
 
   private def extensionsRegex: String = extensions.sourceExtensions.mkString(".*\\.(", "|", ")$")
@@ -88,9 +91,11 @@ trait Search {
     * @return search result
     */
   private def mapCSearchOutput(out: String): IO[Option[CSearchResult]] = {
-    out.split(':').toList match {
-      case fullPath :: lineNumber :: _ => csearchResult(fullPath, lineNumber.toInt)
-      case _                           => IO.pure(None)
+    IO(parse(out).flatMap(Search.zoektResultDecoder.decodeJson).toOption).flatMap {
+      case None => IO.pure(None)
+      case Some(value) =>
+        csearchResult(Paths.get(csearchDir.packageRepository, value.Repository, value.FileName).toAbsolutePath.toString,
+                      value.LineNumber)
     }
   }
 
@@ -189,4 +194,15 @@ object Search {
       pack: Package,
       result: CodeSnippet
   )
+
+  final case class ZoektResult(FileName: String,
+                               Repository: String,
+                               LineNumber: Int,
+                               Line: String,
+                               LineFragments: List[ZoektLineFragment])
+  final case class ZoektLineFragment(LineOffset: Int, MatchLength: Int)
+
+  implicit val zoektFragmentDecoder: Decoder[ZoektLineFragment] = deriveDecoder[ZoektLineFragment]
+  val zoektResultDecoder: Decoder[ZoektResult]                  = deriveDecoder[ZoektResult]
+
 }

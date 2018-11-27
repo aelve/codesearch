@@ -45,6 +45,6 @@ object Main extends IOApp {
         "javascript" -> LangRep[NpmTable](NpmDB, JavaScriptIndex(config))
       )
 
-      exitCode <- new Program(langReps, logger, fs2HttpClient, ec).run(params)
+      exitCode <- new Program(langReps, logger, fs2HttpClient, ec).run(params.copy(lang = "haskell", buildIndex = true))
     } yield exitCode
 }
