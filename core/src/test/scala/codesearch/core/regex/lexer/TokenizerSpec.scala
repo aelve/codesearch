@@ -30,7 +30,7 @@ class TokenizerSpec extends FreeSpec with Matchers {
 
       testParseAndRender(
         "Hello World [^Gared]",
-        Seq(Literal("Hello"), SpecialSymbol(" "), Literal("World"), SpecialSymbol(" "), Other("[^Gared]")))
+        Seq(Literal("Hello"), SpecialSymbol(" "), Literal("World"), SpecialSymbol(" "), CharSet("[^Gared]")))
 
       testParseAndRender(
         "Hello World [^Gared] (Bale) \\Symbol",
@@ -39,7 +39,7 @@ class TokenizerSpec extends FreeSpec with Matchers {
           SpecialSymbol(" "),
           Literal("World"),
           SpecialSymbol(" "),
-          Other("[^Gared]"),
+          CharSet("[^Gared]"),
           SpecialSymbol(" "),
           SpecialSymbol("("),
           Literal("Bale"),
@@ -57,7 +57,7 @@ class TokenizerSpec extends FreeSpec with Matchers {
           Literal("Kek"),
           Escaped(')'),
           SpecialSymbol(" "),
-          Other("[^Gared]"),
+          CharSet("[^Gared]"),
           SpecialSymbol(" "),
           SpecialSymbol("("),
           Literal("Bale"),
@@ -112,7 +112,7 @@ class TokenizerSpec extends FreeSpec with Matchers {
     }
 
     // TODO: these examples give somewhat incorrect results. Properly they
-    // should be parsed as Other or as their own case.
+    // should be parsed as CharSet or as their own case.
     "Repetition" - {
       testParseAndRender("a{2}", Seq(Literal("a"), SpecialSymbol("{"), Literal("2"), SpecialSymbol("}")))
       testParseAndRender("a{2,3}", Seq(Literal("a"), SpecialSymbol("{"), Literal("2,3"), SpecialSymbol("}")))
@@ -131,22 +131,24 @@ class TokenizerSpec extends FreeSpec with Matchers {
     }
 
     "Character sets" - {
-      testParseAndRender("[^a-z]", Seq(Other("[^a-z]")))
+      testParseAndRender("[^a-z]", Seq(CharSet("[^a-z]")))
       // Parsed as set('[')
-      testParseAndRender("[[]", Seq(Other("[[]")))
+      testParseAndRender("[[]", Seq(CharSet("[[]")))
       // Parsed as set(']')
-      testParseAndRender("[]]", Seq(Other("[]]")))
+      testParseAndRender("[]]", Seq(CharSet("[]]")))
       // Parsed as set('[a]')
-      testParseAndRender("[a]]", Seq(Other("[a]"), SpecialSymbol("]")))
+      testParseAndRender("[a]]", Seq(CharSet("[a]"), SpecialSymbol("]")))
       // Parsed as set('[', ']')
-      testParseAndRender("[][]", Seq(Other("[][]")))
+      testParseAndRender("[][]", Seq(CharSet("[][]")))
       // Parsed as two sets
-      testParseAndRender("[][] [][]", Seq(Other("[][]"), SpecialSymbol(" "), Other("[][]")))
+      testParseAndRender("[][] [][]", Seq(CharSet("[][]"), SpecialSymbol(" "), CharSet("[][]")))
       // Parsed as two sets
-      testParseAndRender("[[] []]", Seq(Other("[[]"), SpecialSymbol(" "), Other("[]]")))
+      testParseAndRender("[[] []]", Seq(CharSet("[[]"), SpecialSymbol(" "), CharSet("[]]")))
       testParseAndRender("[\\]\\\\]", Seq(SpecialSymbol("["), Escaped(']'), Escaped('\\'), SpecialSymbol("]")))
-      testParseAndRender("[{3,5}]", Seq(Other("[{3,5}]")))
-      testParseAndRender("[{3,5]}", Seq(Other("[{3,5]"), SpecialSymbol("}")))
+      testParseAndRender("[{3,5}]", Seq(CharSet("[{3,5}]")))
+      testParseAndRender("[{3,5]}", Seq(CharSet("[{3,5]"), SpecialSymbol("}")))
+      testParseAndRender("[a-z [:alpha:] foo [:bar:]]", Seq(CharSet("[a-z [:alpha:] foo [:bar:]]")))
+      testParseAndRender("[[:alpha:]]", Seq(CharSet("[[:alpha:]]")))
     }
 
   }
