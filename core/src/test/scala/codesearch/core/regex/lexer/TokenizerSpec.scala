@@ -148,6 +148,7 @@ class TokenizerSpec extends FreeSpec with Matchers {
       testParseAndRender("[{3,5}]", Seq(CharSet("[{3,5}]")))
       testParseAndRender("[{3,5]}", Seq(CharSet("[{3,5]"), SpecialSymbol("}")))
       testParseAndRender("[\\foo]", Seq(CharSet("[\\foo]")))
+      testParseAndRender("[a-z\\\\n\\\\t]", Seq(CharSet("[a-z\\\\n\\\\t]")))
       testParseAndRender("[a-z [:alpha:] foo [:bar:]]", Seq(CharSet("[a-z [:alpha:] foo [:bar:]]")))
       testParseAndRender("[[:alpha:]]", Seq(CharSet("[[:alpha:]]")))
     }
