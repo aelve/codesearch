@@ -1,5 +1,6 @@
 package codesearch.core.regex.lexer
 
+import scala.io.Source
 import org.scalatest.{FreeSpec, Matchers}
 import codesearch.core.regex.lexer.tokens._
 
@@ -10,6 +11,11 @@ class TokenizerSpec extends FreeSpec with Matchers {
       Tokenizer.parseStringWithSpecialSymbols(value) shouldBe tokens
       StringAssembler.buildStringFromTokens(tokens) shouldBe value
     }
+  }
+
+  /** Break a regex into tokens and then reassemble it from the tokens. */
+  def roundTrip(caseString: String): String = {
+    StringAssembler.buildStringFromTokens(Tokenizer.parseStringWithSpecialSymbols(caseString))
   }
 
   "Roundtrip tests" - {
@@ -151,6 +157,13 @@ class TokenizerSpec extends FreeSpec with Matchers {
       testParseAndRender("[a-z\\n\\t]", Seq(CharSet("[a-z\\n\\t]")))
       testParseAndRender("[a-z [:alpha:] foo [:bar:]]", Seq(CharSet("[a-z [:alpha:] foo [:bar:]]")))
       testParseAndRender("[[:alpha:]]", Seq(CharSet("[[:alpha:]]")))
+    }
+
+    "RoundTrip cases" - {
+      val cases = Source.fromResource("regex/cases.txt").getLines
+      cases.foreach { caseString =>
+        caseString shouldBe roundTrip(caseString)
+      }
     }
 
   }
