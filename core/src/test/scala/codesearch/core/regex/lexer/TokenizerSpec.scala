@@ -13,6 +13,7 @@ class TokenizerSpec extends FreeSpec with Matchers {
     }
   }
 
+  /** Break a regex into tokens and then reassemble it from the tokens. */
   def roundTrip(caseString: String): String = {
     StringAssembler.buildStringFromTokens(Tokenizer.parseStringWithSpecialSymbols(caseString))
   }
