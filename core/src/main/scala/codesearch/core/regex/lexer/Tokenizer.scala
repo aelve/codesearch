@@ -10,7 +10,7 @@ object Tokenizer {
 
   private def endForCharSet[_: P] = P("]").!
 
-  // ** A POSIX character class, e.g. `[:alpha:]`. */
+  //** A POSIX character class, e.g. `[:alpha:]`. */
   private def charSetPred[_: P] = P("[:" ~ (!":]" ~ AnyChar).rep ~ ":]")
 
   private def specialSymbols[_: P] =
