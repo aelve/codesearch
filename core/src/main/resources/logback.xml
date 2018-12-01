@@ -28,7 +28,8 @@
         <appender-ref ref="FILE"/>
     </logger>
 
-    <logger name="codesearch.core" level="INFO" additivity="false">
+    <variable name="ENV_LOG_LEVEL" value="${ENV_LOG_LEVEL:-INFO}" />
+    <logger name="codesearch.core" level="${ENV_LOG_LEVEL}" additivity="false">
         <appender-ref ref="STDOUT"/>
     </logger>
 

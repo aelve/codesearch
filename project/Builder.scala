@@ -46,6 +46,7 @@ object Builder {
       "commons-io"           % "commons-io"      % "2.6",
       "javax.inject"         % "javax.inject"    % "1",
       "ch.qos.logback"       % "logback-classic" % "1.2.3",
+      "org.codehaus.janino"  % "janino"          % "3.0.11",
       "com.typesafe.play"    %% "play-json"      % "2.6.9",
       "com.github.mpilquist" %% "simulacrum"     % "0.13.0",
       "org.typelevel"        %% "cats-core"      % "1.2.0"
