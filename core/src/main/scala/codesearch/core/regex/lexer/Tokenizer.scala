@@ -10,6 +10,7 @@ object Tokenizer {
 
   private def endForCharSet[_: P] = P("]").!
 
+  /** A POSIX character class, e.g. `[:alpha:]`. */
   private def charSetPred[_: P] = P("[:" ~ (!":]" ~ AnyChar).rep ~ ":]")
 
   private def specialSymbols[_: P] =
@@ -17,7 +18,7 @@ object Tokenizer {
 
   private def parserEscaped[_: P] = P("\\" ~ AnyChar.!).map(a => Escaped(a.charAt(0)))
 
-  private def parserCharInsideSet[_: P] = P(!"\\" ~ !endForCharSet ~ (charSetPred | AnyChar)).rep.!
+  private def parserCharInsideSet[_: P] = P(("\\" | !endForCharSet) ~ (charSetPred | AnyChar)).rep.!
 
   private def parserCharSet[_: P] =
     P(startForCharSet ~ parserCharInsideSet ~ endForCharSet).rep(1).!.map(CharSet(_))
