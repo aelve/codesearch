@@ -24,6 +24,7 @@ trait Search {
   protected type Tag
   protected def csearchDir: СSearchDirectory[Tag]
   protected def extensions: Extensions[Tag]
+  protected val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.unsafeCreate[IO]
 
   def search(request: SearchRequest): IO[CSearchPage] = {
     for {
@@ -57,6 +58,7 @@ trait Search {
 
   private def csearch(request: SearchRequest): IO[List[String]] = {
     val env = ("CSEARCHINDEX", csearchDir.indexDirAs[String])
+    logger.debug(s"running CSEARCHINDEX=${csearchDir.indexDirAs[String]} ${arguments(request).mkString(" ")}")
     IO((Process(arguments(request), None, env) #| Seq("head", "-1001")).!!.split('\n').toList)
   }
 
