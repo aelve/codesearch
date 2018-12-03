@@ -3,17 +3,15 @@ import java.net.URLDecoder
 
 import ammonite.ops.{Path, pwd}
 import cats.effect.IO
-import codesearch.core.config.{Config, SnippetConfig}
-import codesearch.core.index.repository.Extensions
-import codesearch.core.util.Helper
-import cats.syntax.traverse._
-import cats.instances.option._
 import cats.instances.list._
+import cats.instances.option._
+import cats.syntax.traverse._
+import codesearch.core.config.{Config, SnippetConfig}
 import codesearch.core.index.directory.СSearchDirectory
+import codesearch.core.index.repository.Extensions
 import codesearch.core.search.Search.{CSearchPage, CSearchResult, CodeSnippet, Package, PackageResult, snippetConfig}
+import codesearch.core.util.Helper
 import codesearch.core.util.Helper.readFileAsync
-import codesearch.core.regex.lexer.tokens.Token
-import codesearch.core.regex.lexer.{StringAssembler, Tokenizer}
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
@@ -57,19 +55,21 @@ trait Search {
   protected def buildRepUrl(packageName: String, version: String): String
 
   private def csearch(request: SearchRequest): IO[List[String]] = {
-    val env = ("CSEARCHINDEX", csearchDir.indexDirAs[String])
-    logger.debug(s"running CSEARCHINDEX=${csearchDir.indexDirAs[String]} ${arguments(request).mkString(" ")}")
-    IO((Process(arguments(request), None, env) #| Seq("head", "-1001")).!!.split('\n').toList)
+    val indexDir = csearchDir.indexDirAs[String]
+    val env      = ("CSEARCHINDEX", indexDir)
+    for {
+      _       <- logger.debug(s"running CSEARCHINDEX=$indexDir ${arguments(request).mkString(" ")}")
+      results <- IO((Process(arguments(request), None, env) #| Seq("head", "-1001")).!!.split('\n').toList)
+    } yield results
   }
 
   private def arguments(request: SearchRequest): List[String] = {
-    val forExtensions = if (request.sourcesOnly) extensionsRegex else ".*"
-    val query         = if (request.preciseMatch) Helper.hideSymbols(request.query) else request.query
-    val insensitive   = if (request.insensitive) "-i" else ""
+    def extensionsRegex: String = extensions.sourceExtensions.mkString(".*\\.(", "|", ")$")
+    val forExtensions: String   = if (request.sourcesOnly) extensionsRegex else ".*"
+    val query: String           = if (request.preciseMatch) Helper.hideSymbols(request.query) else request.query
+    val insensitive: String     = if (request.insensitive) "-i" else ""
     List("csearch", "-n", insensitive, "-f", forExtensions, query)
   }
-
-  private def extensionsRegex: String = extensions.sourceExtensions.mkString(".*\\.(", "|", ")$")
 
   private def resultsFound(found: List[String], page: Int): IO[List[Option[CSearchResult]]] = {
     val from  = math.max(page - 1, 0) * snippetConfig.pageSize
