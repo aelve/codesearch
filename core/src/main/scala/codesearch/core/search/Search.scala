@@ -55,9 +55,12 @@ trait Search {
   protected def buildRepUrl(packageName: String, version: String): String
 
   private def csearch(request: SearchRequest): IO[List[String]] = {
-    val env = ("CSEARCHINDEX", csearchDir.indexDirAs[String])
-    logger.debug(s"running CSEARCHINDEX=${csearchDir.indexDirAs[String]} ${arguments(request).mkString(" ")}")
-    IO((Process(arguments(request), None, env) #| Seq("head", "-1001")).!!.split('\n').toList)
+    val indexDir = csearchDir.indexDirAs[String]
+    val env      = ("CSEARCHINDEX", indexDir)
+    for {
+      _       <- logger.debug(s"running CSEARCHINDEX=$indexDir ${arguments(request).mkString(" ")}")
+      results <- IO((Process(arguments(request), None, env) #| Seq("head", "-1001")).!!.split('\n').toList)
+    } yield results
   }
 
   private def arguments(request: SearchRequest): List[String] = {
