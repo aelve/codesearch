@@ -31,22 +31,27 @@ class SpaceInsensitiveSpec extends FreeSpec with Matchers {
 
       addingSpaceInsensitive("foo {1,3}", "foo {1,3}")
 
+      addingSpaceInsensitive("foo {1,}", "foo {1,}")
+
+      addingSpaceInsensitive("foo {1}", "foo {1}")
+
+      addingSpaceInsensitive("foo {bar}", "foo +{bar}")
+
       addingSpaceInsensitive("foo [b ar]", "foo +[b ar]")
-    }
-
-    "*Not valid tests*" - {
-
-      /**
-        * This test is actually broken for now; this should become "foo +{bar}"
-        * because not everything in curly braces is parsed as a range.
-        */
-      addingSpaceInsensitive("foo {bar}", "foo {bar}")
     }
 
     "Strings with other cases and regex" - {
       addingSpaceInsensitive("foo *[bar]", "foo *[bar]")
 
       addingSpaceInsensitive("foo +{bar}", "foo +{bar}")
+
+      addingSpaceInsensitive("foo   {1,3}", "foo   {1,3}")
+
+      addingSpaceInsensitive("foo   {1,}", "foo   {1,}")
+
+      addingSpaceInsensitive("foo   {1}", "foo   {1}")
+
+      addingSpaceInsensitive("foo   {bar}", "foo   {bar}")
 
       addingSpaceInsensitive("foo   [bar]", "foo   [bar]")
     }

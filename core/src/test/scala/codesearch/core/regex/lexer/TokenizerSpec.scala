@@ -117,21 +117,18 @@ class TokenizerSpec extends FreeSpec with Matchers {
       testParseAndRender("a  b", Seq(Literal("a"), SpecialSymbol(" "), SpecialSymbol(" "), Literal("b")))
     }
 
-    // TODO: these examples give somewhat incorrect results. Properly they
-    // should be parsed as CharSet or as their own case.
     "Repetition" - {
-      testParseAndRender("a{2}", Seq(Literal("a"), SpecialSymbol("{"), Literal("2"), SpecialSymbol("}")))
-      testParseAndRender("a{2,3}", Seq(Literal("a"), SpecialSymbol("{"), Literal("2,3"), SpecialSymbol("}")))
-      testParseAndRender("a{2,}", Seq(Literal("a"), SpecialSymbol("{"), Literal("2,"), SpecialSymbol("}")))
+      testParseAndRender("a{2}", Seq(Literal("a"), RepetitionSeq("{2}")))
+      testParseAndRender("a{2,3}", Seq(Literal("a"), RepetitionSeq("{2,3}")))
+      testParseAndRender("a{2,}", Seq(Literal("a"), RepetitionSeq("{2,}")))
       testParseAndRender("a{2}?",
-                         Seq(Literal("a"), SpecialSymbol("{"), Literal("2"), SpecialSymbol("}"), SpecialSymbol("?")))
+                         Seq(Literal("a"), RepetitionSeq("{2}"), SpecialSymbol("?")))
     }
 
     "Escaping" - {
       testParseAndRender("\\|", Seq(Escaped('|')))
       testParseAndRender("\\\\a", Seq(Escaped('\\'), Literal("a")))
       testParseAndRender("\\d", Seq(Escaped('d')))
-      // TODO: incorrect
       testParseAndRender("\\123", Seq(Escaped('1'), Literal("23")))
       testParseAndRender("\\p{Greek}", Seq(Escaped('p'), SpecialSymbol("{"), Literal("Greek"), SpecialSymbol("}")))
     }
