@@ -155,6 +155,10 @@ class TokenizerSpec extends FreeSpec with Matchers {
       testParseAndRender("[[:alpha:]]", Seq(CharSet("[[:alpha:]]")))
     }
 
+    "POSIX classes test" - {
+      testParseAndRender("foo [:alpha:]", Seq(Literal("foo"), SpecialSymbol(" "), CharSet("[:alpha:]")))
+    }
+
     "RoundTrip cases" - {
       val cases = Source.fromResource("regex/cases.txt").getLines
       cases.foreach { caseString => caseString shouldBe roundTrip(caseString)
