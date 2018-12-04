@@ -13,7 +13,8 @@ object Tokenizer {
   /** A POSIX character class, e.g. `[:alpha:]`. */
   private def charSetPred[_: P] = P("[:" ~ (!":]" ~ AnyChar).rep ~ ":]")
 
-  private def parseRepetitionSeq[_: P] = P("{" ~ (CharIn("0-9").rep ~ ("," ~ CharIn("0-9").rep | "," | "")) ~ "}").!.map(RepetitionSeq(_))
+  private def parseRepetitionSeq[_: P] =
+    P("{" ~ (CharIn("0-9").rep ~ ("," ~ CharIn("0-9").rep | "," | "")) ~ "}").!.map(RepetitionSeq(_))
 
   private def specialSymbols[_: P] =
     P("\\" | " " | "." | "|" | "$" | "%" | "^" | "&" | "*" | "+" | "?" | "!" | "[" | "]" | "{" | "}" | "(" | ")").!

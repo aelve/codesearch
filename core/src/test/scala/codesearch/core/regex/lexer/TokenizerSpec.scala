@@ -121,8 +121,7 @@ class TokenizerSpec extends FreeSpec with Matchers {
       testParseAndRender("a{2}", Seq(Literal("a"), RepetitionSeq("{2}")))
       testParseAndRender("a{2,3}", Seq(Literal("a"), RepetitionSeq("{2,3}")))
       testParseAndRender("a{2,}", Seq(Literal("a"), RepetitionSeq("{2,}")))
-      testParseAndRender("a{2}?",
-                         Seq(Literal("a"), RepetitionSeq("{2}"), SpecialSymbol("?")))
+      testParseAndRender("a{2}?", Seq(Literal("a"), RepetitionSeq("{2}"), SpecialSymbol("?")))
     }
 
     "Escaping" - {
@@ -158,8 +157,7 @@ class TokenizerSpec extends FreeSpec with Matchers {
 
     "RoundTrip cases" - {
       val cases = Source.fromResource("regex/cases.txt").getLines
-      cases.foreach { caseString =>
-        caseString shouldBe roundTrip(caseString)
+      cases.foreach { caseString => caseString shouldBe roundTrip(caseString)
       }
     }
 
