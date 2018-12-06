@@ -124,7 +124,7 @@ private[index] final class NpmDetails(implicit http: SttpBackend[IO, Stream[IO, 
 }
 
 private[index] object NpmDetails {
-  val FsIndexRoot: Path = Paths.get("./index/npm")
+  val FsIndexRoot: Path = Paths.get("./data/meta/npm")
   def apply()(
       implicit http: SttpBackend[IO, Stream[IO, ByteBuffer]],
       shift: ContextShift[IO]

@@ -29,8 +29,8 @@ class RubyIndex(rubyConfig: RubyConfig)(
 ) extends LanguageIndex[GemTable] with GemDB {
 
   private val GEM_INDEX_URL     = "http://rubygems.org/latest_specs.4.8.gz"
-  private val GEM_INDEX_ARCHIVE = pwd / 'data / 'ruby / "ruby_index.gz"
-  private val GEM_INDEX_JSON    = pwd / 'data / 'ruby / "ruby_index.json"
+  private val GEM_INDEX_ARCHIVE = pwd / 'data / 'meta / 'ruby / "ruby_index.gz"
+  private val GEM_INDEX_JSON    = pwd / 'data / 'meta / 'ruby / "ruby_index.json"
   private val DESERIALIZER_PATH = pwd / 'scripts / "update_index.rb"
 
   override protected type Tag = Ruby
