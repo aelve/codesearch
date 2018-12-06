@@ -1,4 +1,5 @@
 package codesearch.core.search
+
 import java.net.URLDecoder
 
 import ammonite.ops.{Path, pwd}
@@ -64,11 +65,14 @@ trait Search {
   }
 
   private def arguments(request: SearchRequest): List[String] = {
-    def extensionsRegex: String = extensions.sourceExtensions.mkString(".*\\.(", "|", ")$")
-    val forExtensions: String   = if (request.sourcesOnly) extensionsRegex else ".*"
-    val query: String           = if (request.preciseMatch) Helper.hideSymbols(request.query) else request.query
-    val insensitive: String     = if (request.insensitive) "-i" else ""
-    List("csearch", "-n", insensitive, "-f", forExtensions, query)
+    def extensionsRegex = extensions.sourceExtensions.mkString(".*\\.(", "|", ")$")
+    val forExtensions   = if (request.sourcesOnly) extensionsRegex else ".*"
+    val query           = if (request.preciseMatch) Helper.hideSymbols(request.query) else request.query
+    if (request.insensitive) {
+      List("csearch", "-n", "-i", "-f", forExtensions, query)
+    } else {
+      List("csearch", "-n", "-f", forExtensions, query)
+    }
   }
 
   private def resultsFound(found: List[String], page: Int): IO[List[Option[CSearchResult]]] = {
