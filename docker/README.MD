@@ -31,21 +31,30 @@ docker run -d \
   quay.io/aelve/codesearch-core make tables
 ```
 
+# Download packages meta-information (e.g. Haskell)
+
+```
+docker run -d \
+  -v $(pwd)/data:/data \
+  --link codesearch-db:postgres \
+  quay.io/aelve/codesearch-core make download-haskell
+```
+
 # Download packages (e.g. Haskell)
 
 ```
 docker run -d \
-  -v $(pwd)/packages:/data \
-  -v $(pwd)/npm:/index/npm \
+  -v $(pwd)/data:/data \
+  -v $(pwd)/index:/index \
   --link codesearch-db:postgres \
-  quay.io/aelve/codesearch-core make download-haskell
+  quay.io/aelve/codesearch-core make update-haskell
 ```
 # Index packages (e.g. Haskell)
 
 ```
 docker run -d \
-  -v $(pwd)/packages:/data \
-  -v $(pwd)/npm:/index/npm \
+  -v $(pwd)/data:/data \
+  -v $(pwd)/index:/index \
   --link codesearch-db:postgres \
   quay.io/aelve/codesearch-core make index-haskell
 ```
@@ -54,7 +63,8 @@ docker run -d \
 
 ```
 docker run -p 9000:80 -d \
-  -v $(pwd)/packages:/data \
+  -v $(pwd)/data:/data \
+  -v $(pwd)/index:/index \
   --link codesearch-db:postgres \
   --name codesearch-web-server \
   quay.io/aelve/codesearch-web-server make serve
@@ -66,10 +76,11 @@ And port 80 -> 80, because load balancer forwading 80 -> 80.
 It should look like this:
 ```
 docker run -p 80:80 -d \
-  -v $(pwd)/packages:/data \
+  -v $(pwd)/data:/data \
+  -v $(pwd)/index:/index \
   --link codesearch-db:postgres \
   --name codesearch-web-server \
   -e APPLICATION_SECRET=f:D5ROEXEDLBI24hcbi9PuHdE \
-  -e JAVA_OPTS="-Dplay.filters.hosts.allowed.0=localhost -Dplay.filters.hosts.allowed.1=codesearch.aelve.com -Dplay.filters.hosts.allowed.2=cloud.digitalocean.com"\
+  -e JAVA_OPTS="-Dplay.filters.hosts.allowed.1=codesearch.aelve.com -Dplay.filters.hosts.allowed.2=cloud.digitalocean.com"\
   quay.io/aelve/codesearch-web-server make serve
 ```
