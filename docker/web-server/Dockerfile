@@ -6,8 +6,8 @@ RUN apk --no-cache add \
   go \
   musl-dev
 
-COPY codesearch-server.jar /
-COPY docker/web-server/Makefile /
+COPY ../../codesearch-server.jar /
+COPY Makefile /
 
 RUN go get github.com/google/codesearch/cmd/...
 RUN rm -rf /var/cache/apk/*
