@@ -9,7 +9,7 @@ import simulacrum.typeclass
 @typeclass trait Directory[A] {
 
   /** Defines root directory for sources storing */
-  def sourcesDir: Path = Paths.get("./data")
+  def sourcesDir: Path = Paths.get("./data/packages")
 
   /** Defines path to directory with source files */
   def packageDir(pack: A): Path

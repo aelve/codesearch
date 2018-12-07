@@ -62,7 +62,7 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
 
   def source(relativePath: String, query: String, L: Int): Action[AnyContent] =
     Action.async { implicit request =>
-      val realPath = s"data/$relativePath"
+      val realPath = s"data/packages/$relativePath"
       OptionT
         .fromOption[Future](searchEngine.packageName(realPath))
         .flatMap(pack => OptionT.liftF(Helper.readFileAsync(realPath).unsafeToFuture).map(s => (pack, s)))

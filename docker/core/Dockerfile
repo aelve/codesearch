@@ -13,8 +13,8 @@ RUN apk --no-cache add \
   ruby-json
 
 COPY codesearch-core.jar /
-COPY docker/core/Makefile /
-COPY scripts/update_index.rb /scripts/
+COPY /scripts/update_index.rb /scripts/
+COPY /docker/core/Makefile /
 
 RUN go get github.com/google/codesearch/cmd/...
 RUN rm -rf /var/cache/apk/*
