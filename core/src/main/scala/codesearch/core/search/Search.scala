@@ -112,8 +112,8 @@ trait Search {
           CSearchResult(
             p,
             CodeSnippet(
-              relativePath.split('/').drop(4).mkString("/"), // drop `data/hackage/packageName/version/`
-              relativePath.split('/').drop(1).mkString("/"), // drop `data`
+              relativePath.split('/').drop(5).mkString("/"), // drop `data/packages/hackage/packageName/version/`
+              relativePath.split('/').drop(2).mkString("/"), // drop `data/packages/`
               firstLine,
               lineNumber - 1,
               rows

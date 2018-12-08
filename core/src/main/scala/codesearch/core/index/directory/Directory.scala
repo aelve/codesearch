@@ -8,9 +8,6 @@ import simulacrum.typeclass
 
 @typeclass trait Directory[A] {
 
-  /** Defines root directory for sources storing */
-  def sourcesDir: Path = Paths.get("./data/packages")
-
   /** Defines path to directory with source files */
   def packageDir(pack: A): Path
 
@@ -34,6 +31,9 @@ import simulacrum.typeclass
 
 /** Companion contained defines type-classes for inheritors [[SourcePackage]] */
 object Directory {
+
+  /** Defines root directory for sources storing */
+  val sourcesDir: Path = Paths.get("./data/packages")
 
   implicit def hackageDirectory: Directory[HackagePackage] = new Directory[HackagePackage] {
     override def archive(pack: HackagePackage): Path =
