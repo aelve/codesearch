@@ -13,6 +13,9 @@ object Tokenizer {
   /** A POSIX character class, e.g. `[:alpha:]`. */
   private def charSetPred[_: P] = P("[:" ~ (!":]" ~ AnyChar).rep ~ ":]")
 
+  private def parseRepetitionSeq[_: P] =
+    P("{" ~ (CharIn("0-9").rep ~ ("," ~ CharIn("0-9").rep | "," | "")) ~ "}").!.map(RepetitionSeq(_))
+
   private def specialSymbols[_: P] =
     P("\\" | " " | "." | "|" | "$" | "%" | "^" | "&" | "*" | "+" | "?" | "!" | "[" | "]" | "{" | "}" | "(" | ")").!
 
@@ -29,7 +32,7 @@ object Tokenizer {
   private def parserAnyStringBeforeSpecialSymbol[_: P] = P((!specialSymbols ~ AnyChar).rep(1).!.map(Literal(_)))
 
   private def parseStringWithSpecialSymbols[_: P] =
-    P(parserEscaped | parserCharSet | parserAnyStringBeforeSpecialSymbol | parserSpecialSymbol).rep
+    P(parserEscaped | parserCharSet | parserAnyStringBeforeSpecialSymbol | parseRepetitionSeq | parserSpecialSymbol).rep
 
   /**
     * Parse string into a Tokens

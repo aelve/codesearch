@@ -1,7 +1,7 @@
 package codesearch.core.regex.space
 
 import codesearch.core.regex.lexer.{StringAssembler, Tokenizer}
-import codesearch.core.regex.lexer.tokens.{SpecialSymbol, Token}
+import codesearch.core.regex.lexer.tokens._
 
 object SpaceInsensitive {
 
@@ -28,7 +28,7 @@ object SpaceInsensitive {
             current match {
               case SpecialSymbol("+") => current :: result
               case SpecialSymbol("*") => current :: result
-              case SpecialSymbol("{") => current :: result
+              case RepetitionSeq(_)   => current :: result
               case SpecialSymbol("?") => current :: (allocatedOneOrMoreSpaces ::: result.tail)
               case SpecialSymbol(" ") => current :: result
               case _                  => current :: SpecialSymbol("+") :: result
