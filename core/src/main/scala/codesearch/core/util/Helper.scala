@@ -8,10 +8,11 @@ import org.apache.commons.io.FilenameUtils
 import scala.collection.mutable
 import scala.io.Source
 import scala.util.matching.Regex
+import codesearch.core.regex.lexer.tokens._
+import codesearch.core.regex.lexer._
+import codesearch.core.regex.space.SpaceInsensitive
 
 object Helper {
-
-  private val SPECIAL_CHARS = "$^*+().?|"
 
   val langByExt: Map[String, String] = Map(
     "hs"   -> "haskell",
@@ -38,13 +39,26 @@ object Helper {
   def readFileAsync(path: String): IO[List[String]] =
     IO(Source.fromFile(path, "UTF-8")).bracket(source => IO.pure(source.getLines.toList))(source => IO(source.close()))
 
-  def hideSymbols(str: String): String = {
-    str.foldRight("") {
-      case (c, res) if SPECIAL_CHARS contains c =>
-        s"\\$c$res"
-      case (c, res) =>
-        s"$c$res"
+  def preciseMatch(query: String): String = {
+    val queryTokens: Seq[Token] = Tokenizer.parseStringWithSpecialSymbols(query)
+    val preciseMatch: Seq[Token] = queryTokens.map {
+      case SpecialSymbol(value @ "|") => Escaped(value.charAt(0))
+      case SpecialSymbol(value @ "^") => Escaped(value.charAt(0))
+      case SpecialSymbol(value @ "$") => Escaped(value.charAt(0))
+      case SpecialSymbol(value @ "+") => Escaped(value.charAt(0))
+      case SpecialSymbol(value @ "*") => Escaped(value.charAt(0))
+      case SpecialSymbol(value @ "(") => Escaped(value.charAt(0))
+      case SpecialSymbol(value @ ")") => Escaped(value.charAt(0))
+      case SpecialSymbol(value @ ".") => Escaped(value.charAt(0))
+      case SpecialSymbol(value @ "?") => Escaped(value.charAt(0))
+      case other @ _ => other
     }
+
+    StringAssembler.buildStringFromTokens(preciseMatch)
+  }
+
+  def spaceInsenstive(query: String): String = {
+    SpaceInsensitive.spaceInsensitiveString(query)
   }
 
   def langByLink(fileLink: String, defaultLang: String): String = {
@@ -52,16 +66,21 @@ object Helper {
     langByExt.getOrElse(ext, defaultLang)
   }
 
-  def buildRegex(query: String, insensitive: Boolean, precise: Boolean): Regex = {
+  def buildRegex(query: String, insensitive: Boolean, space: Boolean, precise: Boolean): Regex = {
     val regex = mutable.StringBuilder.newBuilder
     if (insensitive) {
       regex.append("(?i)")
     }
     regex.append {
-      if (precise) {
-        Helper.hideSymbols(query)
+      val preciseMatch = if (precise) {
+        Helper.preciseMatch(query)
       } else {
         query
+      }
+      if (space) {
+        Helper.spaceInsenstive(preciseMatch)
+      } else {
+        preciseMatch
       }
     }
     regex.toString.r

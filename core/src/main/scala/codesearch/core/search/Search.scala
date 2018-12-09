@@ -65,13 +65,15 @@ trait Search {
   }
 
   private def arguments(request: SearchRequest): List[String] = {
-    def extensionsRegex = extensions.sourceExtensions.mkString(".*\\.(", "|", ")$")
-    val forExtensions   = if (request.sourcesOnly) extensionsRegex else ".*"
-    val query           = if (request.preciseMatch) Helper.hideSymbols(request.query) else request.query
+    def extensionsRegex   = extensions.sourceExtensions.mkString(".*\\.(", "|", ")$")
+    val forExtensions     = if (request.sourcesOnly) extensionsRegex else ".*"
+    val preciseMatchQuery = if (request.preciseMatch) Helper.preciseMatch(request.query) else request.query
+    val spaceInsensitiveQuery =
+      if (request.spaceInsensitive) Helper.spaceInsenstive(preciseMatchQuery) else preciseMatchQuery
     if (request.insensitive) {
-      List("csearch", "-n", "-i", "-f", forExtensions, query)
+      List("csearch", "-n", "-i", "-f", forExtensions, spaceInsensitiveQuery)
     } else {
-      List("csearch", "-n", "-f", forExtensions, query)
+      List("csearch", "-n", "-f", forExtensions, spaceInsensitiveQuery)
     }
   }
 

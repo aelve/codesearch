@@ -1,4 +1,4 @@
-@(actSearch: String, query: String, insensitive: Boolean, precise: Boolean, sources: Boolean)
+@(actSearch: String, query: String, insensitive: Boolean, space: Boolean, precise: Boolean, sources: Boolean)
 
 <section class="container-fluid">
     <div class="col-lg-6 mx-auto p-3 h7 justify-content-center">
@@ -12,6 +12,10 @@
             <div class="form-check form-check-inline">
                 <input type="checkbox" class="form-check-input" name="insensitive" id="insensitive-search" @(if (insensitive) "checked")>
                 <label class="form-check-label" for="insensitive-search">Case-insensitive search</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input type="checkbox" class="form-check-input" name="space" id="space-insensitive" @(if (space) "checked")>
+                <label class="form-check-label" for="space-insensitive">Space-insensitive search</label>
             </div>
             <div class="form-check form-check-inline">
                 <input type="checkbox" class="form-check-input" name="precise" id="precise-match" @(if (precise) "checked")>
