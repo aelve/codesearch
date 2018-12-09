@@ -51,7 +51,7 @@ object Helper {
       case SpecialSymbol(value @ ")") => Escaped(value.charAt(0))
       case SpecialSymbol(value @ ".") => Escaped(value.charAt(0))
       case SpecialSymbol(value @ "?") => Escaped(value.charAt(0))
-      case other @ _ => other
+      case other @ _                  => other
     }
 
     StringAssembler.buildStringFromTokens(preciseMatch)
