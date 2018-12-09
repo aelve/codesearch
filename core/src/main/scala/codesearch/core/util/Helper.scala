@@ -40,7 +40,7 @@ object Helper {
     IO(Source.fromFile(path, "UTF-8")).bracket(source => IO.pure(source.getLines.toList))(source => IO(source.close()))
 
   def preciseMatch(query: String): String = {
-    val queryTokens: Seq[Token]  = Tokenizer.parseStringWithSpecialSymbols(query)
+    val queryTokens: Seq[Token]   = Tokenizer.parseStringWithSpecialSymbols(query)
     val specialChars: Set[String] = Set("|", "^", "$", "$", "+", "*", "(", ")", ".", "?")
     val preciseMatch: Seq[Token] = queryTokens.map {
       case SpecialSymbol(value) if specialChars.contains(value) => Escaped(value.charAt(0))
