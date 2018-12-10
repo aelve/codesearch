@@ -3,7 +3,7 @@ package codesearch.core.search
 /**
   * @param query input regular expression
   * @param insensitive insensitive flag
-  * @param spaceInsensitive insensitive search flag
+  * @param spaceInsensitive space insensitive search flag
   * @param preciseMatch precise match flag
   * @param sourcesOnly sources only flag
   * @param page next pagination
