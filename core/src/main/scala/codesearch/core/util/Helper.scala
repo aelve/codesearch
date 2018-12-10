@@ -66,7 +66,7 @@ object Helper {
         insensitiveCase + preciseMatch
       }
     }
-    regex.toString.r
+    regex.r
   }
 
 }
