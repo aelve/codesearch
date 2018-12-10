@@ -40,7 +40,7 @@ trait Search {
     * @param relativePath path to source code
     * @return package name and url to repository
     */
-  def packageName(relativePath: String): Option[Package] = relativePath.split('/').drop(2).toList match {
+  def packageName(relativePath: String): Option[Package] = relativePath.split('/').drop(3).toList match {
     case libName :: version :: _ =>
       val decodedName = URLDecoder.decode(libName, "UTF-8")
       Some(Package(s"$decodedName-$version", buildRepUrl(decodedName, version)))
@@ -116,8 +116,8 @@ trait Search {
           CSearchResult(
             p,
             CodeSnippet(
-              relativePath.split('/').drop(4).mkString("/"), // drop `data/hackage/packageName/version/`
-              relativePath.split('/').drop(1).mkString("/"), // drop `data`
+              relativePath.split('/').drop(5).mkString("/"), // drop `data/packages/hackage/packageName/version/`
+              relativePath.split('/').drop(2).mkString("/"), // drop `data/packages/`
               firstLine,
               lineNumber - 1,
               rows
