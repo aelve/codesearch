@@ -28,9 +28,9 @@ object SpaceInsensitive {
             current match {
               case SpecialSymbol("+") => current :: result
               case SpecialSymbol("*") => current :: result
-              case RepetitionSeq(_)   => current :: result
               case SpecialSymbol("?") => current :: (allocatedOneOrMoreSpaces ::: result.tail)
               case SpecialSymbol(" ") => current :: result
+              case RepetitionSeq(_)   => current :: result
               case _                  => current :: SpecialSymbol("+") :: result
             }
           case _ =>

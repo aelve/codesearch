@@ -128,6 +128,7 @@ class TokenizerSpec extends FreeSpec with Matchers {
       testParseAndRender("\\|", Seq(Escaped('|')))
       testParseAndRender("\\\\a", Seq(Escaped('\\'), Literal("a")))
       testParseAndRender("\\d", Seq(Escaped('d')))
+      //TODO: Incorrect
       testParseAndRender("\\123", Seq(Escaped('1'), Literal("23")))
       testParseAndRender("\\p{Greek}", Seq(Escaped('p'), SpecialSymbol("{"), Literal("Greek"), SpecialSymbol("}")))
     }
