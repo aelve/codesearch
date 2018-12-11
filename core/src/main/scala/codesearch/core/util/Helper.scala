@@ -5,7 +5,6 @@ import java.io.File
 import cats.effect.IO
 import org.apache.commons.io.FilenameUtils
 
-import scala.collection.mutable
 import scala.io.Source
 import scala.util.matching.Regex
 import codesearch.core.regex.lexer.tokens._
