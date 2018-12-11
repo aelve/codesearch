@@ -56,15 +56,15 @@ object Helper {
   }
 
   def buildRegex(query: String, insensitive: Boolean, space: Boolean, precise: Boolean): Regex = {
+    val preciseAndSpace: String = {
+      val preciseMatch = if (precise) Helper.preciseMatch(query) else query
+
+      if (space) SpaceInsensitive.spaceInsensitiveString(preciseMatch) else preciseMatch
+    }
+
     val regex: String = {
       val insensitiveCase = if (insensitive) "(?i)" else ""
-      val preciseMatch    = if (precise) Helper.preciseMatch(query) else query
-
-      if (space) {
-        insensitiveCase + SpaceInsensitive.spaceInsensitiveString(preciseMatch)
-      } else {
-        insensitiveCase + preciseMatch
-      }
+      insensitiveCase + preciseAndSpace
     }
     regex.r
   }
