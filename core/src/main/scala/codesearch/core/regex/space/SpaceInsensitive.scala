@@ -37,7 +37,11 @@ object SpaceInsensitive {
             current :: result
         }
       }
-      .reverse
+      .reverse match {
+      case result @ _ :+ SpecialSymbol(" ") :+ SpecialSymbol(" ") => result
+      case result @ _ :+ SpecialSymbol(" ")                       => result :+ SpecialSymbol("+")
+      case value                                                  => value
+    }
 
     StringAssembler.buildStringFromTokens(addedRegexForSpaceInsensitive)
   }
