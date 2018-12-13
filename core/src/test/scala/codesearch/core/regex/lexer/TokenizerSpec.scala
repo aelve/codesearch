@@ -51,7 +51,7 @@ class TokenizerSpec extends FreeSpec with Matchers {
           Literal("Bale"),
           SpecialSymbol(")"),
           SpecialSymbol(" "),
-          Escaped('S'),
+          Escaped("S"),
           Literal("ymbol")
         )
       )
@@ -59,9 +59,9 @@ class TokenizerSpec extends FreeSpec with Matchers {
       testParseAndRender(
         "\\(Kek\\) [^Gared] (Bale) \\Symbol \\Kek+",
         Seq(
-          Escaped('('),
+          Escaped("("),
           Literal("Kek"),
-          Escaped(')'),
+          Escaped(")"),
           SpecialSymbol(" "),
           CharSet("[^Gared]"),
           SpecialSymbol(" "),
@@ -69,10 +69,10 @@ class TokenizerSpec extends FreeSpec with Matchers {
           Literal("Bale"),
           SpecialSymbol(")"),
           SpecialSymbol(" "),
-          Escaped('S'),
+          Escaped("S"),
           Literal("ymbol"),
           SpecialSymbol(" "),
-          Escaped('K'),
+          Escaped("K"),
           Literal("ek"),
           SpecialSymbol("+")
         )
@@ -120,13 +120,9 @@ class TokenizerSpec extends FreeSpec with Matchers {
     "Repetition" - {
       testParseAndRender("a{2}", Seq(Literal("a"), RepetitionSeq("{2}")))
       testParseAndRender("a{2,3}", Seq(Literal("a"), RepetitionSeq("{2,3}")))
-      testParseAndRender("a{2, 3}",
-                         Seq(Literal("a"),
-                             SpecialSymbol("{"),
-                             Literal("2,"),
-                             SpecialSymbol(" "),
-                             Literal("3"),
-                             SpecialSymbol("}")))
+      testParseAndRender(
+        "a{2, 3}",
+        Seq(Literal("a"), SpecialSymbol("{"), Literal("2,"), SpecialSymbol(" "), Literal("3"), SpecialSymbol("}")))
       testParseAndRender("a{,3}", Seq(Literal("a"), SpecialSymbol("{"), Literal(",3"), SpecialSymbol("}")))
       testParseAndRender("a{2,}", Seq(Literal("a"), RepetitionSeq("{2,}")))
       testParseAndRender("a{,}", Seq(Literal("a"), SpecialSymbol("{"), Literal(","), SpecialSymbol("}")))
@@ -134,23 +130,23 @@ class TokenizerSpec extends FreeSpec with Matchers {
     }
 
     "Escaping" - {
-      testParseAndRender("\\|", Seq(Escaped('|')))
-      testParseAndRender("\\\\a", Seq(Escaped('\\'), Literal("a")))
-      testParseAndRender("\\d", Seq(Escaped('d')))
+      testParseAndRender("\\|", Seq(Escaped("|")))
+      testParseAndRender("\\\\a", Seq(Escaped("\\"), Literal("a")))
+      testParseAndRender("\\d", Seq(Escaped("d")))
       //TODO: Incorrect
-      testParseAndRender("\\123", Seq(Escaped('1'), Literal("23")))
-      testParseAndRender("\\p{Greek}", Seq(Escaped('p'), SpecialSymbol("{"), Literal("Greek"), SpecialSymbol("}")))
+      testParseAndRender("\\123", Seq(Escaped("1"), Literal("23")))
+      testParseAndRender("\\p{Greek}", Seq(Escaped("p"), SpecialSymbol("{"), Literal("Greek"), SpecialSymbol("}")))
     }
 
     "Character sets" - {
       testParseAndRender("[^a-z]", Seq(CharSet("[^a-z]")))
-      // Parsed as set('[')
+      // Parsed as set("[")
       testParseAndRender("[[]", Seq(CharSet("[[]")))
-      // Parsed as set(']')
+      // Parsed as set("]")
       testParseAndRender("[]]", Seq(CharSet("[]]")))
-      // Parsed as set('[a]')
+      // Parsed as set("[a]")
       testParseAndRender("[a]]", Seq(CharSet("[a]"), SpecialSymbol("]")))
-      // Parsed as set('[', ']')
+      // Parsed as set("[", "]")
       testParseAndRender("[][]", Seq(CharSet("[][]")))
       // Parsed as two sets
       testParseAndRender("[][] [][]", Seq(CharSet("[][]"), SpecialSymbol(" "), CharSet("[][]")))

@@ -40,24 +40,11 @@ object Helper {
 
   def preciseMatch(query: String): String = {
     val queryTokens: Seq[Token] = Tokenizer.parseStringWithSpecialSymbols(query)
-    val specialSymbolsTokens: Set[Token] = Set(
-      SpecialSymbol("|"),
-      SpecialSymbol("^"),
-      SpecialSymbol("$"),
-      SpecialSymbol("$"),
-      SpecialSymbol("+"),
-      SpecialSymbol("*"),
-      SpecialSymbol("("),
-      SpecialSymbol(")"),
-      SpecialSymbol("."),
-      SpecialSymbol("?")
-    )
     val preciseMatch: Seq[Token] = queryTokens.map {
-      case specialSymbol @ SpecialSymbol(value) if specialSymbolsTokens.contains(specialSymbol) =>
-        Escaped(value.charAt(0))
-      case other => other
+      case literal @ Literal(_) => literal
+      case token: Token         => Escaped(token.repr)
+      case other                => other
     }
-
     StringAssembler.buildStringFromTokens(preciseMatch)
   }
 
@@ -77,6 +64,7 @@ object Helper {
       val insensitiveCase = if (insensitive) "(?i)" else ""
       insensitiveCase + preciseAndSpace
     }
+    println(regex)
     regex.r
   }
 

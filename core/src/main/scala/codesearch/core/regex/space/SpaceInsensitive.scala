@@ -24,7 +24,7 @@ object SpaceInsensitive {
         result match {
           case SpecialSymbol(" ") :: SpecialSymbol(" ") :: _ =>
             current :: result
-          case SpecialSymbol(" ") :: _ =>
+          case (SpecialSymbol(" ") | Escaped(" ")) :: _ =>
             current match {
               case SpecialSymbol("+") => current :: result
               case SpecialSymbol("*") => current :: result
@@ -39,7 +39,7 @@ object SpaceInsensitive {
       }
       .reverse match {
       case result @ _ :+ SpecialSymbol(" ") :+ SpecialSymbol(" ") => result
-      case result @ _ :+ SpecialSymbol(" ")                       => result :+ SpecialSymbol("+")
+      case result @ _ :+ (SpecialSymbol(" ") | Escaped(" "))      => result :+ SpecialSymbol("+")
       case value                                                  => value
     }
 

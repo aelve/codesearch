@@ -20,7 +20,7 @@ object Tokenizer {
   private def specialSymbols[_: P] =
     P("\\" | " " | "." | "|" | "$" | "%" | "^" | "&" | "*" | "+" | "?" | "!" | "[" | "]" | "{" | "}" | "(" | ")").!
 
-  private def parserEscaped[_: P] = P("\\" ~ AnyChar.!).map(a => Escaped(a.charAt(0)))
+  private def parserEscaped[_: P] = P("\\" ~ AnyChar.!).map(Escaped(_))
 
   private def parserCharInsideSet[_: P] = P(("\\" | !endForCharSet) ~ (charSetPred | AnyChar)).rep.!
 
