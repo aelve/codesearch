@@ -17,6 +17,8 @@ class SpaceInsensitiveSpec extends FreeSpec with Matchers {
 
       addingSpaceInsensitive(" bar foo", " +bar +foo")
 
+      addingSpaceInsensitive("  Test String  ", "  Test +String  ")
+
       addingSpaceInsensitive(" Gared Bale ", " +Gared +Bale +")
 
       addingSpaceInsensitive("Hello    world", "Hello    world")

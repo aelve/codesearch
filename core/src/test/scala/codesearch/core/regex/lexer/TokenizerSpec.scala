@@ -120,6 +120,14 @@ class TokenizerSpec extends FreeSpec with Matchers {
     "Repetition" - {
       testParseAndRender("a{2}", Seq(Literal("a"), RepetitionSeq("{2}")))
       testParseAndRender("a{2,3}", Seq(Literal("a"), RepetitionSeq("{2,3}")))
+      testParseAndRender("a{2, 3}",
+                         Seq(Literal("a"),
+                             SpecialSymbol("{"),
+                             Literal("2,"),
+                             SpecialSymbol(" "),
+                             Literal("3"),
+                             SpecialSymbol("}")))
+      testParseAndRender("a{,3}", Seq(Literal("a"), SpecialSymbol("{"), Literal(",3"), SpecialSymbol("}")))
       testParseAndRender("a{2,}", Seq(Literal("a"), RepetitionSeq("{2,}")))
       testParseAndRender("a{,}", Seq(Literal("a"), SpecialSymbol("{"), Literal(","), SpecialSymbol("}")))
       testParseAndRender("a{2}?", Seq(Literal("a"), RepetitionSeq("{2}"), SpecialSymbol("?")))
