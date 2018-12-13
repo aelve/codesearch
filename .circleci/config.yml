@@ -8,29 +8,23 @@ jobs:
       - image: codestar/circleci-scala-sbt-git:scala-2.12.6-sbt-1.1.6
     steps:
       - checkout
-
       - restore_cache:
           keys:
             - codesearch-{{ checksum "project/Builder.scala" }}-{{ checksum "build.sbt" }}
             - codesearch
-
       - run:
           command:
             sbt compile
-
       - run:
           command:
             sbt core/assembly
-
       - run:
           command:
             sbt web-server/assembly
-
       - run:
           command: |
             sbt scalafmt exit
             git diff --exit-code
-
       - save_cache:
           key: codesearch-{{ checksum "project/Builder.scala" }}-{{ checksum "build.sbt" }}
           paths:
@@ -50,3 +44,34 @@ jobs:
             - ~/.sbt
             - ~/.iv2/cache
             - ~/.m2
+
+  build-and-publish-docker-image:
+    type: approval
+    requires:
+      - build
+    branches:
+      only:
+        - develop
+    working_directory: ~/codesearch
+    environment:
+      REGISTRY: https://quay.io/repository/aelve
+      DOCKER_USER: foo
+      DOCKER_PASS: bar
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          docker login $REGISTRY -u $DOCKER_USER -p $DOCKER_PASS
+      - run:
+          name: Running build core image
+          command: make docker-core
+      - run:
+          name: Running build web-server image
+          command: make docker-web-server
+      - run:
+          name: Running push core image
+          command: make docker-push-core
+      - run:
+          name: Running push web-server image
+          command: make docker-push-web-server
+
