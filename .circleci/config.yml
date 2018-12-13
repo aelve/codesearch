@@ -3,75 +3,77 @@
 workflows:
   version: 2
   build_and_push:
-    jobs:
-      - build:
-          working_directory: ~/codesearch
-          docker:
-            - image: codestar/circleci-scala-sbt-git:scala-2.12.6-sbt-1.1.6
-          steps:
-            - checkout
-            - restore_cache:
-                keys:
-                  - codesearch-{{ checksum "project/Builder.scala" }}-{{ checksum "build.sbt" }}
-                  - codesearch
-            - run:
-                command:
-                  sbt compile
-            - run:
-                command:
-                  sbt core/assembly
-            - run:
-                command:
-                  sbt web-server/assembly
-            - run:
-                command: |
-                  sbt scalafmt exit
-                  git diff --exit-code
-            - save_cache:
-                key: codesearch-{{ checksum "project/Builder.scala" }}-{{ checksum "build.sbt" }}
-                paths:
-                  - target/resolution-cache
-                  - target/streams
-                  - project/target/resolution-cache
-                  - project/target/streams
-                  - ~/.sbt
-                  - ~/.iv2/cache
-                  - ~/.m2
-            - save_cache:
-                # Changing this to a different key is the only way to remove old
-                # dependencies from the cache and/or generate a more up-to-date
-                # cache
-                key: codesearch
-                paths:
-                  - ~/.sbt
-                  - ~/.iv2/cache
-                  - ~/.m2
+    - build
+    - build_and_publish_docker_image:
+        type: approval
+        requires:
+          - build
 
-      - build_and_publish_docker_image:
-          type: approval
-          requires:
-            - build
-          environment:
-            REGISTRY: https://quay.io/repository/aelve
-            DOCKER_USER: foo
-            DOCKER_PASS: bar
-          steps:
-            - setup_remote_docker:
-                docker_layer_caching: true
-            - run:
-                docker login $REGISTRY -u $DOCKER_USER -p $DOCKER_PASS
-            - run:
-                name: Running build core-test image
-                command: make docker-core
-            - run:
-                name: Running build web-server-test image
-                command: make docker-web-server
-            - run:
-                name: Running push core-test image
-                command: make docker-push-core
-            - run:
-                name: Running push web-server-test image
-                command: make docker-push-web-server
-      - start:
-          requires:
-          - build_and_publish_docker_image
+version: 2
+  jobs:
+    build:
+        working_directory: ~/codesearch
+        docker:
+          - image: codestar/circleci-scala-sbt-git:scala-2.12.6-sbt-1.1.6
+        steps:
+          - checkout
+          - restore_cache:
+              keys:
+                - codesearch-{{ checksum "project/Builder.scala" }}-{{ checksum "build.sbt" }}
+                - codesearch
+          - run:
+              command:
+                sbt compile
+          - run:
+              command:
+                sbt core/assembly
+          - run:
+              command:
+                sbt web-server/assembly
+          - run:
+              command: |
+                sbt scalafmt exit
+                git diff --exit-code
+          - save_cache:
+              key: codesearch-{{ checksum "project/Builder.scala" }}-{{ checksum "build.sbt" }}
+              paths:
+                - target/resolution-cache
+                - target/streams
+                - project/target/resolution-cache
+                - project/target/streams
+                - ~/.sbt
+                - ~/.iv2/cache
+                - ~/.m2
+          - save_cache:
+              # Changing this to a different key is the only way to remove old
+              # dependencies from the cache and/or generate a more up-to-date
+              # cache
+              key: codesearch
+              paths:
+                - ~/.sbt
+                - ~/.iv2/cache
+                - ~/.m2
+
+    build_and_publish_docker_image:
+        environment:
+          REGISTRY: https://quay.io/repository/aelve
+          DOCKER_USER: foo
+          DOCKER_PASS: bar
+        working_directory: ~/codesearch
+        steps:
+          - setup_remote_docker:
+              docker_layer_caching: true
+          - run:
+              docker login $REGISTRY -u $DOCKER_USER -p $DOCKER_PASS
+          - run:
+              name: Running build core-test image
+              command: make docker-core
+          - run:
+              name: Running build web-server-test image
+              command: make docker-web-server
+          - run:
+              name: Running push core-test image
+              command: make docker-push-core
+          - run:
+              name: Running push web-server-test image
+              command: make docker-push-web-server
