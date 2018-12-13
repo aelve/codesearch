@@ -45,7 +45,7 @@ jobs:
             - ~/.iv2/cache
             - ~/.m2
 
-  build-and-publish-docker-image:
+  build_and_publish_docker_image:
     type: approval
     requires:
       - build
