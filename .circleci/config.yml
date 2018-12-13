@@ -50,6 +50,7 @@ jobs:
       DOCKER_USER: foo
       DOCKER_PASS: bar
     working_directory: ~/codesearch
+    machine: true
     steps:
       - setup_remote_docker:
           docker_layer_caching: true
@@ -76,4 +77,4 @@ workflows:
     - build_and_publish_docker_image:
         type: approval
         requires:
-        - build
+          - build
