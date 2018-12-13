@@ -61,14 +61,17 @@ workflows:
             - run:
                 docker login $REGISTRY -u $DOCKER_USER -p $DOCKER_PASS
             - run:
-                name: Running build core image
+                name: Running build core-test image
                 command: make docker-core
             - run:
-                name: Running build web-server image
+                name: Running build web-server-test image
                 command: make docker-web-server
             - run:
-                name: Running push core image
+                name: Running push core-test image
                 command: make docker-push-core
             - run:
-                name: Running push web-server image
+                name: Running push web-server-test image
                 command: make docker-push-web-server
+      - start:
+          requires:
+          - build_and_publish_docker_image
