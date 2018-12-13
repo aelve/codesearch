@@ -51,10 +51,6 @@ workflows:
           type: approval
           requires:
             - build
-          branches:
-            only:
-              - develop
-          working_directory: ~/codesearch
           environment:
             REGISTRY: https://quay.io/repository/aelve
             DOCKER_USER: foo
@@ -76,4 +72,3 @@ workflows:
             - run:
                 name: Running push web-server image
                 command: make docker-push-web-server
-
