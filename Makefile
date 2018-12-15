@@ -45,7 +45,7 @@ serve:
 	java -jar codesearch-server.jar
 
 # Build a Docker image (the project must be built already)
-docker-%:
+build-docker-%:
 	docker build \
 		-f "docker/$*/Dockerfile" \
 		-t "quay.io/aelve/codesearch-$*:local" .
@@ -54,5 +54,5 @@ docker-%:
 		"quay.io/aelve/codesearch-$*:latest"
 
 # Push a Docker image to Quay
-docker-push-%:
+push-docker-%:
 	docker push "quay.io/aelve/codesearch-$*:latest"

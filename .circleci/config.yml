@@ -60,6 +60,9 @@ jobs:
       - persist_to_workspace:
           root: ~/codesearch
           paths:
+            - .dockerignore
+            - docker
+            - Makefile
             - codesearch-core.jar
             - codesearch-server.jar
 
@@ -68,20 +71,19 @@ jobs:
     machine:
       docker_layer_caching: true
     steps:
-      - checkout
       - run:
           docker login "$REGISTRY" -u "$DOCKER_USER" -p "$DOCKER_PASS"
       - attach_workspace:
           at: ~/codesearch
       - run:
           name: Running build core-test image
-          command: make docker-core
+          command: make build-docker-core
       - run:
           name: Running build web-server-test image
-          command: make docker-web-server
+          command: make build-docker-web-server
       - run:
           name: Running push core-test image
-          command: make docker-push-core
+          command: make push-docker-core
       - run:
           name: Running push web-server-test image
-          command: make docker-push-web-server
+          command: make push-docker-web-server
