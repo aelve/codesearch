@@ -62,6 +62,7 @@ jobs:
     machine:
       docker_layer_caching: true
     steps:
+      - checkout
       - run:
           docker login "$REGISTRY" -u "$DOCKER_USER" -p "$DOCKER_PASS"
       - run:
