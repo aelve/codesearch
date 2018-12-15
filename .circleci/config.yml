@@ -5,10 +5,13 @@ workflows:
   build_and_push:
     jobs:
       - build
-      - build_and_publish_docker_image:
+      - hold:
           type: approval
           requires:
             - build
+      - build_and_publish_docker_image:
+          requires:
+            - hold
 
 version: 2
 jobs:
@@ -74,4 +77,3 @@ jobs:
       - run:
           name: Running push web-server-test image
           command: make docker-push-web-server
-          
