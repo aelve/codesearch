@@ -62,6 +62,7 @@ jobs:
           paths:
             - .dockerignore
             - docker
+            - scripts
             - Makefile
             - codesearch-core.jar
             - codesearch-server.jar
