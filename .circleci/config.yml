@@ -1,5 +1,15 @@
 # Taken from https://github.com/code-star/circleci-scala-sbt-git
 
+workflows:
+  version: 2
+  build_and_push:
+    jobs:
+      - build
+      - build_and_publish_docker_image:
+          type: approval
+          requires:
+            - build
+
 version: 2
 jobs:
   build:
@@ -45,17 +55,13 @@ jobs:
             - ~/.iv2/cache
             - ~/.m2
   build_and_publish_docker_image:
-    environment:
-      REGISTRY: https://quay.io/repository/aelve
-      DOCKER_USER: foo
-      DOCKER_PASS: bar
     working_directory: ~/codesearch
     machine: true
     steps:
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
-          docker login $REGISTRY -u $DOCKER_USER -p $DOCKER_PASS
+          docker login "$REGISTRY" -u "$DOCKER_USER" -p "$DOCKER_PASS"
       - run:
           name: Running build core-test image
           command: make docker-core
@@ -68,13 +74,4 @@ jobs:
       - run:
           name: Running push web-server-test image
           command: make docker-push-web-server
-
-workflows:
-  version: 2
-  build_and_push:
-    jobs:
-    - build
-    - build_and_publish_docker_image:
-        type: approval
-        requires:
-          - build
+          
