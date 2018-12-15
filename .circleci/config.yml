@@ -5,13 +5,13 @@ workflows:
   build_and_push:
     jobs:
       - build
-      - hold:
+      - approve:
           type: approval
           requires:
             - build
       - build_and_publish_docker_image:
           requires:
-            - hold
+            - approve
 
 version: 2
 jobs:
@@ -59,10 +59,9 @@ jobs:
             - ~/.m2
   build_and_publish_docker_image:
     working_directory: ~/codesearch
-    machine: true
+    machine:
+      docker_layer_caching: true
     steps:
-      - setup_remote_docker:
-          docker_layer_caching: true
       - run:
           docker login "$REGISTRY" -u "$DOCKER_USER" -p "$DOCKER_PASS"
       - run:
