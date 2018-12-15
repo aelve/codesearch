@@ -64,7 +64,6 @@ object Helper {
       val insensitiveCase = if (insensitive) "(?i)" else ""
       insensitiveCase + preciseAndSpace
     }
-    println(regex)
     regex.r
   }
 

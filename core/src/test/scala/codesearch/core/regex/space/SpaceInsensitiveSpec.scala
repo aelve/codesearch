@@ -25,15 +25,15 @@ class SpaceInsensitiveSpec extends FreeSpec with Matchers {
     }
 
     "String with escaping" - {
-      addingSpaceInsensitive("FOO\\ BAR", "FOO\\ +BAR")
+      addingSpaceInsensitive("FOO\\ BAR", "FOO\\ BAR")
 
-      addingSpaceInsensitive("Foo\\ Bar \\ ", "Foo\\ +Bar +\\ +")
+      addingSpaceInsensitive("Foo\\ Bar \\ ", "Foo\\ Bar +\\ ")
 
-      addingSpaceInsensitive("Gared\\ Bale\\ ", "Gared\\ +Bale\\ +")
+      addingSpaceInsensitive("Gared\\ Bale\\ ", "Gared\\ Bale\\ ")
 
-      addingSpaceInsensitive("hello\\ world\\  ", "hello\\ +world\\  +")
+      addingSpaceInsensitive("hello\\ world\\  ", "hello\\ world\\  +")
 
-      addingSpaceInsensitive("test\\ str\\  \\ ", "test\\ +str\\  +\\ +")
+      addingSpaceInsensitive("test\\ str\\  \\ ", "test\\ str\\  +\\ ")
     }
 
     "Strings with regexp" - {
