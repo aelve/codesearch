@@ -57,6 +57,12 @@ jobs:
             - ~/.sbt
             - ~/.iv2/cache
             - ~/.m2
+      - persist_to_workspace:
+          root: ~/codesearch
+          paths:
+            - codesearch-core.jar
+            - codesearch-server.jar
+
   build_and_publish_docker_image:
     working_directory: ~/codesearch
     machine:
@@ -65,6 +71,8 @@ jobs:
       - checkout
       - run:
           docker login "$REGISTRY" -u "$DOCKER_USER" -p "$DOCKER_PASS"
+      - attach_workspace:
+          at: ~/codesearch
       - run:
           name: Running build core-test image
           command: make docker-core
