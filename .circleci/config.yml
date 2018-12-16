@@ -9,9 +9,15 @@ workflows:
           type: approval
           requires:
             - build
-      - build_and_publish_docker_image:
+          filters:
+            branches:
+              only: develop
+      - build_and_publish_docker_images:
           requires:
             - approve
+          filters:
+            branches:
+              only: develop
 
 version: 2
 jobs:
@@ -67,7 +73,7 @@ jobs:
             - codesearch-core.jar
             - codesearch-server.jar
 
-  build_and_publish_docker_image:
+  build_and_publish_docker_images:
     working_directory: ~/codesearch
     machine:
       docker_layer_caching: true
