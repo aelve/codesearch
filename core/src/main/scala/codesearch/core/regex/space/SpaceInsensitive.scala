@@ -6,7 +6,7 @@ import codesearch.core.regex.lexer.tokens._
 object SpaceInsensitive {
 
   /**
-    * Make a regex space-insensitive in places where one space is used.
+    * Make a regex space-insensitive in places where one space(_ is used.
     *
     * Only single spaces are affected, everything else (e.g. "  " or "\ ") is left as-is.
     *
