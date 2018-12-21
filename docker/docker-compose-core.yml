@@ -2,6 +2,7 @@ version: '3.3'
 
 services:
   core:
+    restart: on-failure
     container_name: codesearch_core
     image: quay.io/aelve/codesearch-core
     external_links:
