@@ -12,18 +12,18 @@ services:
     - /mnt/vol/index:/index
     - /mnt/vol/logs:/logs
     command: >
-      sh -c "make tables && \
-            make download-haskell && \
-            make update-haskell && \
-            make index-haskell && \
-            make download-rust && \
-            make update-rust && \
-            make index-rust && \
-            make download-ruby && \
-            make update-ruby && \
-            make index-ruby && \
-            make download-javascript && \
-            make update-javascript && \
+      sh -c "make tables \
+            make download-haskell \
+            make update-haskell \
+            make index-haskell \
+            make download-rust \
+            make update-rust \
+            make index-rust \
+            make download-ruby \
+            make update-ruby \
+            make index-ruby \
+            make download-javascript \
+            make update-javascript \
             make index-javascript"
     networks:
       - default
