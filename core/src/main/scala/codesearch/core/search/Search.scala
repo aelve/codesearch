@@ -73,9 +73,9 @@ trait Search {
       if (request.spaceInsensitive) SpaceInsensitive.spaceInsensitiveString(preciseMatch) else preciseMatch
     }
     if (request.insensitive) {
-      List("csearch", "-n", "-i", "-f", forExtensions, query)
+      List("csearch", "-n", "-i", "-f", forExtensions, query, request.filter)
     } else {
-      List("csearch", "-n", "-f", forExtensions, query)
+      List("csearch", "-n", "-f", forExtensions, query, request.filter)
     }
   }
 
