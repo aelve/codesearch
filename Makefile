@@ -1,5 +1,3 @@
-.RECIPEPREFIX +=
-
 # Run Postgres
 .PHONY: db
 db:
