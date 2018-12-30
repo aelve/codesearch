@@ -4,7 +4,7 @@ services:
   core:
     restart: on-failure
     container_name: codesearch_core
-    image: quay.io/aelve/codesearch-core
+    image: quay.io/aelve/codesearch-core:latest
     external_links:
     - postgres_1
     volumes:
