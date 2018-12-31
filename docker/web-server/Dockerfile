@@ -9,7 +9,7 @@ RUN apk --no-cache add \
 COPY codesearch-server.jar /
 COPY /docker/web-server/Makefile /
 
-RUN go get github.com/google/codesearch/cmd/...
+RUN go get github.com/Evengining/codesearch/cmd/...
 RUN rm -rf /var/cache/apk/*
 
 ENV PATH /root/go/bin:$PATH

@@ -11,6 +11,7 @@ package codesearch.core.search
 case class SearchRequest(
     query: String,
     filter: String,
+    specify: String,
     insensitive: Boolean,
     spaceInsensitive: Boolean,
     preciseMatch: Boolean,
@@ -22,6 +23,7 @@ object SearchRequest {
   def applyRaw(
       query: String,
       filter: String,
+      specify: String,
       insensitive: String,
       spaceInsensitive: String,
       preciseMatch: String,
@@ -30,6 +32,7 @@ object SearchRequest {
   ): SearchRequest = SearchRequest(
     query,
     filter,
+    specify,
     isEnabled(insensitive),
     isEnabled(spaceInsensitive),
     isEnabled(preciseMatch),
