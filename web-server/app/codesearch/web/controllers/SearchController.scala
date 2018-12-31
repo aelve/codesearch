@@ -37,7 +37,6 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
 
   def search(query: String,
              filter: String,
-             specify: String,
              caseInsensitive: String,
              spaceInsenstive: String,
              precise: String,
