@@ -2,6 +2,7 @@ package codesearch.core.search
 
 /**
   * @param query input regular expression
+  * @param filter filter for query
   * @param insensitive insensitive flag
   * @param spaceInsensitive space insensitive search flag
   * @param preciseMatch precise match flag
