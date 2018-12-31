@@ -5,19 +5,14 @@ workflows:
   build_and_push:
     jobs:
       - build
-      - approve:
-          type: approval
+      - build_and_publish_docker_images:
           requires:
             - build
           filters:
             branches:
-              only: develop
-      - build_and_publish_docker_images:
-          requires:
-            - approve
-          filters:
-            branches:
-              only: develop
+              only:
+                - develop
+                - master
 
 version: 2
 jobs:
@@ -79,18 +74,18 @@ jobs:
       docker_layer_caching: true
     steps:
       - run:
-          docker login "$REGISTRY" -u "$DOCKER_USER" -p "$DOCKER_PASS"
+          docker login quay.io -u "$DOCKER_USER" -p "$DOCKER_PASS"
       - attach_workspace:
           at: ~/codesearch
       - run:
           name: Running build core image
-          command: make build-docker-core
+          command: make build-docker-core "branch=${CIRCLE_BRANCH}"
       - run:
           name: Running build web-server image
-          command: make build-docker-web-server
+          command: make build-docker-web-server "branch=${CIRCLE_BRANCH}"
       - run:
           name: Running push core image
-          command: make push-docker-core
+          command: make push-docker-core "branch=${CIRCLE_BRANCH}"
       - run:
           name: Running push web-server image
-          command: make push-docker-web-server
+          command: make push-docker-web-server "branch=${CIRCLE_BRANCH}"
