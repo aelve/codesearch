@@ -46,18 +46,18 @@ serve:
 
 # Build a Docker image (the project must be built already)
 build-docker-%:
-	if [ -n $(branch) ] && ([ $(branch) == "master" ] || [ $(branch) == "develop" ]); \
+	if [ "$(branch)" == "master" ] || [ "$(branch)" == "develop" ]; \
 	then \
 		docker build \
 			-f "docker/$*/Dockerfile" \
-			-t "quay.io/aelve/codesearch-$*:$(branch)" . \
+			-t "quay.io/aelve/codesearch-$*:$(branch)" . ; \
 	else \
 		docker build \
 			-f "docker/$*/Dockerfile" \
-			-t "quay.io/aelve/codesearch-$*:local" . \
+			-t "quay.io/aelve/codesearch-$*:latest" . ; \
 	fi \
 
-	if [ $(branch) == "master" ]; \
+	if [ "$(branch)" == "master" ]; \
 	then \
 		docker tag \
 			"quay.io/aelve/codesearch-$*:master" \
@@ -66,15 +66,15 @@ build-docker-%:
 
 # Push a Docker image to Quay
 push-docker-%:
-	if [[ -n $(branch) ]]; \
+	if [ -n "$(branch)" ]; \
+    then \
+    	if [ "$(branch)" == "master" ]; \
     	then \
-    		if [ $(branch) == "master" ]; \
-    		then \
-    			docker push "quay.io/aelve/codesearch-$*:master"; \
-    			docker push "quay.io/aelve/codesearch-$*:latest"; \
-    		else \
-    			docker push "quay.io/aelve/codesearch-$*:$(branch)"; \
-    		fi \
+    		docker push "quay.io/aelve/codesearch-$*:master"; \
+    		docker push "quay.io/aelve/codesearch-$*:latest"; \
     	else \
-    		echo "Empty `branch` parameter."; \
-    	fi
+    		docker push "quay.io/aelve/codesearch-$*:$(branch)"; \
+    	fi \
+    else \
+    	echo "Empty branch parameter."; \
+    fi
