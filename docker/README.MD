@@ -9,14 +9,14 @@ From the repository root:
 
 ```
 make build
-make docker-core docker-web-server
+make build-docker-core build-docker-web-server
 ```
 
 # Start the database
 
 ```
 docker run -d -p 5432:5432 \
-  -v $(pwd)/postgres:/var/lib/postgresql \
+  -v $(pwd)/postgresql:/var/lib/postgresql \
   -e POSTGRES_DB='sourcesdb' \
   -e POSTGRES_USER='postgres' \
   -e POSTGRES_PASSWORD='postgres' \
@@ -46,6 +46,7 @@ docker run -d \
 docker run -d \
   -v $(pwd)/data:/data \
   -v $(pwd)/index:/index \
+  -v $(pwd)/logs:/logs \
   --link codesearch-db:postgres \
   quay.io/aelve/codesearch-core make update-haskell
 ```
@@ -55,6 +56,7 @@ docker run -d \
 docker run -d \
   -v $(pwd)/data:/data \
   -v $(pwd)/index:/index \
+  -v $(pwd)/logs:/logs \
   --link codesearch-db:postgres \
   quay.io/aelve/codesearch-core make index-haskell
 ```
