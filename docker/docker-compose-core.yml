@@ -13,18 +13,10 @@ services:
     - /mnt/vol/logs:/logs
     command: >
       sh -c "make tables && \
-            make download-haskell && \
-            make update-haskell && \
-            make index-haskell && \
-            make download-rust && \
-            make update-rust && \
-            make index-rust && \
-            make download-ruby && \
-            make update-ruby && \
-            make index-ruby && \
-            make download-javascript && \
-            make update-javascript && \
-            make index-javascript"
+            make download-haskell update-haskell index-haskell && \
+            make download-rust update-rust index-rust && \
+            make download-ruby update-ruby index-ruby && \
+            make download-javascript update-javascript index-javascript"
     networks:
     - default
     - codesearch_default
