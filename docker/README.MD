@@ -86,3 +86,14 @@ docker run -p 80:80 -d \
   -e JAVA_OPTS="-Dplay.filters.hosts.allowed.1=codesearch.aelve.com -Dplay.filters.hosts.allowed.2=cloud.digitalocean.com"\
   quay.io/aelve/codesearch-web-server make serve
 ```
+# Start the core service with all tasks (tables, download, update, index) for all languages via docker-compose
+
+```
+docker-compose -f docker-compose-core up -d
+```
+
+# Start the server and database services via docker-compose
+
+```
+docker-compose -f docker-compose-server up -d
+```
