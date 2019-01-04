@@ -61,18 +61,13 @@ trait DefaultDB[T <: DefaultTable] {
     db.run(act)
   }
 
-  def initDB: IO[Unit] = {
-    IO.fromFuture(
+  def initDB: IO[Unit] =
+    IO.fromFuture(IO(db.run(MTable.getTables))).flatMap { vector =>
       IO(
-        db.run(
-          MTable.getTables.map { tables =>
-            if (!tables.exists(_.name.name == table.baseTableRow.tableName))
-              table.schema.create
-          }
-        )
+        if (!vector.exists(_.name.name == table.baseTableRow.tableName))
+          db.run(table.schema.create)
       )
-    )
-  }
+    }
 }
 
 trait HackageDB extends DefaultDB[HackageTable] {
