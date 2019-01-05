@@ -10,5 +10,5 @@ object StringAssembler {
     * @param tokens sequence tokens, example: Seq(Literal("Hello"), SpecialSymbol(" "), Literal("World"))
     * @return string from tokens, example: "Hello World"
     */
-  def buildStringFromTokens(tokens: Seq[Token]) = tokens.map(_.repr).mkString
+  def buildStringFromTokens(tokens: Seq[Token]): String = tokens.map(_.repr).mkString
 }
