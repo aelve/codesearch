@@ -13,13 +13,16 @@ object Tokenizer {
   /** A POSIX character class, e.g. `[:alpha:]`. */
   private def charSetPred[_: P] = P("[:" ~ (!":]" ~ AnyChar).rep ~ ":]")
 
+  /**Handles cases {n} and {n,} and {n, n}, example {33,}*/
   private def parseRepetitionSeq[_: P] =
-    P("{" ~ (CharIn("0-9").rep ~ ("," ~ CharIn("0-9").rep | "," | "")) ~ "}").!.map(RepetitionSeq(_))
+    P("{" ~ (CharIn("0-9").rep(1) ~ ("," ~ CharIn("0-9").rep | "")) ~ "}").!.map(RepetitionSeq(_))
 
   private def specialSymbols[_: P] =
-    P("\\" | " " | "." | "|" | "$" | "%" | "^" | "&" | "*" | "+" | "?" | "!" | "[" | "]" | "{" | "}" | "(" | ")").!
+    P("\\" | "." | "|" | "$" | "%" | "^" | "&" | "*" | "+" | "?" | "!" | "[" | "]" | "{" | "}" | "(" | ")").!
 
-  private def parserEscaped[_: P] = P("\\" ~ AnyChar.!).map(a => Escaped(a.charAt(0)))
+  private def parseSpaces[_: P] = P(" ").!.map(Space(_))
+
+  private def parserEscaped[_: P] = P("\\" ~ AnyChar.!).map(Escaped(_))
 
   private def parserCharInsideSet[_: P] = P(("\\" | !endForCharSet) ~ (charSetPred | AnyChar)).rep.!
 
@@ -29,10 +32,10 @@ object Tokenizer {
   private def parserSpecialSymbol[_: P] =
     P(specialSymbols.map(specialSymbolInString => SpecialSymbol(specialSymbolInString)))
 
-  private def parserAnyStringBeforeSpecialSymbol[_: P] = P((!specialSymbols ~ AnyChar).rep(1).!.map(Literal(_)))
+  private def parserAnyStringBeforeSpecialSymbol[_: P] = P((!" " ~ !specialSymbols ~ AnyChar).rep(1).!.map(Literal(_)))
 
   private def parseStringWithSpecialSymbols[_: P] =
-    P(parserEscaped | parserCharSet | parserAnyStringBeforeSpecialSymbol | parseRepetitionSeq | parserSpecialSymbol).rep
+    P(parserEscaped | parserCharSet | parserAnyStringBeforeSpecialSymbol | parseSpaces | parseRepetitionSeq | parserSpecialSymbol).rep
 
   /**
     * Parse string into a Tokens

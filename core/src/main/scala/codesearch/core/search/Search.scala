@@ -15,6 +15,7 @@ import codesearch.core.util.Helper
 import codesearch.core.util.Helper.readFileAsync
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+import codesearch.core.regex.space.SpaceInsensitive
 
 import scala.sys.process.Process
 
@@ -68,13 +69,16 @@ trait Search {
   }
 
   private def arguments(request: SearchRequest): List[String] = {
-    def extensionsRegex = extensions.sourceExtensions.mkString(".*\\.(", "|", ")$")
-    val forExtensions   = if (request.sourcesOnly) extensionsRegex else ".*"
-    val query           = if (request.preciseMatch) Helper.hideSymbols(request.query) else request.query
+    def extensionsRegex: String = extensions.sourceExtensions.mkString(".*\\.(", "|", ")$")
+    val forExtensions: String   = if (request.sourcesOnly) extensionsRegex else ".*"
+    val query: String = {
+      val preciseMatch: String = if (request.preciseMatch) Helper.preciseMatch(request.query) else request.query
+      if (request.spaceInsensitive) SpaceInsensitive.spaceInsensitiveString(preciseMatch) else preciseMatch
+    }
     if (request.insensitive) {
-      List("csearch", "-n", "-i", "-f", forExtensions, query)
+      List("csearch", "-n", "-i", "-f", forExtensions, query, request.filter)
     } else {
-      List("csearch", "-n", "-f", forExtensions, query)
+      List("csearch", "-n", "-f", forExtensions, query, request.filter)
     }
   }
 

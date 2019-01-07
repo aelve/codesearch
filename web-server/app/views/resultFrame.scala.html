@@ -6,7 +6,7 @@
 @import codesearch.core.search.Search.PackageResult
 @import codesearch.web.SnippetHelper
 
-@(lang: String, insensitive: Boolean, precise: Boolean, query: String, updated: String, packages: Seq[PackageResult], totalMatches: Int)
+@(lang: String, insensitive: Boolean, space: Boolean, precise: Boolean, query: String, updated: String, packages: Seq[PackageResult], totalMatches: Int)
 
 <section class="container">
     <span class="text-secondary">Index updated @updated</span> <br>
@@ -23,10 +23,10 @@
 
         @for(result <- pack.results) {
             <a href="src/@result.fileLink?query=@{Helper.buildRegex(query = query,
-                insensitive = insensitive, precise = precise)}&L=@{result.matchedLine + 1}#snippet.@{result.matchedLine + 1}">@result.relativePath</a>
+                insensitive = insensitive, space = space, precise = precise)}&L=@{result.matchedLine + 1}#snippet.@{result.matchedLine + 1}">@result.relativePath</a>
             <pre data-start=@{result.numberOfFirstLine + 1}><code class="@("language-" + Helper.langByLink(result.fileLink, lang) +
                     " line-numbers")">@{
-                val re = Helper.buildRegex(query = query, insensitive = insensitive, precise = precise)
+                val re = Helper.buildRegex(query = query, insensitive = insensitive, space = space, precise = precise)
 
                 val id = result.matchedLine - result.numberOfFirstLine
                 val hLine = result.ctxt(id)

@@ -14,30 +14,33 @@ object SpaceInsensitive {
     * @return regex with added symbols "+" for space-insensitivity. Example: "hello +world   kek( +)?"
     */
   def spaceInsensitiveString(query: String): String = {
-    val tokens: Seq[Token] = Tokenizer.parseStringWithSpecialSymbols(query)
-
+    val tokens: List[Token] = Tokenizer.parseStringWithSpecialSymbols(query).toList
     val allocatedOneOrMoreSpaces: List[Token] =
-      List(SpecialSymbol("("), SpecialSymbol(" "), SpecialSymbol("+"), SpecialSymbol(")")).reverse
+      List(SpecialSymbol("("), Space(" "), SpecialSymbol("+"), SpecialSymbol(")")).reverse
 
-    val addedRegexForSpaceInsensitive: Seq[Token] = tokens
-      .foldLeft(List.empty[Token]) { (result, current) =>
-        result match {
-          case SpecialSymbol(" ") :: SpecialSymbol(" ") :: _ =>
-            current :: result
-          case SpecialSymbol(" ") :: _ =>
-            current match {
-              case SpecialSymbol("+") => current :: result
-              case SpecialSymbol("*") => current :: result
-              case RepetitionSeq(_)   => current :: result
-              case SpecialSymbol("?") => current :: (allocatedOneOrMoreSpaces ::: result.tail)
-              case SpecialSymbol(" ") => current :: result
-              case _                  => current :: SpecialSymbol("+") :: result
-            }
-          case _ =>
-            current :: result
+    @annotation.tailrec
+    def loop(result: List[Token], remaining: List[Token]): List[Token] = (result, remaining) match {
+      case (_, Nil)                                     => result
+      case (Space(_) :: Space(_) :: _, current :: next) => loop(current :: result, next)
+      case (Space(_) :: _, current :: next) =>
+        current match {
+          case Space(_)           => loop(current :: result, next)
+          case SpecialSymbol("+") => loop(current :: result, next)
+          case SpecialSymbol("?") => loop(current :: (allocatedOneOrMoreSpaces ::: result.tail), next)
+          case SpecialSymbol("*") => loop(current :: result, next)
+          case RepetitionSeq(_)   => loop(current :: result, next)
+          case _                  => loop(current :: SpecialSymbol("+") :: result, next)
         }
-      }
-      .reverse
+      case (_, current :: Nil) =>
+        current match {
+          case Space(_)           => SpecialSymbol("+") :: current :: result
+          case SpecialSymbol("+") => current :: result
+          case _                  => current :: result
+        }
+      case (_, current :: next) => loop(current :: result, next)
+    }
+
+    val addedRegexForSpaceInsensitive: Seq[Token] = loop(List.empty[Token], tokens).reverse
 
     StringAssembler.buildStringFromTokens(addedRegexForSpaceInsensitive)
   }
