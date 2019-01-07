@@ -1,7 +1,7 @@
 package codesearch.core.index
 
-import java.nio.file.Path
 import java.nio.ByteBuffer
+import java.nio.file.Path
 
 import cats.effect.{ContextShift, IO}
 import codesearch.core.config.{Config, JavaScriptConfig}
@@ -16,11 +16,8 @@ import codesearch.core.model.{NpmTable, Version}
 import com.softwaremill.sttp.SttpBackend
 import fs2.Stream
 
-import scala.concurrent.ExecutionContext
-
 class JavaScriptIndex(javaScriptConfig: JavaScriptConfig)(
-    implicit val executor: ExecutionContext,
-    val http: SttpBackend[IO, Stream[IO, ByteBuffer]],
+    implicit val http: SttpBackend[IO, Stream[IO, ByteBuffer]],
     val shift: ContextShift[IO]
 ) extends LanguageIndex[NpmTable] with NpmDB {
 
@@ -48,8 +45,7 @@ class JavaScriptIndex(javaScriptConfig: JavaScriptConfig)(
 
 object JavaScriptIndex {
   def apply(config: Config)(
-      implicit ec: ExecutionContext,
-      http: SttpBackend[IO, Stream[IO, ByteBuffer]],
+      implicit http: SttpBackend[IO, Stream[IO, ByteBuffer]],
       shift: ContextShift[IO]
   ) = new JavaScriptIndex(config.languagesConfig.javaScriptConfig)
 }

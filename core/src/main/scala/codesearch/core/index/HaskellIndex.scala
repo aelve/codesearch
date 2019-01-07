@@ -19,12 +19,10 @@ import com.softwaremill.sttp.SttpBackend
 import fs2.Stream
 import org.rauschig.jarchivelib.{ArchiveFormat, ArchiverFactory, CompressionType}
 
-import scala.concurrent.ExecutionContext
 import scala.sys.process._
 
 class HaskellIndex(haskellConfig: HaskellConfig)(
-    implicit val executor: ExecutionContext,
-    val http: SttpBackend[IO, Stream[IO, ByteBuffer]],
+    implicit val http: SttpBackend[IO, Stream[IO, ByteBuffer]],
     val shift: ContextShift[IO]
 ) extends LanguageIndex[HackageTable] with HackageDB {
 
@@ -78,9 +76,7 @@ class HaskellIndex(haskellConfig: HaskellConfig)(
 }
 
 object HaskellIndex {
-  def apply(config: Config)(
-      implicit ec: ExecutionContext,
-      http: SttpBackend[IO, Stream[IO, ByteBuffer]],
+  def apply(config: Config)(implicit http: SttpBackend[IO, Stream[IO, ByteBuffer]],
       shift: ContextShift[IO]
   ) = new HaskellIndex(config.languagesConfig.haskellConfig)
 }

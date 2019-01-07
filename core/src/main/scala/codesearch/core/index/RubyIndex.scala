@@ -19,12 +19,10 @@ import com.softwaremill.sttp.SttpBackend
 import fs2.Stream
 import play.api.libs.json.Json
 
-import scala.concurrent.ExecutionContext
 import scala.sys.process._
 
 class RubyIndex(rubyConfig: RubyConfig)(
-    implicit val executor: ExecutionContext,
-    val http: SttpBackend[IO, Stream[IO, ByteBuffer]],
+    implicit val http: SttpBackend[IO, Stream[IO, ByteBuffer]],
     val shift: ContextShift[IO]
 ) extends LanguageIndex[GemTable] with GemDB {
 
@@ -63,8 +61,7 @@ class RubyIndex(rubyConfig: RubyConfig)(
 
 object RubyIndex {
   def apply(config: Config)(
-      implicit ec: ExecutionContext,
-      http: SttpBackend[IO, Stream[IO, ByteBuffer]],
+      implicit http: SttpBackend[IO, Stream[IO, ByteBuffer]],
       shift: ContextShift[IO]
   ) = new RubyIndex(config.languagesConfig.rubyConfig)
 }

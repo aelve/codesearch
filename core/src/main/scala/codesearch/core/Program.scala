@@ -1,7 +1,5 @@
 package codesearch.core
 
-import java.nio.ByteBuffer
-
 import cats.effect._
 import cats.instances.list._
 import cats.syntax.applicative._
@@ -9,18 +7,10 @@ import cats.syntax.foldable._
 import cats.syntax.traverse._
 import codesearch.core.Main.{LangRep, Params}
 import codesearch.core.model.DefaultTable
-import com.softwaremill.sttp.SttpBackend
-import fs2.Stream
 import io.chrisdavenport.log4cats.Logger
+import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
-import scala.concurrent.ExecutionContext
-
-class Program(
-    langReps: Map[String, LangRep[_ <: DefaultTable]],
-    logger: Logger[IO],
-    http: SttpBackend[IO, Stream[IO, ByteBuffer]],
-    ec: ExecutionContext
-) {
+class Program(langReps: Map[String, LangRep[_ <: DefaultTable]], logger: Logger[IO]) {
 
   def run(params: Params): IO[ExitCode] =
     for {
@@ -34,8 +24,6 @@ class Program(
       _ <- downloadMeta(params).whenA(params.downloadMeta)
       _ <- updatePackages(params).whenA(params.updatePackages)
       _ <- buildIndex(params).whenA(params.buildIndex)
-
-      _ <- IO(http.close())
 
     } yield ExitCode.Success
 
@@ -78,4 +66,9 @@ class Program(
       _         <- languages.traverse_(_.langIndex.buildIndex)
       _         <- logger.info(s"${params.lang} packages successfully indexed")
     } yield ()
+}
+
+object Program {
+  def apply(langReps: Map[String, LangRep[_ <: DefaultTable]]): IO[Program] =
+    Slf4jLogger.fromClass[IO](getClass).map(logger => new Program(langReps, logger))
 }

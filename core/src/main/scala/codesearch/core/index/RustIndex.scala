@@ -23,11 +23,8 @@ import org.rauschig.jarchivelib.ArchiverFactory
 import play.api.libs.json.Json
 import codesearch.core.index.directory.Preamble._
 
-import scala.concurrent.ExecutionContext
-
 class RustIndex(rustConfig: RustConfig)(
-    implicit val executor: ExecutionContext,
-    val http: SttpBackend[IO, Stream[IO, ByteBuffer]],
+    implicit val http: SttpBackend[IO, Stream[IO, ByteBuffer]],
     val shift: ContextShift[IO]
 ) extends LanguageIndex[CratesTable] with CratesDB {
 
@@ -79,8 +76,7 @@ class RustIndex(rustConfig: RustConfig)(
 
 object RustIndex {
   def apply(config: Config)(
-      implicit ec: ExecutionContext,
-      http: SttpBackend[IO, Stream[IO, ByteBuffer]],
+      implicit http: SttpBackend[IO, Stream[IO, ByteBuffer]],
       shift: ContextShift[IO]
   ) = new RustIndex(config.languagesConfig.rustConfig)
 }
