@@ -67,14 +67,14 @@ build-docker-%:
 # Push a Docker image to Quay
 push-docker-%:
 	if [ -n "$(branch)" ]; \
-    then \
-    	if [ "$(branch)" == "master" ]; \
-    	then \
-    		docker push "quay.io/aelve/codesearch-$*:master"; \
-    		docker push "quay.io/aelve/codesearch-$*:latest"; \
-    	else \
-    		docker push "quay.io/aelve/codesearch-$*:$(branch)"; \
-    	fi \
-    else \
-    	echo "Empty branch parameter."; \
-    fi
+	then \
+		if [ "$(branch)" == "master" ]; \
+		then \
+			docker push "quay.io/aelve/codesearch-$*:master"; \
+			docker push "quay.io/aelve/codesearch-$*:latest"; \
+		else \
+			docker push "quay.io/aelve/codesearch-$*:$(branch)"; \
+		fi \
+	else \
+		echo "Empty branch parameter."; \
+	fi
