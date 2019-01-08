@@ -40,11 +40,14 @@ trait Search {
     * @param relativePath path to source code
     * @return package name and url to repository
     */
-  def packageName(relativePath: String): Option[Package] = relativePath.split('/').drop(3).toList match {
-    case libName :: version :: _ =>
-      val decodedName = URLDecoder.decode(libName, "UTF-8")
-      Some(Package(s"$decodedName-$version", buildRepUrl(decodedName, version)))
-    case _ => None
+  def packageName(relativePath: String): Option[Package] = {
+    val slashes = if (relativePath.startsWith("./")) 4 else 3
+    relativePath.split('/').drop(slashes).toList match {
+      case libName :: version :: _ =>
+        val decodedName = URLDecoder.decode(libName, "UTF-8")
+        Some(Package(s"$decodedName-$version", buildRepUrl(decodedName, version)))
+      case _ => None
+    }
   }
 
   /**
@@ -73,9 +76,9 @@ trait Search {
       if (request.spaceInsensitive) SpaceInsensitive.spaceInsensitiveString(preciseMatch) else preciseMatch
     }
     if (request.insensitive) {
-      List("csearch", "-n", "-i", "-f", forExtensions, query)
+      List("csearch", "-n", "-i", "-f", forExtensions, query, request.filter)
     } else {
-      List("csearch", "-n", "-f", forExtensions, query)
+      List("csearch", "-n", "-f", forExtensions, query, request.filter)
     }
   }
 

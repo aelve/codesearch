@@ -16,7 +16,7 @@ COPY codesearch-core.jar /
 COPY /scripts/update_index.rb /scripts/
 COPY /docker/core/Makefile /
 
-RUN go get github.com/google/codesearch/cmd/...
+RUN go get github.com/Evengining/codesearch/cmd/...
 RUN rm -rf /var/cache/apk/*
 
 ENV PATH /root/go/bin:$PATH

@@ -33,7 +33,7 @@ class SpaceInsensitiveSpec extends FreeSpec with Matchers {
 
       addingSpaceInsensitive("hello\\ world\\  ", "hello\\ world\\  +")
 
-      addingSpaceInsensitive("test\\ str\\  \\ ", "test\\ str\\  +\\ ")
+      addingSpaceInsensitive("test\\\\ str\\ ", "test\\\\ +str\\ ")
     }
 
     "Strings with regexp" - {

@@ -6,6 +6,7 @@ import cats.effect.IO
 import codesearch.core.index.repository.SourcePackage
 import codesearch.core.model._
 import slick.jdbc.PostgresProfile.api._
+import slick.jdbc.meta.MTable
 import slick.lifted.TableQuery
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -60,9 +61,13 @@ trait DefaultDB[T <: DefaultTable] {
     db.run(act)
   }
 
-  def initDB: IO[Unit] = {
-    IO.fromFuture(IO(db.run(table.schema.create)))
-  }
+  def initDB: IO[Unit] =
+    IO.fromFuture(IO(db.run(MTable.getTables))).flatMap { vector =>
+      IO(
+        if (!vector.exists(_.name.name == table.baseTableRow.tableName))
+          db.run(table.schema.create)
+      )
+    }
 }
 
 trait HackageDB extends DefaultDB[HackageTable] {

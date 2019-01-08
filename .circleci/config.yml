@@ -1,5 +1,19 @@
 # Taken from https://github.com/code-star/circleci-scala-sbt-git
 
+workflows:
+  version: 2
+  build_and_push:
+    jobs:
+      - build
+      - build_and_publish_docker_images:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - develop
+                - master
+
 version: 2
 jobs:
   build:
@@ -8,29 +22,23 @@ jobs:
       - image: codestar/circleci-scala-sbt-git:scala-2.12.6-sbt-1.1.6
     steps:
       - checkout
-
       - restore_cache:
           keys:
             - codesearch-{{ checksum "project/Builder.scala" }}-{{ checksum "build.sbt" }}
             - codesearch
-
       - run:
           command:
             sbt compile
-
       - run:
           command:
             sbt core/assembly
-
       - run:
           command:
             sbt web-server/assembly
-
       - run:
           command: |
             sbt scalafmt exit
             git diff --exit-code
-
       - save_cache:
           key: codesearch-{{ checksum "project/Builder.scala" }}-{{ checksum "build.sbt" }}
           paths:
@@ -50,3 +58,34 @@ jobs:
             - ~/.sbt
             - ~/.iv2/cache
             - ~/.m2
+      - persist_to_workspace:
+          root: ~/codesearch
+          paths:
+            - .dockerignore
+            - docker
+            - scripts
+            - Makefile
+            - codesearch-core.jar
+            - codesearch-server.jar
+
+  build_and_publish_docker_images:
+    working_directory: ~/codesearch
+    machine:
+      docker_layer_caching: true
+    steps:
+      - run:
+          docker login quay.io -u "$DOCKER_USER" -p "$DOCKER_PASS"
+      - attach_workspace:
+          at: ~/codesearch
+      - run:
+          name: Running build core image
+          command: make build-docker-core "branch=${CIRCLE_BRANCH}"
+      - run:
+          name: Running build web-server image
+          command: make build-docker-web-server "branch=${CIRCLE_BRANCH}"
+      - run:
+          name: Running push core image
+          command: make push-docker-core "branch=${CIRCLE_BRANCH}"
+      - run:
+          name: Running push web-server image
+          command: make push-docker-web-server "branch=${CIRCLE_BRANCH}"
