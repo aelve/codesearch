@@ -33,7 +33,8 @@ import simulacrum.typeclass
 object Directory {
 
   /** Defines root directory for sources storing */
-  val sourcesDir: Path = Paths.get("./data/packages")
+  val sourcesDir: Path  = Paths.get("./data/packages")
+  val metaInfoDir: Path = Paths.get("./data/meta")
 
   implicit def hackageDirectory: Directory[HackagePackage] = new Directory[HackagePackage] {
     override def archive(pack: HackagePackage): Path =

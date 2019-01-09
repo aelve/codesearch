@@ -1,14 +1,15 @@
 package codesearch.core.index.details
 
 import java.nio.ByteBuffer
+import java.nio.file.Path
 import java.nio.file.StandardOpenOption.{CREATE, TRUNCATE_EXISTING}
-import java.nio.file.{Path, Paths}
 
 import cats.Semigroup
 import cats.effect.{ContextShift, IO}
 import cats.instances.map._
 import codesearch.core._
 import codesearch.core.index.details.NpmDetails.FsIndexRoot
+import codesearch.core.index.directory.Directory
 import codesearch.core.index.directory.Preamble._
 import codesearch.core.index.repository.ByteStreamDownloader
 import codesearch.core.model.Version
@@ -58,15 +59,6 @@ private[index] final class NpmDetails(implicit http: SttpBackend[IO, Stream[IO, 
       "readmeFilename"
     )
 
-  private def tokenFilter[F[_]]: Pipe[F, JsonToken, JsonToken] =
-    TokenFilter.downObject
-      .downField("rows")
-      .downArray
-      .downObject
-      .downField("doc")
-      .downObject
-      .removeFields(excludeFields)
-
   def index: IO[Unit] =
     new ByteStreamDownloader()
       .download(NpmRegistryUrl)
@@ -91,6 +83,15 @@ private[index] final class NpmDetails(implicit http: SttpBackend[IO, Stream[IO, 
       .compile
       .foldMonoid
   }
+
+  private def tokenFilter[F[_]]: Pipe[F, JsonToken, JsonToken] =
+    TokenFilter.downObject
+      .downField("rows")
+      .downArray
+      .downObject
+      .downField("doc")
+      .downObject
+      .removeFields(excludeFields)
 
   private def cutStream: Pipe[IO, Byte, Byte] = { input =>
     var depth = 0
@@ -124,7 +125,7 @@ private[index] final class NpmDetails(implicit http: SttpBackend[IO, Stream[IO, 
 }
 
 private[index] object NpmDetails {
-  val FsIndexRoot: Path = Paths.get("./data/meta/npm")
+  val FsIndexRoot: Path = Directory.metaInfoDir / "npm"
   def apply()(
       implicit http: SttpBackend[IO, Stream[IO, ByteBuffer]],
       shift: ContextShift[IO]
