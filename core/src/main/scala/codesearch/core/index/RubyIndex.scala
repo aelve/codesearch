@@ -44,7 +44,7 @@ class RubyIndex(rubyConfig: RubyConfig)(
   }
 
   override def downloadMetaInformation: IO[Unit] = IO {
-    (pwd / 'data / 'ruby).toIO.mkdirs()
+    (pwd / 'data / 'meta / 'ruby).toIO.mkdirs()
     Seq("curl", "-o", GEM_INDEX_ARCHIVE.toString, GEM_INDEX_URL) !!
 
     Seq("/usr/bin/ruby", DESERIALIZER_PATH.toString(), GEM_INDEX_ARCHIVE.toString(), GEM_INDEX_JSON.toString()) !!
