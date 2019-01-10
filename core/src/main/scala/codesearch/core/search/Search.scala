@@ -36,15 +36,18 @@ trait Search {
 
   /**
     * Build package name and path to remote repository
-    *
+    * 
     * @param relativePath path to source code
     * @return package name and url to repository
     */
-  def packageName(relativePath: String): Option[Package] = relativePath.split('/').drop(3).toList match {
-    case libName :: version :: _ =>
-      val decodedName = URLDecoder.decode(libName, "UTF-8")
-      Some(Package(s"$decodedName-$version", buildRepUrl(decodedName, version)))
-    case _ => None
+  def packageName(relativePath: String): Option[Package] = {
+    val slashes = if (relativePath.startsWith("./")) 4 else 3
+    relativePath.split('/').drop(slashes).toList match {
+      case libName :: version :: _ =>
+        val decodedName = URLDecoder.decode(libName, "UTF-8")
+        Some(Package(s"$decodedName-$version", buildRepUrl(decodedName, version)))
+      case _ => None
+    }
   }
 
   /**
