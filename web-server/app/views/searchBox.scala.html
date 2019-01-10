@@ -2,13 +2,13 @@
 
 <section class="container-fluid">
     <div class="col-lg-6 mx-auto p-3 h7 justify-content-center">
-        <form action=@actSearch method="get">
+        <form>
             <div class="input-group">
                 <input type="text" class="form-control" name="query" value="@query">
                 
                 <input type="text" class="form-control" name="filter" value="@filter" placeholder="[Filter for query]">
                 <span class="input-group-btn">
-                    <input class="btn btn-secondary" type="submit" value="Go!">
+                    <input class="btn btn-secondary" onclick="sendForm()" type="button" value="Go!">
                 </span>
             </div>
             <div class="form-check form-check-inline">
@@ -25,6 +25,46 @@
             </div>
 
             <script>
+                    function sendForm() {
+                        function checkBoxValidator(elem) {
+                            if(elem.checked) return "on"
+
+                            return "off"
+                        }
+
+                        function inputsValidator(elem) {
+                            if(elem.value) return elem.value
+
+                            return undefined
+                        }
+
+                        const fieldForm = name => document.getElementsByName(name)[0]
+
+                        const query = inputsValidator(fieldForm("query"))
+                        const filter = inputsValidator(fieldForm("filter"))
+                        const insensitive = checkBoxValidator(fieldForm("insensitive"))
+                        const space = checkBoxValidator(fieldForm("space"))
+                        const precise = checkBoxValidator(fieldForm("precise"))
+                        const sources = inputsValidator(fieldForm("sources"))
+
+                        function startQuery(query, filter) {
+                            let acc = ""
+                            if(query !== undefined)
+                                acc += `query=${query}&`
+                            if(filter !== undefined)
+                                acc += `filter=${filter}&`
+
+                            return acc
+                        }
+                        const location = document.location.origin
+                        const pathname = document.location.pathname
+
+                        if(pathname.endsWith("/search"))
+                            document.location.href = location + pathname + '?' + startQuery(query, filter) + `insensitive=${insensitive}&space=${space}&precise=${precise}&sources=${sources}`
+                        else
+                            document.location.href = location + pathname + "/search?" + startQuery(query, filter) + `insensitive=${insensitive}&space=${space}&precise=${precise}&sources=${sources}`
+                    }
+
                     function changeSourcesOnly() {
                         var v = document.getElementById("sources-only-hidden").value;
                         if (v === "on") {

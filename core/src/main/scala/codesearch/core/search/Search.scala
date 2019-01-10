@@ -36,7 +36,7 @@ trait Search {
 
   /**
     * Build package name and path to remote repository
-    * 
+    *
     * @param relativePath path to source code
     * @return package name and url to repository
     */
