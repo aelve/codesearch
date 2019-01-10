@@ -40,14 +40,11 @@ trait Search {
     * @param relativePath path to source code
     * @return package name and url to repository
     */
-  def packageName(relativePath: String): Option[Package] = {
-    val slashes = if (relativePath.startsWith("./")) 4 else 3
-    relativePath.split('/').drop(slashes).toList match {
-      case libName :: version :: _ =>
-        val decodedName = URLDecoder.decode(libName, "UTF-8")
-        Some(Package(s"$decodedName-$version", buildRepUrl(decodedName, version)))
-      case _ => None
-    }
+  def packageName(relativePath: String): Option[Package] = relativePath.split('/').drop(3).toList match {
+    case libName :: version :: _ =>
+      val decodedName = URLDecoder.decode(libName, "UTF-8")
+      Some(Package(s"$decodedName-$version", buildRepUrl(decodedName, version)))
+    case _ => None
   }
 
   /**
@@ -62,6 +59,7 @@ trait Search {
   private def csearch(request: SearchRequest): IO[List[String]] = {
     val indexDir = csearchDir.indexDirAs[String]
     val env      = ("CSEARCHINDEX", indexDir)
+
     for {
       _       <- logger.debug(s"running CSEARCHINDEX=$indexDir ${arguments(request).mkString(" ")}")
       results <- IO((Process(arguments(request), None, env) #| Seq("head", "-1001")).!!.split('\n').toList)
@@ -71,14 +69,17 @@ trait Search {
   private def arguments(request: SearchRequest): List[String] = {
     def extensionsRegex: String = extensions.sourceExtensions.mkString(".*\\.(", "|", ")$")
     val forExtensions: String   = if (request.sourcesOnly) extensionsRegex else ".*"
+
     val query: String = {
       val preciseMatch: String = if (request.preciseMatch) Helper.preciseMatch(request.query) else request.query
       if (request.spaceInsensitive) SpaceInsensitive.spaceInsensitiveString(preciseMatch) else preciseMatch
     }
-    if (request.insensitive) {
-      List("csearch", "-n", "-i", "-f", forExtensions, query, request.filter)
-    } else {
-      List("csearch", "-n", "-f", forExtensions, query, request.filter)
+
+    request.filter match {
+      case Some(filter) if (request.insensitive) => List("csearch", "-n", "-i", "-f", forExtensions, query, filter)
+      case Some(filter)                          => List("csearch", "-n", "-f", forExtensions, query, filter)
+      case None if (request.insensitive)         => List("csearch", "-n", "-i", "-f", forExtensions, query)
+      case None                                  => List("csearch", "-n", "-f", forExtensions, query)
     }
   }
 
