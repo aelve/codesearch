@@ -3,6 +3,8 @@ package codesearch.core.regex.space
 import codesearch.core.regex.lexer.{StringAssembler, Tokenizer}
 import codesearch.core.regex.lexer.tokens._
 
+import scala.annotation.tailrec
+
 object SpaceInsensitive {
 
   /**
@@ -18,7 +20,7 @@ object SpaceInsensitive {
     val allocatedOneOrMoreSpaces: List[Token] =
       List(SpecialSymbol("("), Space(" "), SpecialSymbol("+"), SpecialSymbol(")")).reverse
 
-    @annotation.tailrec
+    @tailrec
     def loop(result: List[Token], remaining: List[Token]): List[Token] = (result, remaining) match {
       case (_, Nil)                                     => result
       case (Space(_) :: Space(_) :: _, current :: next) => loop(current :: result, next)

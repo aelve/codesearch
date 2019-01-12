@@ -5,7 +5,7 @@ sealed trait Token {
     case CharSet(valueToken)       => valueToken
     case SpecialSymbol(valueToken) => valueToken
     case Literal(valueToken)       => valueToken
-    case Escaped(valueToken)       => s"\\${valueToken}"
+    case Escaped(valueToken)       => s"\\$valueToken"
     case RepetitionSeq(valueToken) => valueToken
     case Space(valueToken)         => valueToken
   }
