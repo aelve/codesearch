@@ -18,7 +18,7 @@ object SnippetHelper {
 
     matches.map(m => (m.start, m.end)).foreach {
       case (l, r) =>
-        if (lastR <= l) {
+        if (lastR < l || l == 0) {
           if (lastR != 0) {
             htmlBuilder.append(Html("</mark>"))
           }
