@@ -3,7 +3,7 @@ package codesearch.core.search
 import java.net.URLDecoder
 
 import ammonite.ops.{Path, pwd}
-import cats.data.NonEmptyList
+import cats.data.NonEmptyVector
 import cats.effect.IO
 import cats.syntax.option._
 import codesearch.core.config.{Config, SnippetConfig}
@@ -120,7 +120,7 @@ trait Search {
     */
   private def extractRows(
       path: String,
-      codeLines: NonEmptyList[Int],
+      codeLines: NonEmptyVector[Int],
       beforeLines: Int,
       afterLines: Int
   ): IO[(Int, Seq[String])] = {
@@ -164,7 +164,7 @@ object Search {
       relativePath: String,
       fileLink: String,
       numberOfFirstLine: Int,
-      matchedLines: NonEmptyList[Int],
+      matchedLines: NonEmptyVector[Int],
       lines: Seq[String]
   )
 

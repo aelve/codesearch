@@ -1,6 +1,6 @@
 package codesearch.core.search
 
-import cats.data.NonEmptyList
+import cats.data.NonEmptyVector
 import codesearch.core.config.SnippetConfig
 import codesearch.core.search.SnippetsGrouper.SnippetInfo
 import org.scalatest.{Matchers, WordSpec}
@@ -28,7 +28,7 @@ class SnippetsGrouperSpec extends WordSpec with Matchers {
     snippets should contain theSameElementsAs List(
       SnippetInfo(
         filePath = "3models/0.3.0/Graphics/Model/DirectX.hs",
-        lines = NonEmptyList.of(13, 14, 15, 16, 17)
+        lines = NonEmptyVector.of(13, 14, 15, 16, 17)
       )
     )
   }
@@ -51,11 +51,11 @@ class SnippetsGrouperSpec extends WordSpec with Matchers {
     snippets should contain theSameElementsAs List(
       SnippetInfo(
         filePath = "3models/0.3.0/Graphics/Model/DirectX.hs",
-        lines = NonEmptyList.of(28)
+        lines = NonEmptyVector.of(28)
       ),
       SnippetInfo(
         filePath = "3models/0.3.0/Graphics/Model/DirectX.hs",
-        lines = NonEmptyList.of(39)
+        lines = NonEmptyVector.of(39)
       )
     )
   }
@@ -78,11 +78,11 @@ class SnippetsGrouperSpec extends WordSpec with Matchers {
     snippets should contain theSameElementsAs List(
       SnippetInfo(
         filePath = "3models/0.3.0/Graphics/Model/DirectX.hs",
-        lines = NonEmptyList.of(14)
+        lines = NonEmptyVector.of(14)
       ),
       SnippetInfo(
         filePath = "3models/0.3.0/Graphics/Model/Obj.hs",
-        lines = NonEmptyList.of(16)
+        lines = NonEmptyVector.of(16)
       )
     )
   }
