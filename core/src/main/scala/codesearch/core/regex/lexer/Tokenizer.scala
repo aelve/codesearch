@@ -6,6 +6,17 @@ import codesearch.core.regex.lexer.tokens._
 
 object Tokenizer {
 
+  /**
+    * Parses string into a Tokens
+    *
+    * @param query search query
+    * @return sequence tokens
+    */
+  def parseStringWithSpecialSymbols(query: String): Seq[Token] = {
+    val Parsed.Success(tokens, _) = parse(query, parseStringWithSpecialSymbols(_))
+    tokens
+  }
+
   private def startForCharSet[_: P] = P("[]" | "[" | "[^").!
 
   private def endForCharSet[_: P] = P("]").!
@@ -36,15 +47,4 @@ object Tokenizer {
 
   private def parseStringWithSpecialSymbols[_: P] =
     P(parserEscaped | parserCharSet | parserAnyStringBeforeSpecialSymbol | parseSpaces | parseRepetitionSeq | parserSpecialSymbol).rep
-
-  /**
-    * Parse string into a Tokens
-    *
-    * @param query search query
-    * @return sequence tokens
-    */
-  def parseStringWithSpecialSymbols(query: String): Seq[Token] = {
-    val Parsed.Success(tokens, _) = parse(query, parseStringWithSpecialSymbols(_))
-    tokens
-  }
 }
