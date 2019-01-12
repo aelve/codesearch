@@ -1,8 +1,11 @@
 package codesearch.core.index.directory
+
 import java.io.File
 import java.nio.file.Path
 
-import cats.effect.IO
+import cats.effect.Sync
+import cats.syntax.flatMap._
+import cats.syntax.functor._
 import org.apache.commons.io.FileUtils.{moveDirectoryToDirectory, moveFileToDirectory}
 import org.rauschig.jarchivelib.ArchiveFormat.TAR
 import org.rauschig.jarchivelib.ArchiverFactory
@@ -15,7 +18,7 @@ private[index] trait Extractor {
     * @param from is file to unarchiving
     * @param to is target directory
     */
-  def unzipUsingMethod(from: File, to: Path): IO[Unit] = IO(
+  def unzipUsingMethod[F[_]](from: File, to: Path)(implicit F: Sync[F]): F[Unit] = F.delay(
     ArchiverFactory
       .createArchiver(TAR, GZIP)
       .extract(from, to.toFile)
@@ -27,7 +30,7 @@ private[index] trait Extractor {
     * @param directory is target directory
     * @return directory containing all unarchived files and directories
     */
-  def extract(archive: File, directory: Path): IO[Path] =
+  def extract[F[_]: Sync](archive: File, directory: Path): F[Path] =
     for {
       _    <- unzipUsingMethod(archive, directory)
       path <- flatDir(directory)
@@ -38,7 +41,7 @@ private[index] trait Extractor {
     * @param unarchived is directory contains unarchived files
     * @return same directory containing all files and directories from unarchived files
     */
-  def flatDir(unarchived: Path): IO[Path] = IO {
+  def flatDir[F[_]](unarchived: Path)(implicit F: Sync[F]): F[Path] = F.delay {
     val dir = unarchived.toFile
     dir.listFiles
       .filter(_.isDirectory)

@@ -1,6 +1,6 @@
 package codesearch.core.config
 
-import cats.effect.IO
+import cats.effect.Sync
 import pureconfig.module.catseffect._
 import pureconfig.{CamelCase, ConfigFieldMapping, ProductHint}
 
@@ -30,6 +30,6 @@ object Config {
 
   implicit def hint[T]: ProductHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
 
-  def load: IO[Config] = loadConfigF[IO, Config]
+  def load[F[_]: Sync]: F[Config] = loadConfigF[F, Config]
 
 }

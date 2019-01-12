@@ -1,6 +1,5 @@
 package codesearch.core.index
 
-import java.nio.ByteBuffer
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 import java.nio.file.{Files, Path => NioPath}
 
@@ -11,7 +10,6 @@ import codesearch.core.db.DefaultDB
 import codesearch.core.index.directory.{Directory, СSearchDirectory}
 import codesearch.core.index.repository._
 import codesearch.core.model.DefaultTable
-import com.softwaremill.sttp.SttpBackend
 import fs2.Stream
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
@@ -24,9 +22,7 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
 
   protected val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.unsafeCreate[IO]
 
-  protected type Tag
-
-  protected def csearchDir: СSearchDirectory[Tag]
+  protected def csearchDir: СSearchDirectory
 
   protected def concurrentTasksCount: Int
 
@@ -107,10 +103,9 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
     */
   protected def buildFsUrl(packageName: String, version: String): NioPath
 
-  protected def archiveDownloadAndExtract[B <: SourcePackage: Extensions: Directory](pack: B)(
-      implicit httpClient: SttpBackend[IO, Stream[IO, ByteBuffer]]
+  protected def archiveDownloadAndExtract[B <: SourcePackage: Directory](pack: B)(
+      implicit repository: SourcesDownloader[IO, B]
   ): IO[Int] = {
-    val repository = SourceRepository[B](new FileDownloader())
     val task = for {
       _         <- repository.downloadSources(pack)
       rowsCount <- insertOrUpdate(pack)

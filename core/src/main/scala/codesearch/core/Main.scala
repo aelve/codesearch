@@ -5,6 +5,7 @@ import cats.syntax.flatMap._
 import codesearch.core.config.Config
 import codesearch.core.db._
 import codesearch.core.index._
+import codesearch.core.index.repository.Downloader
 import codesearch.core.model._
 import com.softwaremill.sttp.asynchttpclient.fs2.AsyncHttpClientFs2Backend
 
@@ -24,8 +25,9 @@ object Main extends IOApp {
     Resource.make(IO(AsyncHttpClientFs2Backend[IO]()))(client => IO(client.close())).use { implicit httpClient =>
       for {
         params <- CLI.params(args)
-        config <- Config.load
-        langReps = Map(
+        config <- Config.load[IO]
+        implicit0(downloader: Downloader[IO]) = Downloader.create[IO]
+        langReps =           Map(
           "haskell"    -> LangRep[HackageTable](HackageDB, HaskellIndex(config)),
           "rust"       -> LangRep[CratesTable](CratesDB, RustIndex(config)),
           "ruby"       -> LangRep[GemTable](GemDB, RubyIndex(config)),

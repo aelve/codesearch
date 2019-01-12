@@ -9,9 +9,10 @@ import codesearch.core.config.{Config, RustConfig}
 import codesearch.core.db.CratesDB
 import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
+import codesearch.core.index.directory.Preamble._
 import codesearch.core.index.directory.СSearchDirectory
-import codesearch.core.index.repository.Extensions._
-import codesearch.core.index.repository.{CratesPackage, FileDownloader}
+import codesearch.core.index.directory.СSearchDirectory.RustCSearchIndex
+import codesearch.core.index.repository.{CratesPackage, Downloader, SourcesDownloader}
 import codesearch.core.model.CratesTable
 import codesearch.core.util.Helper
 import com.softwaremill.sttp.{SttpBackend, _}
@@ -20,11 +21,12 @@ import org.apache.commons.io.FileUtils
 import org.rauschig.jarchivelib.ArchiveFormat.ZIP
 import org.rauschig.jarchivelib.ArchiverFactory
 import play.api.libs.json.Json
-import codesearch.core.index.directory.Preamble._
 
 class RustIndex(rustConfig: RustConfig)(
     implicit val http: SttpBackend[IO, Stream[IO, ByteBuffer]],
-    val shift: ContextShift[IO]
+    val shift: ContextShift[IO],
+    downloader: Downloader[IO],
+    sourcesDownloader: SourcesDownloader[IO, CratesPackage]
 ) extends LanguageIndex[CratesTable] with CratesDB {
 
   private val GithubUrl = uri"https://github.com/rust-lang/crates.io-index/archive/master.zip"
@@ -36,9 +38,7 @@ class RustIndex(rustConfig: RustConfig)(
     "archive.zip"
   )
 
-  override protected type Tag = Rust
-
-  override protected val csearchDir: СSearchDirectory[Tag] = implicitly
+  override protected val csearchDir: СSearchDirectory = RustCSearchIndex
 
   override protected def concurrentTasksCount: Int = rustConfig.concurrentTasksCount
 
@@ -49,7 +49,7 @@ class RustIndex(rustConfig: RustConfig)(
   override def downloadMetaInformation: IO[Unit] = {
     for {
       _       <- IO(FileUtils.deleteDirectory(RepoDir))
-      archive <- new FileDownloader().download(GithubUrl, RepoDir.toPath / "archive.zip")
+      archive <- downloader.download(GithubUrl, RepoDir.toPath / "archive.zip")
       _       <- IO(ArchiverFactory.createArchiver(ZIP).extract(archive, RepoDir))
     } yield ()
   }
@@ -73,6 +73,8 @@ class RustIndex(rustConfig: RustConfig)(
 object RustIndex {
   def apply(config: Config)(
       implicit http: SttpBackend[IO, Stream[IO, ByteBuffer]],
-      shift: ContextShift[IO]
+      shift: ContextShift[IO],
+      downloader: Downloader[IO],
+      sourcesDownloader: SourcesDownloader[IO, CratesPackage]
   ) = new RustIndex(config.languagesConfig.rustConfig)
 }

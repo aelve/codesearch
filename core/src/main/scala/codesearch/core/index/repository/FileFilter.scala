@@ -1,9 +1,11 @@
 package codesearch.core.index.repository
+
 import java.io.File
 
+import codesearch.core.index.repository.Extensions._
 import org.apache.commons.io.FilenameUtils.getExtension
 
-trait FileFilter {
+trait FileFilter[A] {
 
   /** Function tells whether the file matches the defines predicate
     *
@@ -14,10 +16,19 @@ trait FileFilter {
 }
 
 object FileFilter {
-  def create[A](implicit E: Extensions[A]): FileFilter = new FileFilter {
+
+  implicit def hackagePackageFileFilter: FileFilter[HackagePackage] = create(HaskellExtensions)
+  implicit def cratesPackageFileFilter: FileFilter[CratesPackage]   = create(RustExtensions)
+  implicit def npmPackageFileFilter: FileFilter[NpmPackage]         = create(JavaScriptExtensions)
+  implicit def gemPackageFileFilter: FileFilter[GemPackage]         = create(RubyExtensions)
+
+  def apply[A: FileFilter]: FileFilter[A] = implicitly
+
+  def create[A](E: Extensions): FileFilter[A] = new FileFilter[A] {
     val maxFileSize: Int = 1024 * 1024
     val allowedFileNames = Set("makefile", "dockerfile", "readme", "changelog", "changes")
-    override def filter(file: File): Boolean = {
+
+    def filter(file: File): Boolean = {
       val fileName = file.getName.toLowerCase
       val fileExt  = getExtension(fileName)
       (if (fileExt.isEmpty) allowedFileNames.contains(fileName)

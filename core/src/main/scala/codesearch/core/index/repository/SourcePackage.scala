@@ -4,13 +4,12 @@ import java.io.File
 import java.net.URLEncoder
 import java.nio.file.Path
 
-import cats.effect.IO
-import codesearch.core.index.{Haskell, JavaScript, Ruby, Rust}
+import cats.effect.Sync
 import codesearch.core.index.directory.Extractor
 import com.softwaremill.sttp.{Uri, _}
 import org.rauschig.jarchivelib.ArchiveFormat.TAR
-import org.rauschig.jarchivelib.CompressionType.GZIP
 import org.rauschig.jarchivelib.ArchiverFactory
+import org.rauschig.jarchivelib.CompressionType.GZIP
 
 trait SourcePackage extends Extractor {
   val name: String
@@ -21,16 +20,16 @@ trait SourcePackage extends Extractor {
 private[index] final case class HackagePackage(
     name: String,
     version: String
-) extends SourcePackage with Haskell {
+) extends SourcePackage {
   val url: Uri = uri"https://hackage.haskell.org/package/$name-$version/$name-$version.tar.gz"
 }
 
 private[index] final case class GemPackage(
     name: String,
     version: String
-) extends SourcePackage with Ruby {
+) extends SourcePackage {
   val url: Uri = uri"https://rubygems.org/downloads/$name-$version.gem"
-  override def unzipUsingMethod(from: File, to: Path): IO[Unit] = IO {
+  override def unzipUsingMethod[F[_]](from: File, to: Path)(implicit F: Sync[F]): F[Unit] = F.delay {
     val destDir    = to.toFile
     val allowedSet = Set("tgz", "tar.gz")
     ArchiverFactory.createArchiver(TAR).extract(from, destDir)
@@ -43,14 +42,14 @@ private[index] final case class GemPackage(
 private[index] final case class CratesPackage(
     name: String,
     version: String
-) extends SourcePackage with Rust {
+) extends SourcePackage {
   val url: Uri = uri"https://crates.io/api/v1/crates/$name/$version/download"
 }
 
 private[index] final case class NpmPackage(
     name: String,
     version: String
-) extends SourcePackage with JavaScript {
+) extends SourcePackage {
   private val urlString = s"https://registry.npmjs.org/$name/-/$name-$version.tgz"
   //Because package name can look like: react>>=native@@router!!v2.1.123(refactored:-))
   val encodedName: String = URLEncoder.encode(name, "UTF-8")

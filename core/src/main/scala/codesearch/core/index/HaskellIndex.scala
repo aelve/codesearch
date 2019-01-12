@@ -10,11 +10,11 @@ import cats.effect.{ContextShift, IO}
 import cats.syntax.flatMap._
 import codesearch.core.config.{Config, HaskellConfig}
 import codesearch.core.db.HackageDB
-import codesearch.core.index.repository.HackagePackage
+import codesearch.core.index.repository.{Downloader, HackagePackage, SourcesDownloader}
 import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
 import codesearch.core.index.directory.СSearchDirectory
-import codesearch.core.index.repository.Extensions._
+import codesearch.core.index.directory.СSearchDirectory.HaskellCSearchIndex
 import codesearch.core.model.HackageTable
 import com.softwaremill.sttp.SttpBackend
 import fs2.{Chunk, Pipe, Stream}
@@ -24,16 +24,16 @@ import scala.sys.process._
 
 class HaskellIndex(haskellConfig: HaskellConfig)(
     implicit val http: SttpBackend[IO, Stream[IO, ByteBuffer]],
-    val shift: ContextShift[IO]
+    val shift: ContextShift[IO],
+    downloader: Downloader[IO],
+    sourcesDownloader: SourcesDownloader[IO, HackagePackage]
 ) extends LanguageIndex[HackageTable] with HackageDB {
 
   private val INDEX_LINK: String     = "http://hackage.haskell.org/packages/index.tar.gz"
   private val INDEX_SOURCE_GZ: Path  = pwd / 'data / 'meta / 'haskell / "index.tar.gz"
   private val INDEX_SOURCE_DIR: Path = pwd / 'data / 'meta / "haskell"
 
-  override protected type Tag = Haskell
-
-  override protected val csearchDir: СSearchDirectory[Tag] = implicitly
+  override protected val csearchDir: СSearchDirectory = HaskellCSearchIndex
 
   override protected def concurrentTasksCount: Int = haskellConfig.concurrentTasksCount
 
@@ -78,6 +78,10 @@ class HaskellIndex(haskellConfig: HaskellConfig)(
 }
 
 object HaskellIndex {
-  def apply(config: Config)(implicit http: SttpBackend[IO, Stream[IO, ByteBuffer]], shift: ContextShift[IO]) =
-    new HaskellIndex(config.languagesConfig.haskellConfig)
+  def apply(config: Config)(
+      implicit http: SttpBackend[IO, Stream[IO, ByteBuffer]],
+      shift: ContextShift[IO],
+      downloader: Downloader[IO],
+      sourcesDownloader: SourcesDownloader[IO, HackagePackage]
+  ) = new HaskellIndex(config.languagesConfig.haskellConfig)
 }

@@ -12,8 +12,8 @@ import codesearch.core.db.GemDB
 import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
 import codesearch.core.index.directory.СSearchDirectory
-import codesearch.core.index.repository.Extensions._
-import codesearch.core.index.repository.GemPackage
+import codesearch.core.index.directory.СSearchDirectory.RubyCSearchIndex
+import codesearch.core.index.repository.{Downloader, GemPackage, SourcesDownloader}
 import codesearch.core.model.GemTable
 import com.softwaremill.sttp.SttpBackend
 import io.circe.fs2._
@@ -25,7 +25,9 @@ import scala.sys.process._
 
 class RubyIndex(rubyConfig: RubyConfig)(
     implicit val http: SttpBackend[IO, Stream[IO, ByteBuffer]],
-    val shift: ContextShift[IO]
+    val shift: ContextShift[IO],
+    downloader: Downloader[IO],
+    sourcesDownloader: SourcesDownloader[IO, GemPackage]
 ) extends LanguageIndex[GemTable] with GemDB {
 
   private val GEM_INDEX_URL     = "http://rubygems.org/latest_specs.4.8.gz"
@@ -33,9 +35,7 @@ class RubyIndex(rubyConfig: RubyConfig)(
   private val GEM_INDEX_JSON    = Paths.get((pwd / 'data / 'meta / 'ruby / "ruby_index.json").toString)
   private val DESERIALIZER_PATH = pwd / 'scripts / "update_index.rb"
 
-  override protected type Tag = Ruby
-
-  override protected val csearchDir: СSearchDirectory[Tag] = implicitly
+  override protected val csearchDir: СSearchDirectory = RubyCSearchIndex
 
   override protected def concurrentTasksCount: Int = rubyConfig.concurrentTasksCount
 
@@ -78,6 +78,8 @@ class RubyIndex(rubyConfig: RubyConfig)(
 object RubyIndex {
   def apply(config: Config)(
       implicit http: SttpBackend[IO, Stream[IO, ByteBuffer]],
-      shift: ContextShift[IO]
+      shift: ContextShift[IO],
+      downloader: Downloader[IO],
+      sourcesDownloader: SourcesDownloader[IO, GemPackage]
   ) = new RubyIndex(config.languagesConfig.rubyConfig)
 }

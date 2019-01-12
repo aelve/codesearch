@@ -34,7 +34,8 @@ object Builder {
     scalacOptions in (Compile, doc) ++= Seq("-diagrams", "-implicits"),
     scalacOptions in Test ++= Seq("-Yrangepos"),
     addCompilerPlugin("org.scalamacros" % "paradise"            % "2.1.0" cross CrossVersion.full),
-    addCompilerPlugin("com.olegpy"      %% "better-monadic-for" % "0.2.4")
+    addCompilerPlugin("com.olegpy"      %% "better-monadic-for" % "0.3.0-M4"),
+    addCompilerPlugin("org.spire-math"  %% "kind-projector"     % "0.9.8")
   )
 
   lazy val commonDeps = Seq(

@@ -22,9 +22,8 @@ import scala.sys.process.Process
 
 trait Search {
 
-  protected type Tag
-  protected def csearchDir: СSearchDirectory[Tag]
-  protected def extensions: Extensions[Tag]
+  protected def csearchDir: СSearchDirectory
+  protected def extensions: Extensions
   protected val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.unsafeCreate[IO]
 
   def search(request: SearchRequest): IO[CSearchPage] = {
@@ -137,7 +136,7 @@ trait Search {
 object Search {
 
   private[search] val snippetConfig: SnippetConfig =
-    Config.load
+    Config.load[IO]
       .map(_.snippetConfig)
       .unsafeRunSync()
 
