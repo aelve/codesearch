@@ -38,7 +38,7 @@
                 result.numberOfFirstLine + 1
             }><code class="@("language-" + Helper.langByLink(result.fileLink, lang) + " line-numbers")">@{
 
-                val re = Helper.buildRegex(query = query, insensitive = insensitive, precise = precise)
+                val re = Helper.buildRegex(query = query, space = space, insensitive = insensitive, precise = precise)
 
                 val ids = result.matchedLines.map(lineNumber => lineNumber - result.numberOfFirstLine)
 
