@@ -21,7 +21,7 @@ object Tokenizer {
     P("\\" | "." | "|" | "$" | "%" | "^" | "&" | "*" | "+" | "?" | "!" | "[" | "]" | "{" | "}" | "(" | ")").!
 
   private def parserEscaped[_: P] = P("\\" ~ AnyChar.!).map(Escaped)
-  
+
   private def parseSpaces[_: P] = P(" ").!.map(Space)
 
   private def parserCharInsideSet[_: P] = P(("\\" | !endForCharSet) ~ (charSetPred | AnyChar)).rep.!
@@ -31,7 +31,7 @@ object Tokenizer {
 
   private def parserSpecialSymbol[_: P] =
     P(specialSymbols.map(specialSymbolInString => SpecialSymbol(specialSymbolInString)))
-  
+
   private def parserAnyStringBeforeSpecialSymbol[_: P] = P((!specialSymbols ~ AnyChar).rep(1).!.map(Literal))
 
   private def parseStringWithSpecialSymbols[_: P] =
