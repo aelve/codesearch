@@ -17,7 +17,22 @@ case class SearchRequest(
     preciseMatch: Boolean,
     sourcesOnly: Boolean,
     page: Int
-)
+) {
+  def callURI(
+      lang: String,
+      query: String,
+      filter: Option[String],
+      insensitive: String,
+      spaceInsensitive: String,
+      preciseMatch: String,
+      sourcesOnly: String
+  ): String = filter match {
+    case Some(filter) =>
+      s"/$lang/search?query=$query&filter=$filter&insensitive=$insensitive&space=$spaceInsensitive&precise=$preciseMatch&sources=$sourcesOnly"
+    case None =>
+      s"/$lang/search?query=$query&insensitive=$insensitive&space=$spaceInsensitive&precise=$preciseMatch&sources=$sourcesOnly"
+  }
+}
 
 object SearchRequest {
   def applyRaw(
@@ -37,5 +52,6 @@ object SearchRequest {
     isEnabled(sourcesOnly),
     page.toInt
   )
+
   private def isEnabled(param: String): Boolean = param == "on"
 }

@@ -46,12 +46,7 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
       val request =
         SearchRequest.applyRaw(query, filter, caseInsensitive, spaceInsenstive, precise, sources, page)
 
-      val callURI = filter match {
-        case Some(filter) =>
-          s"/$lang/search?query=$query&filter=$filter&caseInsensitive=$caseInsensitive&spaceInsensitive=$spaceInsenstive&precise=$precise&sources=$sources"
-        case None =>
-          s"/$lang/search?query=$query&caseInsensitive=$caseInsensitive&spaceInsensitive=$spaceInsenstive&precise=$precise&sources=$sources"
-      }
+      val callURI = request.callURI(lang, query, filter, caseInsensitive, spaceInsenstive, precise, sources)
 
       db.updated.flatMap { updated =>
         searchEngine.search(request) map {
