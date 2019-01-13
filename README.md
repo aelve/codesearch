@@ -4,15 +4,15 @@
 
 ### codesearch indexer
 
-Google's `codesearch` is the underlying search engine that we use. Install
-it from <https://github.com/google/codesearch>.
+Google's `codesearch` is the underlying search engine that we use (with some
+modifications). Install it from <https://github.com/Evengining/codesearch>.
 
 <details><summary>macOS instructions</summary>
 
 1. Install Go: `brew install go`
 2. Add `$HOME/go/bin` to the PATH
-3. Download and build `codesearch` (should be almost instanteous):
-   `go get github.com/google/codesearch/cmd/...`
+3. Download and build `codesearch` (should take 5 to 10 seconds):
+   `go get github.com/Evengining/codesearch/cmd/...`
 
 </details>
 
@@ -34,7 +34,10 @@ Docker installed, you can do this:
     $ make tables  # Create tables
     $ make serve   # Run the server
 
-If you head to <http://localhost:9000> now, you should see the project running.
+If you head to <http://localhost:9000> now, you should see the project
+running. The port can be changed:
+
+    $ make serve port=7000
 
 Note: if you get an error at the `make tables` stage, you probably haven't
 waited enough. Do `make db-kill` and start from `make db` again.
@@ -42,15 +45,16 @@ waited enough. Do `make db-kill` and start from `make db` again.
 ### Indexing packages
 
 After the previous step the project is running, but the indices are empty.
-To download some packages, do this:
+Download the package index for Haskell (should take about 30 seconds):
 
     $ make download-haskell
 
-At first it will download the Hackage index (taking about 30 seconds), then
-it will start downloading packages. You likely don't want to download the
-whole Hackage, so interrupt it (Ctrl+C) after a minute or less.
+Download some packages. You likely don't want to download the whole Hackage,
+so interrupt it (Ctrl+C) after a minute or less:
 
-Next, index the packages:
+    $ make update-haskell
+
+Next, index the code contained in the packages:
 
     $ make index-haskell
 

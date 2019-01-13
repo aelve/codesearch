@@ -1,5 +1,7 @@
 SHELL := /bin/bash
 
+port := 9000
+
 # Run Postgres
 .PHONY: db
 db:
@@ -31,18 +33,23 @@ db-kill:
 build:
 	sbt core/assembly web-server/assembly
 
-# Download packages. Acceptable values: {haskell, rust, ruby, javascript}
+# Download package index. Acceptable values: {haskell, rust, ruby, javascript}
 download-%:
-	java -jar codesearch-core.jar -d -u -l "$*"
+	java -jar codesearch-core.jar -d -l "$*"
 
-# Index packages. Acceptable values: same as for download-%
+# Download missing or outdated packages. Acceptable values: same as for download-%
+update-%:
+	java -jar codesearch-core.jar -u -l "$*"
+
+# Index package sources. Acceptable values: same as for download-%
 index-%:
 	java -jar codesearch-core.jar -b -l "$*"
 
 # Run the server
 .PHONY: serve
 serve:
-	java -jar codesearch-server.jar
+	LOG_LEVEL=DEBUG java -Dhttp.port=$(port) -Dplay.http.secret.key=devsecret \
+		-jar codesearch-server.jar
 
 # Build a Docker image (the project must be built already)
 build-docker-%:
