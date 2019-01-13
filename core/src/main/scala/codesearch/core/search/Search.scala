@@ -126,7 +126,7 @@ trait Search {
   ): IO[(Int, Seq[String])] = {
     readFileAsync(path).map { lines =>
       val (code, indexes) = lines.zipWithIndex.filter {
-        case (_, index) => index >= codeLines.head - beforeLines - 1 && index <= codeLines.last + afterLines
+        case (_, index) => index >= codeLines.head - beforeLines - 1 && index <= codeLines.last + afterLines - 1
       }.unzip
       indexes.head -> code
     }
