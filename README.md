@@ -4,15 +4,15 @@
 
 ### codesearch indexer
 
-Google's `codesearch` is the underlying search engine that we use. Install
-it from <https://github.com/google/codesearch>.
+Google's `codesearch` is the underlying search engine that we use (with some
+modifications). Install it from <https://github.com/Evengining/codesearch>.
 
 <details><summary>macOS instructions</summary>
 
 1. Install Go: `brew install go`
 2. Add `$HOME/go/bin` to the PATH
-3. Download and build `codesearch` (should be almost instanteous):
-   `go get github.com/google/codesearch/cmd/...`
+3. Download and build `codesearch` (should take 5 to 10 seconds):
+   `go get github.com/Evengining/codesearch/cmd/...`
 
 </details>
 
