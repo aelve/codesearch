@@ -42,15 +42,16 @@ waited enough. Do `make db-kill` and start from `make db` again.
 ### Indexing packages
 
 After the previous step the project is running, but the indices are empty.
-To download some packages, do this:
+Download the package index for Haskell (should take about 30 seconds):
 
     $ make download-haskell
 
-At first it will download the Hackage index (taking about 30 seconds), then
-it will start downloading packages. You likely don't want to download the
-whole Hackage, so interrupt it (Ctrl+C) after a minute or less.
+Download some packages. You likely don't want to download the whole Hackage,
+so interrupt it (Ctrl+C) after a minute or less:
 
-Next, index the packages:
+    $ make update-haskell
+
+Next, index the code contained in the packages:
 
     $ make index-haskell
 
