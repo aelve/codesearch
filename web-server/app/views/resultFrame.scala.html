@@ -22,34 +22,38 @@
         <span class="text-secondary" style="margin-bottom: 1em">@pack.results.size matches</span> <br>
 
         @for(result <- pack.results) {
-            <a href="src/@result.fileLink?query=@{Helper.buildRegex(query = query,
-                insensitive = insensitive, space = space, precise = precise)}&L=@{result.matchedLine + 1}#snippet.@{result.matchedLine + 1}">@result.relativePath</a>
-            <pre data-start=@{result.numberOfFirstLine + 1}><code class="@("language-" + Helper.langByLink(result.fileLink, lang) +
-                    " line-numbers")">@{
-                val re = Helper.buildRegex(query = query, insensitive = insensitive, space = space, precise = precise)
 
-                val id = result.matchedLine - result.numberOfFirstLine
-                val hLine = result.ctxt(id)
-                val matches = re.findAllMatchIn(hLine)
+            <a href="src/@result.fileLink?query=@{
+                Helper.buildRegex(
+                    query = query,
+                    insensitive = insensitive, space = space, precise = precise
+                )
+            }&L=@{
+                result.matchedLines.head
+            }#snippet.@{
+                result.matchedLines.toVector.mkString(",")
+            }">@result.relativePath</a>
 
-                val htmlBuilder: ListBuffer[Html] = mutable.ListBuffer.empty[Html]
+            <pre data-start=@{
+                result.numberOfFirstLine + 1
+            }><code class="@("language-" + Helper.langByLink(result.fileLink, lang) + " line-numbers")">@{
 
-                val pref = result.ctxt.take(id).mkString("\n")
-                val pref2 = {
-                    if (id != 0) {
-                        pref ++ "\n"
+                val re = Helper.buildRegex(query = query, space = space, insensitive = insensitive, precise = precise)
+
+                val ids = result.matchedLines.map(lineNumber => lineNumber - result.numberOfFirstLine)
+
+                val html = result.lines.zipWithIndex.flatMap { case (line, index) =>
+                    if(ids.exists(_ == index + 1)) {
+                        val matches = re.findAllMatchIn(line)
+                        SnippetHelper.markAllMatches(line, matches)
                     } else {
-                        ""
+                        Seq(HtmlFormat.escape(line + "\n"))
                     }
                 }
-                htmlBuilder.append(HtmlFormat.escape(pref2))
 
-                htmlBuilder.append(SnippetHelper.markAllMatches(hLine, matches): _*)
-
-                htmlBuilder.append(HtmlFormat.escape(result.ctxt.drop(id + 1).mkString("\n")))
-
-                HtmlFormat.fill(immutable.Seq(htmlBuilder: _*))
-            }</code></pre>
+                HtmlFormat.fill(html.to)
+            }</code>
+            </pre>
         }
     }
 </section>

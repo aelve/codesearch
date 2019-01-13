@@ -3,16 +3,17 @@ package codesearch.core.search
 import java.net.URLDecoder
 
 import ammonite.ops.{Path, pwd}
+import cats.data.NonEmptyVector
 import cats.effect.IO
-import cats.instances.list._
-import cats.instances.option._
-import cats.syntax.traverse._
+import cats.syntax.option._
 import codesearch.core.config.{Config, SnippetConfig}
 import codesearch.core.index.directory.СSearchDirectory
 import codesearch.core.index.repository.Extensions
 import codesearch.core.search.Search.{CSearchPage, CSearchResult, CodeSnippet, Package, PackageResult, snippetConfig}
+import codesearch.core.search.SnippetsGrouper.SnippetInfo
 import codesearch.core.util.Helper
 import codesearch.core.util.Helper.readFileAsync
+import fs2.{Pipe, Stream}
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import codesearch.core.regex.space.SpaceInsensitive
@@ -28,10 +29,17 @@ trait Search {
 
   def search(request: SearchRequest): IO[CSearchPage] = {
     for {
-      results        <- csearch(request)
-      toOutput       <- resultsFound(results, request.page)
-      groupedResults <- groupResults(toOutput)
-    } yield CSearchPage(groupedResults, results.size)
+      lines <- csearch(request)
+      results <- Stream
+        .emits(lines)
+        .through(SnippetsGrouper.groupLines(snippetConfig))
+        .drop(snippetConfig.pageSize * (request.page - 1))
+        .take(snippetConfig.pageSize)
+        .evalMap(createSnippet)
+        .through(groupByPackage)
+        .compile
+        .toList
+    } yield CSearchPage(results.sortBy(_.pack.name), lines.size)
   }
 
   /**
@@ -64,7 +72,7 @@ trait Search {
     val env      = ("CSEARCHINDEX", indexDir)
     for {
       _       <- logger.debug(s"running CSEARCHINDEX=$indexDir ${arguments(request).mkString(" ")}")
-      results <- IO((Process(arguments(request), None, env) #| Seq("head", "-1001")).!!.split('\n').toList)
+      results <- IO((Process(arguments(request), None, env) #| Seq("head", "-1001")).lineStream.toList)
     } yield results
   }
 
@@ -82,47 +90,24 @@ trait Search {
     }
   }
 
-  private def resultsFound(found: List[String], page: Int): IO[List[Option[CSearchResult]]] = {
-    val from  = math.max(page - 1, 0) * snippetConfig.pageSize
-    val until = page * snippetConfig.pageSize
-    found
-      .slice(from, until)
-      .traverse(mapCSearchOutput)
-  }
-
-  private def groupResults(csearchResults: List[Option[CSearchResult]]): IO[Seq[PackageResult]] = IO(
-    csearchResults.flatten
-      .groupBy(_.pack)
-      .map { case (pack, results) => PackageResult(pack, results.map(_.result)) }
-      .toSeq
-      .sortBy(_.pack.name)
-  )
-
-  /**
-    * Map code search output to case class
-    *
-    * @param out csearch console out
-    * @return search result
-    */
-  private def mapCSearchOutput(out: String): IO[Option[CSearchResult]] = {
-    out.split(':').toList match {
-      case fullPath :: lineNumber :: _ => csearchResult(fullPath, lineNumber.toInt)
-      case _                           => IO.pure(None)
+  private def groupByPackage: Pipe[IO, CSearchResult, PackageResult] = { csearchResults =>
+    csearchResults.groupAdjacentBy(_.pack)(_ == _).map {
+      case (pack, results) => PackageResult(pack, results.map(_.result).toList)
     }
   }
 
-  private def csearchResult(fullPath: String, lineNumber: Int): IO[Option[CSearchResult]] = {
-    val relativePath = Path(fullPath).relativeTo(pwd).toString
-    packageName(relativePath).traverse { p =>
-      extractRows(relativePath, lineNumber, snippetConfig.linesBefore, snippetConfig.linesAfter).map {
+  private def createSnippet(info: SnippetInfo): IO[CSearchResult] = {
+    val relativePath = Path(info.filePath).relativeTo(pwd).toString
+    packageName(relativePath).liftTo[IO](new RuntimeException(s"Not found $relativePath")).flatMap { `package` =>
+      extractRows(relativePath, info.lines, snippetConfig.linesBefore, snippetConfig.linesAfter).map {
         case (firstLine, rows) =>
           CSearchResult(
-            p,
+            `package`,
             CodeSnippet(
               relativePath.split('/').drop(5).mkString("/"), // drop `data/packages/hackage/packageName/version/`
               relativePath.split('/').drop(2).mkString("/"), // drop `data/packages/`
               firstLine,
-              lineNumber - 1,
+              info.lines,
               rows
             )
           )
@@ -133,10 +118,15 @@ trait Search {
   /**
     * Returns index of first matched lines and lines of code
     */
-  private def extractRows(path: String, codeLine: Int, beforeLines: Int, afterLines: Int): IO[(Int, Seq[String])] = {
+  private def extractRows(
+      path: String,
+      codeLines: NonEmptyVector[Int],
+      beforeLines: Int,
+      afterLines: Int
+  ): IO[(Int, Seq[String])] = {
     readFileAsync(path).map { lines =>
       val (code, indexes) = lines.zipWithIndex.filter {
-        case (_, index) => index >= codeLine - beforeLines - 1 && index <= codeLine + afterLines
+        case (_, index) => index >= codeLines.head - beforeLines - 1 && index <= codeLines.last + afterLines - 1
       }.unzip
       indexes.head -> code
     }
@@ -167,15 +157,15 @@ object Search {
     * @param relativePath path into package sources
     * @param fileLink link to file with source code (relative)
     * @param numberOfFirstLine number of first line in snippet from source file
-    * @param matchedLine number of matched line in snippet from source file
-    * @param ctxt lines of snippet
+    * @param matchedLines numbers of matched lines in snippet from source file
+    * @param lines lines of snippet
     */
   final case class CodeSnippet(
       relativePath: String,
       fileLink: String,
       numberOfFirstLine: Int,
-      matchedLine: Int,
-      ctxt: Seq[String]
+      matchedLines: NonEmptyVector[Int],
+      lines: Seq[String]
   )
 
   /**
