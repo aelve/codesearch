@@ -1,5 +1,7 @@
 SHELL := /bin/bash
 
+port := 9000
+
 # Run Postgres
 .PHONY: db
 db:
@@ -46,7 +48,8 @@ index-%:
 # Run the server
 .PHONY: serve
 serve:
-	java -jar codesearch-server.jar
+	LOG_LEVEL=DEBUG java -Dhttp.port=$(port) -Dplay.http.secret.key=devsecret \
+		-jar codesearch-server.jar
 
 # Build a Docker image (the project must be built already)
 build-docker-%:
