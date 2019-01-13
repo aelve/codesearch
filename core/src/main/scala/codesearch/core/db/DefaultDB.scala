@@ -62,9 +62,9 @@ trait DefaultDB[T <: DefaultTable] {
   }
 
   def initDB: IO[Unit] =
-    IO.fromFuture(IO(db.run(MTable.getTables))).flatMap { vector =>
+    IO.fromFuture(IO(db.run(MTable.getTables))).flatMap { tables =>
       IO(
-        if (!vector.exists(_.name.name == table.baseTableRow.tableName))
+        if (!tables.exists(_.name.name == table.baseTableRow.tableName))
           db.run(table.schema.create)
       )
     }

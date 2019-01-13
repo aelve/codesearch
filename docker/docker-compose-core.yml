@@ -2,15 +2,15 @@ version: '3.3'
 
 services:
   core:
+    container_name: core
     restart: on-failure
-    container_name: codesearch_core
-    image: quay.io/aelve/codesearch-core:latest
+    image: quay.io/aelve/codesearch-core:develop
     external_links:
-    - postgres_1
+      - postgres_db
     volumes:
-    - /mnt/vol/data:/data
-    - /mnt/vol/index:/index
-    - /mnt/vol/logs:/logs
+      - /mnt/vol/data:/data
+      - /mnt/vol/index:/index
+      - /mnt/vol/logs:/logs
     command: >
       sh -c "make tables && \
             make download-haskell update-haskell index-haskell && \
@@ -18,8 +18,7 @@ services:
             make download-ruby update-ruby index-ruby && \
             make download-javascript update-javascript index-javascript"
     networks:
-    - default
-    - codesearch_default
+      - codesearch_network
 networks:
-  codesearch_default:
+  codesearch_network:
     external: true

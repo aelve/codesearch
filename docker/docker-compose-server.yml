@@ -2,6 +2,7 @@ version: '3.3'
 
 services:
   postgres:
+    container_name: postgres_db
     image: postgres:latest
     volumes:
     - /mnt/vol/postgresql:/var/lib/postgresql
@@ -11,9 +12,11 @@ services:
       POSTGRES_PASSWORD: postgres
     ports:
     - 5432:5432
+    networks:
+      - codesearch_network
   server:
-    container_name: codesearch_web_server
-    image: quay.io/aelve/codesearch-web-server:latest
+    container_name: web_server
+    image: quay.io/aelve/codesearch-web-server:develop
     volumes:
     - /mnt/vol/data:/data
     - /mnt/vol/index:/index
@@ -25,7 +28,12 @@ services:
       LOG_LEVEL: DEBUG
       JAVA_OPTS: "-Dplay.filters.hosts.allowed.1=codesearch.aelve.com -Dplay.filters.hosts.allowed.2=cloud.digitalocean.com"
       # In production you must override the APPLICATION_SECRET key
-      APPLICATION_SECRET: "u?:IPZT:Cun;SP>edigHDs:cpUf2cY`<7D>b9lHg98^NsVGn]:eLCIjz1Tt_VyIv"
+      APPLICATION_SECRET: ${SECRET_KEY:-"u?:IPZT:Cun;SP>edigHDs:cpUf2cY`<7D>b9lHg98^NsVGn]:eLCIjz1Tt_VyIv"}
     ports:
     # In production you must override SERVER_PORT like: `SERVER_PORT=80 docker-compose -f docker-compose-server.yml ...`
     - ${SERVER_PORT:-9000}:80
+    networks:
+      - codesearch_network
+networks:
+  codesearch_network:
+    external: true
