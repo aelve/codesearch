@@ -16,26 +16,13 @@ case class SearchRequest(
     spaceInsensitive: Boolean,
     preciseMatch: Boolean,
     sourcesOnly: Boolean,
-    page: Int
-) {
-  def callURI(
-      lang: String,
-      query: String,
-      filter: Option[String],
-      insensitive: String,
-      spaceInsensitive: String,
-      preciseMatch: String,
-      sourcesOnly: String
-  ): String = filter match {
-    case Some(filter) =>
-      s"/$lang/search?query=$query&filter=$filter&insensitive=$insensitive&space=$spaceInsensitive&precise=$preciseMatch&sources=$sourcesOnly"
-    case None =>
-      s"/$lang/search?query=$query&insensitive=$insensitive&space=$spaceInsensitive&precise=$preciseMatch&sources=$sourcesOnly"
-  }
-}
+    page: Int,
+    callURI: String
+)
 
 object SearchRequest {
   def applyRaw(
+      lang: String,
       query: String,
       filter: Option[String],
       insensitive: String,
@@ -43,15 +30,25 @@ object SearchRequest {
       preciseMatch: String,
       sourcesOnly: String,
       page: String
-  ): SearchRequest = SearchRequest(
-    query,
-    filter,
-    isEnabled(insensitive),
-    isEnabled(spaceInsensitive),
-    isEnabled(preciseMatch),
-    isEnabled(sourcesOnly),
-    page.toInt
-  )
+  ): SearchRequest = {
+    val callURI: String = filter match {
+      case Some(filter) =>
+        s"/$lang/search?query=$query&filter=$filter&insensitive=$insensitive&space=$spaceInsensitive&precise=$preciseMatch&sources=$sourcesOnly"
+      case None =>
+        s"/$lang/search?query=$query&insensitive=$insensitive&space=$spaceInsensitive&precise=$preciseMatch&sources=$sourcesOnly"
+    }
+
+    SearchRequest(
+      query,
+      filter,
+      isEnabled(insensitive),
+      isEnabled(spaceInsensitive),
+      isEnabled(preciseMatch),
+      isEnabled(sourcesOnly),
+      page.toInt,
+      callURI
+    )
+  }
 
   private def isEnabled(param: String): Boolean = param == "on"
 }
