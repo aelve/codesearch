@@ -57,7 +57,7 @@ class HaskellIndex(haskellConfig: HaskellConfig)(
       }
     } yield ()
 
-  override protected def getLastVersions: Map[String, Version] = {
+  override protected def getLastVersions: Stream[IO, (String, String)] = {
     val indexDir     = INDEX_SOURCE_DIR.toIO
     val packageNames = indexDir.listFiles.filter(_.isDirectory)
     val allVersions = packageNames.flatMap { packagePath =>
@@ -69,6 +69,8 @@ class HaskellIndex(haskellConfig: HaskellConfig)(
       .mapValues(_.map { case (_, version) => version }.max)
 
     lastVersions
+
+    ???
   }
 
   override protected def buildFsUrl(packageName: String, version: String): NioPath =
@@ -76,7 +78,6 @@ class HaskellIndex(haskellConfig: HaskellConfig)(
 }
 
 object HaskellIndex {
-  def apply(config: Config)(implicit http: SttpBackend[IO, Stream[IO, ByteBuffer]],
-      shift: ContextShift[IO]
-  ) = new HaskellIndex(config.languagesConfig.haskellConfig)
+  def apply(config: Config)(implicit http: SttpBackend[IO, Stream[IO, ByteBuffer]], shift: ContextShift[IO]) =
+    new HaskellIndex(config.languagesConfig.haskellConfig)
 }

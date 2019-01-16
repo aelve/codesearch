@@ -55,7 +55,7 @@ class RustIndex(rustConfig: RustConfig)(
     } yield ()
   }
 
-  override protected def getLastVersions: Map[String, Version] = {
+  override protected def getLastVersions: Stream[IO, (String, String)] = {
     val seq = Helper
       .recursiveListFiles(RepoDir)
       .collect {
@@ -64,10 +64,9 @@ class RustIndex(rustConfig: RustConfig)(
           val obj             = Json.parse(lastVersionJSON)
           val name            = (obj \ "name").as[String]
           val vers            = (obj \ "vers").as[String]
-          (name, model.Version(vers))
+          (name, vers)
       }
-      .toSeq
-    Map(seq: _*)
+    seq
   }
 
   override protected def buildFsUrl(packageName: String, version: String): Path =

@@ -4,6 +4,8 @@ import java.io.File
 
 import cats.effect.IO
 import org.apache.commons.io.FilenameUtils
+import fs2.Stream
+import fs2.Chunk
 
 import scala.io.Source
 import scala.util.matching.Regex
@@ -30,8 +32,8 @@ object Helper {
     "rb"   -> "ruby"
   )
 
-  def recursiveListFiles(cur: File): Array[File] = {
-    val these = cur.listFiles
+  def recursiveListFiles(cur: File): Stream[IO, File] = {
+    val these = Stream.evalUnChunk(IO(Chunk.array(cur.listFiles)))
     these.filter(_.isFile) ++ these.filter(_.isDirectory).filter(_.getName != ".git").flatMap(recursiveListFiles)
   }
 

@@ -37,7 +37,7 @@ class JavaScriptIndex(javaScriptConfig: JavaScriptConfig)(
       index <- NpmDetails().index
     } yield index
 
-  override protected def getLastVersions: Map[String, Version] = NpmDetails().detailsMap.unsafeRunSync()
+  override protected def getLastVersions: Stream[IO, (String, String)] = NpmDetails().detailsMap
 
   override protected def buildFsUrl(packageName: String, version: String): Path =
     NpmPackage(packageName, version).packageDir

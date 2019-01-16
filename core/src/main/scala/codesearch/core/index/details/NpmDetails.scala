@@ -74,14 +74,12 @@ private[index] final class NpmDetails(implicit http: SttpBackend[IO, Stream[IO, 
           .compile
           .drain)
 
-  def detailsMap: IO[Map[String, Version]] = {
+  def detailsMap: Stream[IO, (String, String)] = {
     file
       .readAll[IO](FsIndexPath, BlockingEC, chunkSize = 4096)
       .through(byteStreamParser[IO])
       .through(decoder[IO, NpmPackage])
-      .through(toMap)
-      .compile
-      .foldMonoid
+      .through(toCouple)
   }
 
   private def tokenFilter[F[_]]: Pipe[F, JsonToken, JsonToken] =
@@ -104,8 +102,8 @@ private[index] final class NpmDetails(implicit http: SttpBackend[IO, Stream[IO, 
     }
   }
 
-  private def toMap[F[_]]: Pipe[IO, NpmPackage, Map[String, Version]] = { input =>
-    input.map(npmPackage => Map(npmPackage.name -> Version(npmPackage.version)))
+  private def toCouple[F[_]]: Pipe[IO, NpmPackage, (String, String)] = { input =>
+    input.map(npmPackage => (npmPackage.name -> npmPackage.version))
   }
 
   private def decoder[F[_], A](implicit decode: Decoder[A]): Pipe[F, Json, A] =

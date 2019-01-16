@@ -90,14 +90,11 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
       _           <- logger.debug("UPDATE PACKAGES")
       packagesMap <- verNames.map(_.toMap)
 
-      //TODO: getLastVersions should return fs2.Stream[F, (String, Version)]
-      packagesCount <- Stream
-        .fromIterator[IO, (String, String)](getLastVersions.mapValues(_.verString).iterator)
-        .filter {
-          case (packageName, currentVersion) =>
-            !packagesMap.get(packageName).contains(currentVersion)
-        }
-        .mapAsyncUnordered(concurrentTasksCount)(updateSources _ tupled)
+      //TODO: getLastVersions should return fs2.Stream[F, (String, String)]
+      packagesCount <- getLastVersions.filter {
+        case (packageName, currentVersion) =>
+          !packagesMap.get(packageName).contains(currentVersion)
+      }.mapAsyncUnordered(concurrentTasksCount)(updateSources _ tupled)
         .compile
         .foldMonoid
     } yield packagesCount
@@ -129,7 +126,7 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
     *
     * @return last versions of packages
     */
-  protected def getLastVersions: Map[String, Version]
+  protected def getLastVersions: Stream[IO, (String, String)]
 
   /**
     * Update source code from remote repository
