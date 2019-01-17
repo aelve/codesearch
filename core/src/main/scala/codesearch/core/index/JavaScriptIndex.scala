@@ -12,7 +12,7 @@ import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
 import codesearch.core.index.directory.СSearchDirectory
 import codesearch.core.index.repository.Extensions._
-import codesearch.core.model.{NpmTable, Version}
+import codesearch.core.model.NpmTable
 import com.softwaremill.sttp.SttpBackend
 import fs2.Stream
 

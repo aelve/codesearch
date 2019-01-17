@@ -4,7 +4,6 @@ import java.nio.ByteBuffer
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption.{CREATE, TRUNCATE_EXISTING}
 
-import cats.Semigroup
 import cats.effect.{ContextShift, IO}
 import cats.instances.map._
 import codesearch.core._
@@ -12,7 +11,6 @@ import codesearch.core.index.details.NpmDetails.FsIndexRoot
 import codesearch.core.index.directory.Directory
 import codesearch.core.index.directory.Preamble._
 import codesearch.core.index.repository.ByteStreamDownloader
-import codesearch.core.model.Version
 import com.softwaremill.sttp.{SttpBackend, _}
 import fs2.io._
 import fs2.{Chunk, Pipe, Sink, Stream}
@@ -31,8 +29,6 @@ private[index] final class NpmDetails(implicit http: SttpBackend[IO, Stream[IO, 
 
   private val NpmRegistryUrl = uri"https://replicate.npmjs.com/_all_docs?include_docs=true"
   private val FsIndexPath    = FsIndexRoot / "npm_packages_index.json"
-
-  private implicit val versionSemigroup: Semigroup[Version] = (_, last) => last
 
   private implicit val docDecoder: Decoder[NpmRegistryPackage] = (c: HCursor) => {
     val doc = c.downField("doc")
@@ -102,9 +98,8 @@ private[index] final class NpmDetails(implicit http: SttpBackend[IO, Stream[IO, 
     }
   }
 
-  private def toCouple[F[_]]: Pipe[IO, NpmPackage, (String, String)] = { input =>
-    input.map(npmPackage => (npmPackage.name -> npmPackage.version))
-  }
+  private def toCouple[F[_]]: Pipe[IO, NpmPackage, (String, String)] =
+    _.map(npmPackage => (npmPackage.name -> npmPackage.version))
 
   private def decoder[F[_], A](implicit decode: Decoder[A]): Pipe[F, Json, A] =
     _.flatMap { json =>
@@ -114,9 +109,8 @@ private[index] final class NpmDetails(implicit http: SttpBackend[IO, Stream[IO, 
       }
     }
 
-  private def packageToString[F[_]]: Pipe[IO, NpmRegistryPackage, Byte] = { input =>
-    input.flatMap(registryPackage => Stream.chunk(Chunk.array(registryPackage.asJson.noSpaces.getBytes :+ '\n'.toByte)))
-  }
+  private def packageToString[F[_]]: Pipe[IO, NpmRegistryPackage, Byte] =
+    _.flatMap(registryPackage => Stream.chunk(Chunk.array(registryPackage.asJson.noSpaces.getBytes :+ '\n'.toByte)))
 
   private def toFile: Sink[IO, Byte] = file.writeAll(FsIndexPath, BlockingEC, List(CREATE, TRUNCATE_EXISTING))
 

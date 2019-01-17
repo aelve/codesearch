@@ -1,5 +1,6 @@
 package codesearch.core.index
 
+import java.io.File
 import java.net.URL
 import java.nio.ByteBuffer
 import java.nio.file.{Path => NioPath}
@@ -14,9 +15,9 @@ import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
 import codesearch.core.index.directory.СSearchDirectory
 import codesearch.core.index.repository.Extensions._
-import codesearch.core.model.{HackageTable, Version}
+import codesearch.core.model.HackageTable
 import com.softwaremill.sttp.SttpBackend
-import fs2.Stream
+import fs2.{Chunk, Pipe, Stream}
 import org.rauschig.jarchivelib.{ArchiveFormat, ArchiverFactory, CompressionType}
 
 import scala.sys.process._
@@ -59,19 +60,18 @@ class HaskellIndex(haskellConfig: HaskellConfig)(
 
   override protected def getLastVersions: Stream[IO, (String, String)] = {
     val indexDir     = INDEX_SOURCE_DIR.toIO
-    val packageNames = indexDir.listFiles.filter(_.isDirectory)
-    val allVersions = packageNames.flatMap { packagePath =>
-      packagePath.listFiles
-        .filter(_.isDirectory)
-        .map(versionPath => (packagePath.getName, Version(versionPath.getName)))
-    }
-    val lastVersions = allVersions.groupBy { case (name, _) => name }
-      .mapValues(_.map { case (_, version) => version }.max)
-
-    lastVersions
-
-    ???
+    val packageNames = Stream.evalUnChunk(IO(Chunk.array(indexDir.listFiles.filter(_.isDirectory))))
+    packageNames.through(toCouple)
   }
+
+  private def toCouple[F[_]]: Pipe[IO, File, (String, String)] =
+    _.map { packageName =>
+      val packageVersion: String = packageName.listFiles
+        .filter(_.isDirectory)
+        .map(_.getName)
+        .max
+      (packageName.getName -> packageVersion)
+    }
 
   override protected def buildFsUrl(packageName: String, version: String): NioPath =
     HackagePackage(packageName, version).packageDir

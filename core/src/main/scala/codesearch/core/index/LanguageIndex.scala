@@ -10,7 +10,7 @@ import cats.syntax.functor._
 import codesearch.core.db.DefaultDB
 import codesearch.core.index.directory.{Directory, СSearchDirectory}
 import codesearch.core.index.repository._
-import codesearch.core.model.{DefaultTable, Version}
+import codesearch.core.model.DefaultTable
 import com.softwaremill.sttp.SttpBackend
 import fs2.Stream
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger

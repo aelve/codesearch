@@ -58,9 +58,10 @@ class RubyIndex(rubyConfig: RubyConfig)(
       .through(toCouple)
   }
 
-  private def toCouple[F[_]]: Pipe[IO, Seq[String], (String, String)] = { input =>
-    input.map { case Seq(name :: ver :: _) => (name -> ver) }
-  }
+  private def toCouple[F[_]]: Pipe[IO, Seq[String], (String, String)] =
+    _.map {
+      case name :: ver :: _ => (name -> ver)
+    }
 
   private def decoder[F[_], A](implicit decode: Decoder[A]): Pipe[F, Json, A] =
     _.flatMap { json =>

@@ -12,8 +12,7 @@ import codesearch.core.index.directory.Directory.ops._
 import codesearch.core.index.directory.СSearchDirectory
 import codesearch.core.index.repository.Extensions._
 import codesearch.core.index.repository.{CratesPackage, FileDownloader}
-import codesearch.core.model
-import codesearch.core.model.{CratesTable, Version}
+import codesearch.core.model.CratesTable
 import codesearch.core.util.Helper
 import com.softwaremill.sttp.{SttpBackend, _}
 import fs2.Stream
@@ -55,8 +54,8 @@ class RustIndex(rustConfig: RustConfig)(
     } yield ()
   }
 
-  override protected def getLastVersions: Stream[IO, (String, String)] = {
-    val seq = Helper
+  override protected def getLastVersions: Stream[IO, (String, String)] =
+    Helper
       .recursiveListFiles(RepoDir)
       .collect {
         case file if !(IgnoreFiles contains file.getName) =>
@@ -64,10 +63,8 @@ class RustIndex(rustConfig: RustConfig)(
           val obj             = Json.parse(lastVersionJSON)
           val name            = (obj \ "name").as[String]
           val vers            = (obj \ "vers").as[String]
-          (name, vers)
+          (name -> vers)
       }
-    seq
-  }
 
   override protected def buildFsUrl(packageName: String, version: String): Path =
     CratesPackage(packageName, version).packageDir
