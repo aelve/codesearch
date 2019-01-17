@@ -136,7 +136,8 @@ trait Search {
 object Search {
 
   private[search] val snippetConfig: SnippetConfig =
-    Config.load[IO]
+    Config
+      .load[IO]
       .map(_.snippetConfig)
       .unsafeRunSync()
 

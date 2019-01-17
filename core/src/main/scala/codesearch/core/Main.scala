@@ -27,7 +27,7 @@ object Main extends IOApp {
         params <- CLI.params(args)
         config <- Config.load[IO]
         implicit0(downloader: Downloader[IO]) = Downloader.create[IO]
-        langReps =           Map(
+        langReps = Map(
           "haskell"    -> LangRep[HackageTable](HackageDB, HaskellIndex(config)),
           "rust"       -> LangRep[CratesTable](CratesDB, RustIndex(config)),
           "ruby"       -> LangRep[GemTable](GemDB, RubyIndex(config)),

@@ -55,7 +55,8 @@ private[index] final class NpmDetails(implicit http: SttpBackend[IO, Stream[IO, 
     )
 
   def index: IO[Unit] =
-    Downloader.create[IO]
+    Downloader
+      .create[IO]
       .download(NpmRegistryUrl)
       .through(tokenParser[IO])
       .through(tokenFilter)

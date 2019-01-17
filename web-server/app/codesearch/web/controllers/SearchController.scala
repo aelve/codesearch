@@ -94,7 +94,8 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
 }
 
 object SearchController {
-  lazy implicit val snippetConfig: SnippetConfig = Config.load[IO]
+  lazy implicit val snippetConfig: SnippetConfig = Config
+    .load[IO]
     .map(_.snippetConfig)
     .unsafeRunSync() //TODO: pass config here as parameter
 }

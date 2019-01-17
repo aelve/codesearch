@@ -52,12 +52,12 @@ object Extensions {
 
   final object HaskellExtensions extends Extensions {
     override def commonExtensions: Set[String] = super.commonExtensions ++ Set("cabal", "project")
-    def sourceExtensions: Set[String] = Set("hs", "lhs", "hsc", "hs-boot", "lhs-boot")
+    def sourceExtensions: Set[String]          = Set("hs", "lhs", "hsc", "hs-boot", "lhs-boot")
   }
 
   final object RubyExtensions extends Extensions {
     override def commonExtensions: Set[String] = super.commonExtensions ++ Set("gemspec")
-    def sourceExtensions: Set[String] = Set("rb", "rbx", "irb")
+    def sourceExtensions: Set[String]          = Set("rb", "rbx", "irb")
   }
 
   final object RustExtensions extends Extensions {
