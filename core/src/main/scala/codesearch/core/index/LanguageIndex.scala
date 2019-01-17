@@ -94,9 +94,7 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
       packagesCount <- getLastVersions.filter {
         case (packageName, currentVersion) =>
           !packagesMap.get(packageName).contains(currentVersion)
-      }.mapAsyncUnordered(concurrentTasksCount)(updateSources _ tupled)
-        .compile
-        .foldMonoid
+      }.mapAsyncUnordered(concurrentTasksCount)(updateSources _ tupled).compile.foldMonoid
     } yield packagesCount
   }
 
