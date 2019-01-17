@@ -85,8 +85,6 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
     for {
       _           <- logger.debug("UPDATE PACKAGES")
       packagesMap <- verNames.map(_.toMap)
-
-      //TODO: getLastVersions should return fs2.Stream[F, (String, String)]
       packagesCount <- getLastVersions.filter {
         case (packageName, currentVersion) =>
           !packagesMap.get(packageName).contains(currentVersion)

@@ -29,7 +29,7 @@ class JavaScriptIndex(javaScriptConfig: JavaScriptConfig)(
   override protected def concurrentTasksCount: Int = javaScriptConfig.concurrentTasksCount
 
   override protected def updateSources(name: String, version: String): IO[Int] = {
-    archiveDownloadAndExtract(NpmPackage(name, version))
+    logger.info(s"downloading package $name") >> archiveDownloadAndExtract(NpmPackage(name, version))
   }
 
   override def downloadMetaInformation: IO[Unit] =
