@@ -5,7 +5,6 @@ import java.nio.file.Path
 import java.nio.file.StandardOpenOption.{CREATE, TRUNCATE_EXISTING}
 
 import cats.effect.{ContextShift, IO}
-import cats.instances.map._
 import codesearch.core._
 import codesearch.core.index.details.NpmDetails.FsIndexRoot
 import codesearch.core.index.directory.Directory
@@ -74,7 +73,7 @@ private[index] final class NpmDetails(implicit http: SttpBackend[IO, Stream[IO, 
       .readAll[IO](FsIndexPath, BlockingEC, chunkSize = 4096)
       .through(byteStreamParser[IO])
       .through(decoder[IO, NpmPackage])
-      .through(toCouple)
+      .map(npmPackage => npmPackage.name -> npmPackage.version)
   }
 
   private def tokenFilter[F[_]]: Pipe[F, JsonToken, JsonToken] =
@@ -96,9 +95,6 @@ private[index] final class NpmDetails(implicit http: SttpBackend[IO, Stream[IO, 
       } else depth > 0
     }
   }
-
-  private def toCouple[F[_]]: Pipe[IO, NpmPackage, (String, String)] =
-    _.map(npmPackage => (npmPackage.name -> npmPackage.version))
 
   private def decoder[F[_], A](implicit decode: Decoder[A]): Pipe[F, Json, A] =
     _.flatMap { json =>

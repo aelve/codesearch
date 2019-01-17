@@ -2,7 +2,7 @@ package codesearch.core.util
 
 import java.io.File
 
-import cats.effect.IO
+import cats.effect.{IO, Resource}
 import org.apache.commons.io.FilenameUtils
 import fs2.Stream
 import fs2.Chunk
@@ -38,7 +38,7 @@ object Helper {
   }
 
   def readFileAsync(path: String): IO[List[String]] =
-    IO(Source.fromFile(path, "UTF-8")).bracket(source => IO.pure(source.getLines.toList))(source => IO(source.close()))
+    Resource.fromAutoCloseable(IO(Source.fromFile(path, "UTF-8"))).use(source => IO.delay(source.getLines.toList))
 
   def preciseMatch(query: String): String = {
     val queryTokens: Seq[Token] = Tokenizer.parseStringWithSpecialSymbols(query)

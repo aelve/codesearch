@@ -32,7 +32,7 @@ class RubyIndex(rubyConfig: RubyConfig)(
 
   private val GEM_INDEX_URL     = "http://rubygems.org/latest_specs.4.8.gz"
   private val GEM_INDEX_ARCHIVE = pwd / 'data / 'meta / 'ruby / "ruby_index.gz"
-  private val GEM_INDEX_JSON    = Paths.get((pwd / 'data / 'meta / 'ruby / "ruby_index.json").toString)
+  private val GEM_INDEX_JSON    = pwd / 'data / 'meta / 'ruby / "ruby_index.json"
   private val DESERIALIZER_PATH = pwd / 'scripts / "update_index.rb"
 
   override protected val csearchDir: СSearchDirectory = RubyCSearchIndex
@@ -47,29 +47,16 @@ class RubyIndex(rubyConfig: RubyConfig)(
     (pwd / 'data / 'meta / 'ruby).toIO.mkdirs()
     Seq("curl", "-o", GEM_INDEX_ARCHIVE.toString, GEM_INDEX_URL) !!
 
-    Seq("/usr/bin/ruby", DESERIALIZER_PATH.toString, GEM_INDEX_ARCHIVE.toString, GEM_INDEX_JSON.toString()) !!
+    Seq("ruby", DESERIALIZER_PATH.toString, GEM_INDEX_ARCHIVE.toString, GEM_INDEX_JSON.toString()) !!
   }
 
   override protected def getLastVersions: Stream[IO, (String, String)] = {
     file
-      .readAll[IO](GEM_INDEX_JSON, BlockingEC, 4096)
-      .through(byteStreamParser[IO])
+      .readAll[IO](GEM_INDEX_JSON.toNIO, BlockingEC, 4096)
+      .through(byteArrayParser[IO])
       .through(decoder[IO, Seq[String]])
-      .through(toCouple)
+      .collect { case Seq(name, version, _) => name -> version }
   }
-
-  private def toCouple[F[_]]: Pipe[IO, Seq[String], (String, String)] =
-    _.map {
-      case name :: ver :: _ => (name -> ver)
-    }
-
-  private def decoder[F[_], A](implicit decode: Decoder[A]): Pipe[F, Json, A] =
-    _.flatMap { json =>
-      decode(json.hcursor) match {
-        case Left(_)  => Stream.empty
-        case Right(a) => Stream.emit(a)
-      }
-    }
 
   override protected def buildFsUrl(packageName: String, version: String): Path =
     GemPackage(packageName, version).packageDir

@@ -5,6 +5,7 @@ import java.nio.ByteBuffer
 import java.nio.file.Path
 
 import cats.effect.{ContextShift, IO}
+import cats.syntax.flatMap._
 import codesearch.core.config.{Config, RustConfig}
 import codesearch.core.db.CratesDB
 import codesearch.core.index.directory.Directory._
@@ -17,10 +18,11 @@ import codesearch.core.model.CratesTable
 import codesearch.core.util.Helper
 import com.softwaremill.sttp.{SttpBackend, _}
 import fs2.Stream
+import io.circe.Decoder
+import io.circe.fs2._
 import org.apache.commons.io.FileUtils
 import org.rauschig.jarchivelib.ArchiveFormat.ZIP
 import org.rauschig.jarchivelib.ArchiverFactory
-import play.api.libs.json.Json
 
 class RustIndex(rustConfig: RustConfig)(
     implicit val http: SttpBackend[IO, Stream[IO, ByteBuffer]],
@@ -43,7 +45,7 @@ class RustIndex(rustConfig: RustConfig)(
   override protected def concurrentTasksCount: Int = rustConfig.concurrentTasksCount
 
   override protected def updateSources(name: String, version: String): IO[Int] = {
-    archiveDownloadAndExtract(CratesPackage(name, version))
+    logger.info(s"downloading package $name") >> archiveDownloadAndExtract(CratesPackage(name, version))
   }
 
   override def downloadMetaInformation: IO[Unit] = {
@@ -54,17 +56,21 @@ class RustIndex(rustConfig: RustConfig)(
     } yield ()
   }
 
-  override protected def getLastVersions: Stream[IO, (String, String)] =
+  override protected def getLastVersions: Stream[IO, (String, String)] = {
+    implicit val packageDecoder: Decoder[(String, String)] = { c =>
+      for {
+        name    <- c.get[String]("name")
+        version <- c.get[String]("vers")
+      } yield name -> version
+    }
+
     Helper
       .recursiveListFiles(RepoDir)
-      .collect {
-        case file if !(IgnoreFiles contains file.getName) =>
-          val lastVersionJSON = scala.io.Source.fromFile(file).getLines().toSeq.last
-          val obj             = Json.parse(lastVersionJSON)
-          val name            = (obj \ "name").as[String]
-          val vers            = (obj \ "vers").as[String]
-          (name -> vers)
-      }
+      .filter(file => !IgnoreFiles.contains(file.getName))
+      .evalMap(file => Helper.readFileAsync(file.getAbsolutePath).map(_.last))
+      .through(stringStreamParser)
+      .through(decoder[IO, (String, String)])
+  }
 
   override protected def buildFsUrl(packageName: String, version: String): Path =
     CratesPackage(packageName, version).packageDir

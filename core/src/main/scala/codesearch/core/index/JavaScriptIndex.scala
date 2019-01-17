@@ -4,6 +4,7 @@ import java.nio.ByteBuffer
 import java.nio.file.Path
 
 import cats.effect.{ContextShift, IO}
+import cats.syntax.flatMap._
 import codesearch.core.config.{Config, JavaScriptConfig}
 import codesearch.core.db.NpmDB
 import codesearch.core.index.details.NpmDetails
