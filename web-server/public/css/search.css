@@ -18,6 +18,44 @@ pre.line-numbers code {
     display: inline-block;
 }
 
+.warn {
+    border: 1px solid red;
+    box-shadow:red 0px 0px 10px 2px;
+}
+
+.warn:focus {
+    border: 1px solid red;
+    box-shadow:red 0px 0px 10px 2px;
+}
+
+.warning {
+    position: absolute;
+    background: white none repeat scroll 0% 0%;
+    border: 1px solid grey;
+    padding: 10px;
+    border-radius: 10px;
+    margin: 5px;
+    border: 2px solid grey;
+    top: -55px;
+    box-shadow: 0px 0px 10px 1px grey;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+}
+
+.warning:before {
+    content: '';
+    width: 100px;
+    height: auto;
+    -webkit-border-radius: 50px / 25px;
+    -moz-border-radius: 100px / 50px;
+    border-radius: 100px / 50px;
+    border-top: 10px solid grey;
+    position: relative;
+    bottom: -35px;
+    border-right: 5px solid rgba(0,0,0,0);
+    border-left: 5px solid rgba(0,0,0,0);
+}
+
 mark {
     /* highlight marks with gray */
     background-color: rgba(0,0,0,0.1);
