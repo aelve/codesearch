@@ -31,11 +31,8 @@ pre.line-numbers code {
 .warning {
     position: absolute;
     background: white none repeat scroll 0% 0%;
-    border: 1px solid grey;
-    padding: 10px;
-    border-radius: 10px;
-    margin: 5px;
-    border: 2px solid grey;
+    padding: 10px 15px 10px 10px;
+    border-radius: 5px;
     top: -55px;
     box-shadow: 0px 0px 10px 1px grey;
     font-family: Arial, Helvetica, sans-serif;

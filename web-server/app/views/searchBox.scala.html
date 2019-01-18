@@ -30,13 +30,15 @@
     </div>
 </section>
 <script>
+let counterClicks = 0
+
 function FormValidate() {
 
     const sendArr = []
 
-    var div = document.createElement('div')
+    const div = document.createElement('div')
         div.className = "warning"
-        div.innerHTML = "Заполните поле!"
+        div.innerHTML = "Заполните это поле!"
 
     this.query = document.getElementById("query").value
     this.filter = document.getElementById("filter").value
@@ -55,7 +57,6 @@ function FormValidate() {
         }
 
         let arr = sendArr.join('&')
-        document.location.href = document.location.pathname + '/search' + '?' + arr
 
         const pathname = document.location.pathname
         if(pathname.endsWith("/search"))
@@ -65,7 +66,10 @@ function FormValidate() {
 
     } else {
         document.getElementById('query').classList.add('warn')
-        document.getElementById('input-group').insertBefore(div, document.getElementById('input-group').children[1])
+        if (!counterClicks) {
+            document.getElementById('input-group').insertBefore(div, document.getElementById('input-group').children[1])
+            counterClicks++
+        }
     }
 }
 </script>
