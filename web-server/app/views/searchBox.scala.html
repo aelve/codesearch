@@ -1,13 +1,13 @@
 @(actSearch: String, query: String, filter: Option[String], insensitive: Boolean, space: Boolean, precise: Boolean, sources: Boolean)
 <section class="container-fluid">
-    <div class="col-lg-6 mx-auto p-3 h7 justify-content-center">
+    <div class="col-lg-6 mx-auto p-3 h7 justify-content-center" style="position: relative;">
         <form>
-            <div id="input-group" class="input-group">
-                <input type="text" class="form-control" name="query" value="@query" id="query" required>
-
-                <input type="text" class="form-control" name="filter" value="@filter" id="filter" placeholder="[Filter for query]" required>
+            <div id="input-group" class="input-group" style="possition:relative;">
+                <section id="warning" class="warning">Заполните это поле!</section>
+                <input type="text" class="form-control" name="query" value="@query" id="query">
+                <input type="text" class="form-control" name="filter" value="@filter" id="filter" placeholder="[Filter for query]">
                 <span class="input-group-btn">
-                    <input class="btn btn-secondary btn-send-from" type="button" value="Go!" onclick="FormValidate()">
+                    <input class="btn btn-secondary btn-send-from" id="btn-send-from" type="button" value="Go!">
                 </span>
             </div>
             <div class="form-check form-check-inline">
@@ -28,48 +28,67 @@
             </div>
         </form>
     </div>
+
 </section>
 <script>
-let counterClicks = 0
+        document.getElementById('warning').classList.remove('warning');
+        const
+            dQuery = document.getElementById('query'),
+            inpFilter = document.getElementById("filter")
 
-function FormValidate() {
+        function focusQueryInput() {
 
-    const sendArr = []
+            dQuery.addEventListener('input', function(e){
 
-    const div = document.createElement('div')
-        div.className = "warning"
-        div.innerHTML = "Заполните это поле!"
+                if(dQuery.value.length >= 1) {
 
-    this.query = document.getElementById("query").value
-    this.filter = document.getElementById("filter").value
-    this.inpCheck = document.querySelectorAll('input[type="checkbox"]')
+                    document.getElementById('warning').classList.remove('warning')
+                    dQuery.classList.remove('warn')
+                }
+            })
+        }
 
-    if (this.query != '') {
+        function FormValidate() {
 
-        sendArr.push(this.filter != '' ? 'query='+this.query+'&filter='+this.filter : 'query='+this.query)
+            const sendArr = []
 
-        for (let i = 0; i < this.inpCheck.length; i++) {
-            if (this.inpCheck[i].checked) {
-                sendArr.push(`${this.inpCheck[i].getAttribute('name')}=on`)
+            this.query = dQuery.value
+            this.filter = inpFilter.value
+
+            this.inpCheck = document.querySelectorAll('input[type="checkbox"]')
+
+            if (this.query != '') {
+
+                sendArr.push(this.filter != '' ? 'query='+this.query+'&filter='+this.filter : 'query='+this.query)
+
+                for (let i = 0; i < this.inpCheck.length; i++) {
+
+                    if (this.inpCheck[i].checked) {
+                        sendArr.push(`${this.inpCheck[i].getAttribute('name')}=on`)
+                    } else {
+                        sendArr.push(`${this.inpCheck[i].getAttribute('name')}=off`)
+                    }
+                }
+
+                let arr = sendArr.join('&')
+
+                document.location.href = document.location.pathname + '/search' + '?' + arr
+
+                const pathname = document.location.pathname
+
+                if(pathname.endsWith("/search"))
+                    document.location.href = pathname + '?' + arr
+                else
+                    document.location.href = pathname + '/search' + '?' + arr
+
             } else {
-                sendArr.push(`${this.inpCheck[i].getAttribute('name')}=off`)
+                if (!document.getElementById('warning').classList.contains('warning')) {
+                    document.getElementById('warning').classList.add('warning')
+                    dQuery.classList.add('warn')
+                }
+
             }
         }
-
-        let arr = sendArr.join('&')
-
-        const pathname = document.location.pathname
-        if(pathname.endsWith("/search"))
-           document.location.href = pathname + '?' + arr
-        else
-           document.location.href = pathname + '/search' + '?' + arr
-
-    } else {
-        document.getElementById('query').classList.add('warn')
-        if (!counterClicks) {
-            document.getElementById('input-group').insertBefore(div, document.getElementById('input-group').children[1])
-            counterClicks++
-        }
-    }
-}
+        document.getElementById('btn-send-from').addEventListener('click', FormValidate)
+        dQuery.addEventListener('click', focusQueryInput)
 </script>
