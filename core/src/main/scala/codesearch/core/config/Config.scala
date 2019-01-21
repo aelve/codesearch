@@ -4,15 +4,31 @@ import cats.effect.Sync
 import pureconfig.module.catseffect._
 import pureconfig.{CamelCase, ConfigFieldMapping, ProductHint}
 
-case class Config(db: DatabaseConfig, snippetConfig: SnippetConfig, languagesConfig: LanguagesConfig)
+case class Config(
+    db: DatabaseConfig,
+    snippetConfig: SnippetConfig,
+    languagesConfig: LanguagesConfig
+)
+
 case class DatabaseConfig(
     dataSourceClass: String,
     port: Int,
     name: String,
     user: String,
-    password: String
+    password: String,
+    properties: DatabaseProperties
 )
-case class SnippetConfig(pageSize: Int, linesBefore: Int, linesAfter: Int)
+
+case class DatabaseProperties(
+    driver: String,
+    url: String
+)
+
+case class SnippetConfig(
+    pageSize: Int,
+    linesBefore: Int,
+    linesAfter: Int
+)
 
 case class LanguagesConfig(
     haskellConfig: HaskellConfig,

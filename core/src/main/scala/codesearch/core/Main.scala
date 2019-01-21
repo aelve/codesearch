@@ -2,7 +2,7 @@ package codesearch.core
 
 import cats.effect.{ExitCode, IO, IOApp, Resource}
 import cats.syntax.flatMap._
-import codesearch.core.config.Config
+import codesearch.core.config.{Config, DatabaseConfig}
 import codesearch.core.db._
 import codesearch.core.index._
 import codesearch.core.index.repository.Downloader
@@ -26,6 +26,7 @@ object Main extends IOApp {
       for {
         params <- CLI.params(args)
         config <- Config.load[IO]
+        _      <- migrate(config.db)
         implicit0(downloader: Downloader[IO]) = Downloader.create[IO]
         langReps = Map(
           "haskell"    -> LangRep[HackageTable](HackageDB, HaskellIndex(config)),
@@ -36,4 +37,10 @@ object Main extends IOApp {
         exitCode <- Program(langReps) >>= (_.run(params))
       } yield exitCode
     }
+
+  private def migrate(config: DatabaseConfig): IO[Unit] = {
+    DataSource.transactor[IO](config).use { xa =>
+      for { _ <- xa.configure(DataSource.migrate) } yield ()
+    }
+  }
 }
