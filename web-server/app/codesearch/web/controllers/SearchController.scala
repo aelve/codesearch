@@ -1,6 +1,7 @@
 package codesearch.web.controllers
 
 import cats.data.OptionT
+import cats.effect.IO
 import cats.instances.future._
 import codesearch.core.config.{Config, SnippetConfig}
 import codesearch.core.db.DefaultDB
@@ -93,7 +94,8 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
 }
 
 object SearchController {
-  lazy implicit val snippetConfig: SnippetConfig = Config.load
+  lazy implicit val snippetConfig: SnippetConfig = Config
+    .load[IO]
     .map(_.snippetConfig)
     .unsafeRunSync() //TODO: pass config here as parameter
 }

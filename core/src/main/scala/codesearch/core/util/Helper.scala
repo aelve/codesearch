@@ -2,8 +2,10 @@ package codesearch.core.util
 
 import java.io.File
 
-import cats.effect.IO
+import cats.effect.{IO, Resource}
 import org.apache.commons.io.FilenameUtils
+import fs2.Stream
+import fs2.Chunk
 
 import scala.io.Source
 import scala.util.matching.Regex
@@ -30,13 +32,13 @@ object Helper {
     "rb"   -> "ruby"
   )
 
-  def recursiveListFiles(cur: File): Array[File] = {
-    val these = cur.listFiles
+  def recursiveListFiles(cur: File): Stream[IO, File] = {
+    val these = Stream.evalUnChunk(IO(Chunk.array(cur.listFiles)))
     these.filter(_.isFile) ++ these.filter(_.isDirectory).filter(_.getName != ".git").flatMap(recursiveListFiles)
   }
 
   def readFileAsync(path: String): IO[List[String]] =
-    IO(Source.fromFile(path, "UTF-8")).bracket(source => IO.pure(source.getLines.toList))(source => IO(source.close()))
+    Resource.fromAutoCloseable(IO(Source.fromFile(path, "UTF-8"))).use(source => IO.delay(source.getLines.toList))
 
   def preciseMatch(query: String): String = {
     val queryTokens: Seq[Token] = Tokenizer.parseStringWithSpecialSymbols(query)

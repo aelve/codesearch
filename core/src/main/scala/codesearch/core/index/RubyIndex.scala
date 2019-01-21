@@ -1,31 +1,33 @@
 package codesearch.core.index
 
-import java.io.FileInputStream
 import java.nio.ByteBuffer
-import java.nio.file.Path
+import java.nio.file.{Path, Paths}
 
 import ammonite.ops.pwd
 import cats.effect.{ContextShift, IO}
 import cats.syntax.flatMap._
+import codesearch.core._
 import codesearch.core.config.{Config, RubyConfig}
 import codesearch.core.db.GemDB
 import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
 import codesearch.core.index.directory.СSearchDirectory
-import codesearch.core.index.repository.Extensions._
-import codesearch.core.index.repository.GemPackage
-import codesearch.core.model.{GemTable, Version}
+import codesearch.core.index.directory.СSearchDirectory.RubyCSearchIndex
+import codesearch.core.index.repository.{Downloader, GemPackage, SourcesDownloader}
+import codesearch.core.model.GemTable
 import com.softwaremill.sttp.SttpBackend
-import fs2.Stream
-import play.api.libs.json.Json
+import io.circe.fs2._
+import fs2.{Pipe, Stream}
+import fs2.io.file
+import io.circe.{Decoder, Json}
 
-import scala.concurrent.ExecutionContext
 import scala.sys.process._
 
 class RubyIndex(rubyConfig: RubyConfig)(
-    implicit val executor: ExecutionContext,
-    val http: SttpBackend[IO, Stream[IO, ByteBuffer]],
-    val shift: ContextShift[IO]
+    implicit val http: SttpBackend[IO, Stream[IO, ByteBuffer]],
+    val shift: ContextShift[IO],
+    downloader: Downloader[IO],
+    sourcesDownloader: SourcesDownloader[IO, GemPackage]
 ) extends LanguageIndex[GemTable] with GemDB {
 
   private val GEM_INDEX_URL     = "http://rubygems.org/latest_specs.4.8.gz"
@@ -33,9 +35,7 @@ class RubyIndex(rubyConfig: RubyConfig)(
   private val GEM_INDEX_JSON    = pwd / 'data / 'meta / 'ruby / "ruby_index.json"
   private val DESERIALIZER_PATH = pwd / 'scripts / "update_index.rb"
 
-  override protected type Tag = Ruby
-
-  override protected val csearchDir: СSearchDirectory[Tag] = implicitly
+  override protected val csearchDir: СSearchDirectory = RubyCSearchIndex
 
   override protected def concurrentTasksCount: Int = rubyConfig.concurrentTasksCount
 
@@ -47,14 +47,15 @@ class RubyIndex(rubyConfig: RubyConfig)(
     (pwd / 'data / 'meta / 'ruby).toIO.mkdirs()
     Seq("curl", "-o", GEM_INDEX_ARCHIVE.toString, GEM_INDEX_URL) !!
 
-    Seq("/usr/bin/ruby", DESERIALIZER_PATH.toString(), GEM_INDEX_ARCHIVE.toString(), GEM_INDEX_JSON.toString()) !!
+    Seq("ruby", DESERIALIZER_PATH.toString, GEM_INDEX_ARCHIVE.toString, GEM_INDEX_JSON.toString()) !!
   }
 
-  override protected def getLastVersions: Map[String, Version] = {
-    val stream = new FileInputStream(GEM_INDEX_JSON.toIO)
-    val obj    = Json.parse(stream).as[Seq[Seq[String]]]
-    stream.close()
-    obj.map { case Seq(name, ver, _) => (name, Version(ver)) }.toMap
+  override protected def getLastVersions: Stream[IO, (String, String)] = {
+    file
+      .readAll[IO](GEM_INDEX_JSON.toNIO, BlockingEC, 4096)
+      .through(byteArrayParser[IO])
+      .through(decoder[IO, Seq[String]])
+      .collect { case Seq(name, version, _) => name -> version }
   }
 
   override protected def buildFsUrl(packageName: String, version: String): Path =
@@ -63,8 +64,9 @@ class RubyIndex(rubyConfig: RubyConfig)(
 
 object RubyIndex {
   def apply(config: Config)(
-      implicit ec: ExecutionContext,
-      http: SttpBackend[IO, Stream[IO, ByteBuffer]],
-      shift: ContextShift[IO]
+      implicit http: SttpBackend[IO, Stream[IO, ByteBuffer]],
+      shift: ContextShift[IO],
+      downloader: Downloader[IO],
+      sourcesDownloader: SourcesDownloader[IO, GemPackage]
   ) = new RubyIndex(config.languagesConfig.rubyConfig)
 }

@@ -2,12 +2,10 @@ package codesearch.core.index.directory
 
 import java.nio.file.{Path, Paths}
 
-import codesearch.core.index.{Haskell, JavaScript, Ruby, Rust}
 import codesearch.core.index.directory.Preamble._
 import codesearch.core.index.directory.СSearchDirectory.root
-import simulacrum.typeclass
 
-@typeclass trait СSearchDirectory[A] {
+trait СSearchDirectory {
 
   /** Defines package repository name */
   def packageRepository: String
@@ -30,24 +28,24 @@ import simulacrum.typeclass
 object СSearchDirectory {
   private[index] val root: Path = Paths.get("./index/csearch/")
 
-  implicit def haskellCSearchIndex[A <: Haskell]: СSearchDirectory[A] = new СSearchDirectory[A] {
-    override def packageRepository: String = "hackage"
+  final object HaskellCSearchIndex extends СSearchDirectory {
+    def packageRepository: String = "hackage"
   }
 
-  implicit def javaScriptCSearchIndex[A <: JavaScript]: СSearchDirectory[A] = new СSearchDirectory[A] {
-    override def packageRepository: String = "npm"
+  final object JavaScriptCSearchIndex extends СSearchDirectory {
+    def packageRepository: String = "npm"
   }
 
-  implicit def rubyCSearchIndex[A <: Ruby]: СSearchDirectory[A] = new СSearchDirectory[A] {
-    override def packageRepository: String = "gem"
+  final object RubyCSearchIndex extends СSearchDirectory {
+    def packageRepository: String = "gem"
   }
 
-  implicit def rustCSearchIndex[A <: Rust]: СSearchDirectory[A] = new СSearchDirectory[A] {
-    override def packageRepository: String = "crates"
+  final object RustCSearchIndex extends СSearchDirectory {
+    def packageRepository: String = "crates"
   }
 }
 
-@typeclass trait DirAs[A] {
+trait DirAs[A] {
   def dir(packageManager: String): A
   def tempDir(packageManager: String): A
 }

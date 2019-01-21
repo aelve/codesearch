@@ -1,6 +1,5 @@
 package codesearch.core.index
 
-import java.nio.ByteBuffer
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 import java.nio.file.{Files, Path => NioPath}
 
@@ -10,8 +9,7 @@ import cats.syntax.functor._
 import codesearch.core.db.DefaultDB
 import codesearch.core.index.directory.{Directory, СSearchDirectory}
 import codesearch.core.index.repository._
-import codesearch.core.model.{DefaultTable, Version}
-import com.softwaremill.sttp.SttpBackend
+import codesearch.core.model.DefaultTable
 import fs2.Stream
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
@@ -24,9 +22,7 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
 
   protected val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.unsafeCreate[IO]
 
-  protected type Tag
-
-  protected def csearchDir: СSearchDirectory[Tag]
+  protected def csearchDir: СSearchDirectory
 
   protected def concurrentTasksCount: Int
 
@@ -89,17 +85,10 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
     for {
       _           <- logger.debug("UPDATE PACKAGES")
       packagesMap <- verNames.map(_.toMap)
-
-      //TODO: getLastVersions should return fs2.Stream[F, (String, Version)]
-      packagesCount <- Stream
-        .fromIterator[IO, (String, String)](getLastVersions.mapValues(_.verString).iterator)
-        .filter {
-          case (packageName, currentVersion) =>
-            !packagesMap.get(packageName).contains(currentVersion)
-        }
-        .mapAsyncUnordered(concurrentTasksCount)(updateSources _ tupled)
-        .compile
-        .foldMonoid
+      packagesCount <- getLastVersions.filter {
+        case (packageName, currentVersion) =>
+          !packagesMap.get(packageName).contains(currentVersion)
+      }.mapAsyncUnordered(concurrentTasksCount)(updateSources _ tupled).compile.foldMonoid
     } yield packagesCount
   }
 
@@ -112,10 +101,9 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
     */
   protected def buildFsUrl(packageName: String, version: String): NioPath
 
-  protected def archiveDownloadAndExtract[B <: SourcePackage: Extensions: Directory](pack: B)(
-      implicit httpClient: SttpBackend[IO, Stream[IO, ByteBuffer]]
+  protected def archiveDownloadAndExtract[B <: SourcePackage: Directory](pack: B)(
+      implicit repository: SourcesDownloader[IO, B]
   ): IO[Int] = {
-    val repository = SourceRepository[B](new FileDownloader())
     val task = for {
       _         <- repository.downloadSources(pack)
       rowsCount <- insertOrUpdate(pack)
@@ -129,7 +117,7 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
     *
     * @return last versions of packages
     */
-  protected def getLastVersions: Map[String, Version]
+  protected def getLastVersions: Stream[IO, (String, String)]
 
   /**
     * Update source code from remote repository

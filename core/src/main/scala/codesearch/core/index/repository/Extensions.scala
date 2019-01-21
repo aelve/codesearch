@@ -1,13 +1,10 @@
 package codesearch.core.index.repository
 
-import codesearch.core.index.{Haskell, JavaScript, Ruby, Rust}
-import simulacrum.typeclass
-
 /**
   * For more details read here:
   * @see [[https://github.com/aelve/codesearch/issues/93]]
   */
-@typeclass trait Extensions[A] {
+trait Extensions {
 
   /**
     * Defines common extensions set for each language.
@@ -47,23 +44,23 @@ import simulacrum.typeclass
 
 object Extensions {
 
-  implicit def jsExtensions[A <: JavaScript]: Extensions[A] = new Extensions[A] {
+  final object JavaScriptExtensions extends Extensions {
     override def commonExtensions: Set[String] =
       super.commonExtensions ++ Set("css", "scss", "postcss", "sass", "less", "stylus", "html", "xhtml")
-    override def sourceExtensions: Set[String] = Set("js", "ts", "coffee", "jsx")
+    def sourceExtensions: Set[String] = Set("js", "ts", "coffee", "jsx")
   }
 
-  implicit def haskellExtensions[A <: Haskell]: Extensions[A] = new Extensions[A] {
+  final object HaskellExtensions extends Extensions {
     override def commonExtensions: Set[String] = super.commonExtensions ++ Set("cabal", "project")
-    override def sourceExtensions: Set[String] = Set("hs", "lhs", "hsc", "hs-boot", "lhs-boot")
+    def sourceExtensions: Set[String]          = Set("hs", "lhs", "hsc", "hs-boot", "lhs-boot")
   }
 
-  implicit def rubyExtensions[A <: Ruby]: Extensions[A] = new Extensions[A] {
+  final object RubyExtensions extends Extensions {
     override def commonExtensions: Set[String] = super.commonExtensions ++ Set("gemspec")
-    override def sourceExtensions: Set[String] = Set("rb", "rbx", "irb")
+    def sourceExtensions: Set[String]          = Set("rb", "rbx", "irb")
   }
 
-  implicit def rustExtensions[A <: Rust]: Extensions[A] = new Extensions[A] {
-    override def sourceExtensions: Set[String] = Set("rs")
+  final object RustExtensions extends Extensions {
+    def sourceExtensions: Set[String] = Set("rs")
   }
 }
