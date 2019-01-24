@@ -2,10 +2,10 @@
 <section class="container-fluid">
     <div class="col-lg-6 mx-auto p-3 h7 justify-content-center" style="position: relative;">
         <form>
-            <div id="input-group" class="input-group" style="possition:relative;">
-                <section id="warning" class="warning">Заполните это поле!</section>
-                <input type="text" class="form-control" name="query" value="@query" id="query">
-                <input type="text" class="form-control" name="filter" value="@filter" id="filter" placeholder="[Filter for query]">
+            <div id="input-group" class="input-group">
+                <section class="warning">Заполните это поле!</section>
+                <input type="text" class="form-control" name="query" value="@query" class="query">
+                <input type="text" class="form-control" name="filter" value="@filter" class="filter" placeholder="[Filter for query]">
                 <span class="input-group-btn">
                     <input class="btn btn-secondary btn-send-from" id="btn-send-from" type="button" value="Go!">
                 </span>
@@ -28,67 +28,46 @@
             </div>
         </form>
     </div>
-
 </section>
 <script>
-        document.getElementById('warning').classList.remove('warning');
-        const
-            dQuery = document.getElementById('query'),
-            inpFilter = document.getElementById("filter")
-
+        const inpQuery = document.getElementsByName("query")[0]
+        const inpFilter = document.getElementsByName("filter")[0]
         function focusQueryInput() {
-
-            dQuery.addEventListener('input', function(e){
-
-                if(dQuery.value.length >= 1) {
-
-                    document.getElementById('warning').classList.remove('warning')
-                    dQuery.classList.remove('warn')
+            inpQuery.addEventListener('input', function(e){
+                if(inpQuery.value.trim().length >= 1) {
+                    document.getElementsByClassName('warning')[0].classList.remove('show')
+                    inpQuery.classList.remove('warn')
                 }
             })
         }
-
         function FormValidate() {
-
-            const sendArr = []
-
-            this.query = dQuery.value
-            this.filter = inpFilter.value
-
-            this.inpCheck = document.querySelectorAll('input[type="checkbox"]')
-
-            if (this.query != '') {
-
+            if (inpQuery.value.trim().length) {
+                const sendArr = []
+                this.query = encodeURIComponent(inpQuery.value)
+                this.filter = inpFilter.value
+                this.inpsCheck = document.querySelectorAll('input[type="checkbox"]')
                 sendArr.push(this.filter != '' ? 'query='+this.query+'&filter='+this.filter : 'query='+this.query)
-
-                for (let i = 0; i < this.inpCheck.length; i++) {
-
-                    if (this.inpCheck[i].checked) {
-                        sendArr.push(`${this.inpCheck[i].getAttribute('name')}=on`)
+                for (let i = 0; i < this.inpsCheck.length; i++) {
+                    if (this.inpsCheck[i].checked) {
+                        sendArr.push(`${this.inpsCheck[i].getAttribute('name')}=on`)
                     } else {
-                        sendArr.push(`${this.inpCheck[i].getAttribute('name')}=off`)
+                        sendArr.push(`${this.inpsCheck[i].getAttribute('name')}=off`)
                     }
                 }
-
                 let arr = sendArr.join('&')
-
                 document.location.href = document.location.pathname + '/search' + '?' + arr
-
                 const pathname = document.location.pathname
-
                 if(pathname.endsWith("/search"))
                     document.location.href = pathname + '?' + arr
                 else
                     document.location.href = pathname + '/search' + '?' + arr
-
             } else {
-                if (!document.getElementById('warning').classList.contains('warning')) {
-                    document.getElementById('warning').classList.add('warning')
-                    dQuery.classList.add('warn')
+                if (!document.getElementsByClassName('warning')[0].classList.contains('show')) {
+                    document.getElementsByClassName('warning')[0].classList.add('show')
+                    inpQuery.classList.add('warn')
                 }
-
             }
         }
         document.getElementById('btn-send-from').addEventListener('click', FormValidate)
-        dQuery.addEventListener('click', focusQueryInput)
+        inpQuery.addEventListener('click', focusQueryInput)
 </script>
