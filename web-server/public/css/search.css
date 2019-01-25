@@ -52,14 +52,15 @@ pre.line-numbers code {
 
 .show:before {
     content: '';
+    z-index: 9999;
     width: 100px;
     height: auto;
     -webkit-border-radius: 50px / 25px;
     -moz-border-radius: 100px / 50px;
     border-radius: 100px / 50px;
-    border-top: 10px solid grey;
+    border-top: 8px solid grey;
     position: relative;
-    bottom: -35px;
+    bottom: -37px;
     border-right: 5px solid rgba(0,0,0,0);
     border-left: 5px solid rgba(0,0,0,0);
 }
