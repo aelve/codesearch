@@ -69,6 +69,7 @@ trait Search {
   private def csearch(request: SearchRequest): IO[List[String]] = {
     val indexDir = csearchDir.indexDirAs[String]
     val env      = ("CSEARCHINDEX", indexDir)
+
     for {
       _       <- logger.debug(s"running CSEARCHINDEX=$indexDir ${arguments(request).mkString(" ")}")
       results <- IO((Process(arguments(request), None, env) #| Seq("head", "-1001")).lineStream.toList)
@@ -78,14 +79,17 @@ trait Search {
   private def arguments(request: SearchRequest): List[String] = {
     def extensionsRegex: String = extensions.sourceExtensions.mkString(".*\\.(", "|", ")$")
     val forExtensions: String   = if (request.sourcesOnly) extensionsRegex else ".*"
+
     val query: String = {
       val preciseMatch: String = if (request.preciseMatch) Helper.preciseMatch(request.query) else request.query
       if (request.spaceInsensitive) SpaceInsensitive.spaceInsensitiveString(preciseMatch) else preciseMatch
     }
-    if (request.insensitive) {
-      List("csearch", "-n", "-i", "-f", forExtensions, query, request.filter)
-    } else {
-      List("csearch", "-n", "-f", forExtensions, query, request.filter)
+
+    request.filter match {
+      case Some(filter) if (request.insensitive) => List("csearch", "-n", "-i", "-f", forExtensions, query, filter)
+      case Some(filter)                          => List("csearch", "-n", "-f", forExtensions, query, filter)
+      case None if (request.insensitive)         => List("csearch", "-n", "-i", "-f", forExtensions, query)
+      case None                                  => List("csearch", "-n", "-f", forExtensions, query)
     }
   }
 

@@ -1,14 +1,13 @@
-@(actSearch: String, query: String, filter: String, insensitive: Boolean, space: Boolean, precise: Boolean, sources: Boolean)
-
+@(actSearch: String, query: String, filter: Option[String], insensitive: Boolean, space: Boolean, precise: Boolean, sources: Boolean)
 <section class="container-fluid">
-    <div class="col-lg-6 mx-auto p-3 h7 justify-content-center">
-        <form action=@actSearch method="get">
-            <div class="input-group">
-                <input type="text" class="form-control" name="query" value="@query">
-                
-                <input type="text" class="form-control" name="filter" value="@filter" placeholder="[Filter for query]">
+    <div class="col-lg-6 mx-auto p-3 h7 justify-content-center" style="position: relative;">
+        <form>
+            <div id="input-group" class="input-group">
+                <section class="warning">Fill this field!</section>
+                <input type="text" class="form-control" name="query" value="@query" class="query">
+                <input type="text" class="form-control" name="filter" value="@filter" class="filter" placeholder="[Filter for query]">
                 <span class="input-group-btn">
-                    <input class="btn btn-secondary" type="submit" value="Go!">
+                    <input class="btn btn-secondary btn-send-from" id="btn-send-from" type="button" value="Go!">
                 </span>
             </div>
             <div class="form-check form-check-inline">
@@ -23,23 +22,52 @@
                 <input type="checkbox" class="form-check-input" name="precise" id="precise-match" @(if (precise) "checked")>
                 <label class="form-check-label" for="precise-match">Precise match</label>
             </div>
-
-            <script>
-                    function changeSourcesOnly() {
-                        var v = document.getElementById("sources-only-hidden").value;
-                        if (v === "on") {
-                            document.getElementById("sources-only-hidden").value = "off"
-                        } else {
-                            document.getElementById("sources-only-hidden").value = "on"
-                        }
-                    }
-            </script>
-            <input type="hidden" name="sources" id="sources-only-hidden" value=@(if (sources) "on" else "off")>
             <div class="form-check form-check-inline">
-                <input type="checkbox" class="form-check-input" id="sources-only" onclick="changeSourcesOnly()" @(if (sources) "checked")>
-                <label class="form-check-label" for="sources-only">Sources only</label>
+                <input type="checkbox" class="form-check-input" name="sources" id="sources" @(if (sources) "checked")>
+                <label class="form-check-label" for="sources">Sources only</label>
             </div>
         </form>
     </div>
-
 </section>
+<script>
+        const inpQuery = document.getElementsByName("query")[0]
+        const inpFilter = document.getElementsByName("filter")[0]
+        function focusQueryInput() {
+            inpQuery.addEventListener('input', function(e){
+                if(inpQuery.value.trim().length >= 1) {
+                    document.getElementsByClassName('warning')[0].classList.remove('show')
+                    inpQuery.classList.remove('warn')
+                }
+            })
+        }
+        function FormValidate() {
+            if (inpQuery.value.trim().length) {
+                const sendArr = []
+                this.query = encodeURIComponent(inpQuery.value)
+                this.filter = inpFilter.value
+                this.inpsCheck = document.querySelectorAll('input[type="checkbox"]')
+                sendArr.push(this.filter != '' ? 'query='+this.query+'&filter='+this.filter : 'query='+this.query)
+                for (let i = 0; i < this.inpsCheck.length; i++) {
+                    if (this.inpsCheck[i].checked) {
+                        sendArr.push(`${this.inpsCheck[i].getAttribute('name')}=on`)
+                    } else {
+                        sendArr.push(`${this.inpsCheck[i].getAttribute('name')}=off`)
+                    }
+                }
+                let arr = sendArr.join('&')
+                document.location.href = document.location.pathname + '/search' + '?' + arr
+                const pathname = document.location.pathname
+                if(pathname.endsWith("/search"))
+                    document.location.href = pathname + '?' + arr
+                else
+                    document.location.href = pathname + '/search' + '?' + arr
+            } else {
+                if (!document.getElementsByClassName('warning')[0].classList.contains('show')) {
+                    document.getElementsByClassName('warning')[0].classList.add('show')
+                    inpQuery.classList.add('warn')
+                }
+            }
+        }
+        document.getElementById('btn-send-from').addEventListener('click', FormValidate)
+        inpQuery.addEventListener('click', focusQueryInput)
+</script>

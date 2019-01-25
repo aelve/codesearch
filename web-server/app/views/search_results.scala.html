@@ -1,6 +1,6 @@
 @import codesearch.core.search.Search.PackageResult
 
-@(updated: String, packages: Seq[PackageResult], query: String, filter: String, insensitive: Boolean, space: Boolean,
+@(updated: String, packages: Seq[PackageResult], query: String, filter: Option[String], insensitive: Boolean, space: Boolean,
         precise: Boolean, sources: Boolean, page: Int, totalMatches: Int, callURI: String, lang: String)
 
 @headExtra = {

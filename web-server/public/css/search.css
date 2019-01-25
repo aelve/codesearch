@@ -18,6 +18,53 @@ pre.line-numbers code {
     display: inline-block;
 }
 
+.filter:focus {
+    z-index: 5 !important;
+}
+
+.warn {
+    border: 1px solid red;
+    box-shadow:red 0px 0px 10px 2px;
+    z-index: 9999;
+}
+
+.warn:focus {
+    border: 1px solid red;
+    box-shadow:red 0px 0px 10px 2px;
+    z-index: 9999; } .warning {
+    display: none;
+}
+
+.show {
+    display: block !important;
+    position: absolute;
+    background: white none repeat scroll 0% 0%;
+    border: 1px solid grey;
+    padding: 10px 15px 10px 10px;
+    border-radius: 10px;
+    margin: 5px;
+    border: 2px solid grey;
+    top: -55px;
+    box-shadow: 0px 0px 10px 1px grey;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+}
+
+.show:before {
+    content: '';
+    z-index: 9999;
+    width: 100px;
+    height: auto;
+    -webkit-border-radius: 50px / 25px;
+    -moz-border-radius: 100px / 50px;
+    border-radius: 100px / 50px;
+    border-top: 8px solid grey;
+    position: relative;
+    bottom: -37px;
+    border-right: 5px solid rgba(0,0,0,0);
+    border-left: 5px solid rgba(0,0,0,0);
+}
+
 mark {
     /* highlight marks with gray */
     background-color: rgba(0,0,0,0.1);
@@ -38,4 +85,3 @@ code[class*="language-"] {
 h5 {
     /* add space between search results */
     margin-top: 2em;
-}
