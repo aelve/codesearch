@@ -1,4 +1,5 @@
-@(actSearch: String, query: String, filter: Option[String], insensitive: Boolean, space: Boolean, precise: Boolean, sources: Boolean)
+@(actSearch: String, query: String, filter: Option[String], specify: String, insensitive: Boolean, space: Boolean, precise: Boolean, sources: Boolean)
+
 <section class="container-fluid">
     <div class="col-lg-6 mx-auto p-3 h7 justify-content-center" style="position: relative;">
         <form>
@@ -9,6 +10,9 @@
                 <span class="input-group-btn">
                     <input class="btn btn-secondary btn-send-from" id="btn-send-from" type="button" value="Go!">
                 </span>
+            </div>
+            <div class="input-group" style="padding-top: 5px;">
+                <input type="text" class="form-control" name="specify" value="@specify" placeholder="[Specify the path]">
             </div>
             <div class="form-check form-check-inline">
                 <input type="checkbox" class="form-check-input" name="insensitive" id="insensitive-search" @(if (insensitive) "checked")>

@@ -24,6 +24,9 @@ object Tokenizer {
   /** A POSIX character class, e.g. `[:alpha:]`. */
   private def charSetPred[_: P] = P("[:" ~ (!":]" ~ AnyChar).rep ~ ":]")
 
+  private def specialSymbols[_: P] =
+    P("\\" | "." | "|" | "$" | "%" | "^" | "&" | "*" | "+" | "?" | "!" | "[" | "]" | "{" | "}" | "(" | ")").!
+
   /**Handles cases {n} and {n,} and {n, n}, example {33,}*/
   private def parseRepetitionSeq[_: P] =
     P("{" ~ (CharIn("0-9").rep(1) ~ ("," ~ CharIn("0-9").rep | "")) ~ "}").!.map(RepetitionSeq)

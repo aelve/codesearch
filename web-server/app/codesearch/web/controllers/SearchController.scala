@@ -38,6 +38,7 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
 
   def search(query: String,
              filter: Option[String],
+             specify: String,
              caseInsensitive: String,
              spaceInsenstive: String,
              precise: String,
@@ -45,7 +46,7 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
              page: String): Action[AnyContent] =
     Action.async { implicit request =>
       val request =
-        SearchRequest.applyRaw(lang, query, filter, caseInsensitive, spaceInsenstive, precise, sources, page)
+        SearchRequest.applyRaw(lang, query, filter, specify, caseInsensitive, spaceInsenstive, precise, sources, page)
 
       db.updated.flatMap { updated =>
         searchEngine.search(request) map {
@@ -56,6 +57,7 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
                 packages = results,
                 query = query,
                 filter = filter,
+                specify = specify,
                 insensitive = request.insensitive,
                 space = request.spaceInsensitive,
                 precise = request.preciseMatch,

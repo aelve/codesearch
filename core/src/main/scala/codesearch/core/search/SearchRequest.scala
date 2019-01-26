@@ -3,6 +3,7 @@ package codesearch.core.search
 /**
   * @param query input regular expression
   * @param filter filter for query
+  * @param specify field to specify the path
   * @param insensitive insensitive flag
   * @param spaceInsensitive space insensitive search flag
   * @param preciseMatch precise match flag
@@ -12,6 +13,7 @@ package codesearch.core.search
 case class SearchRequest(
     query: String,
     filter: Option[String],
+    specify: String,
     insensitive: Boolean,
     spaceInsensitive: Boolean,
     preciseMatch: Boolean,
@@ -25,6 +27,7 @@ object SearchRequest {
       lang: String,
       query: String,
       filter: Option[String],
+      specify: String,
       insensitive: String,
       spaceInsensitive: String,
       preciseMatch: String,
@@ -41,6 +44,7 @@ object SearchRequest {
     SearchRequest(
       query,
       filter,
+      specify,
       isEnabled(insensitive),
       isEnabled(spaceInsensitive),
       isEnabled(preciseMatch),
