@@ -60,7 +60,7 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
         searchEngine.search(request) map {
           case CSearchPage(results, total) =>
             Ok(
-              views.html.search_results(
+              views.html.searchResults(
                 updated = TimeAgo.using(updated.getTime),
                 packages = results,
                 query = query,
