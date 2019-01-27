@@ -13,7 +13,7 @@ package codesearch.core.search
 case class SearchRequest(
     query: String,
     filter: Option[String],
-    specify: String,
+    specifyPath: Option[String],
     insensitive: Boolean,
     spaceInsensitive: Boolean,
     preciseMatch: Boolean,
@@ -27,24 +27,28 @@ object SearchRequest {
       lang: String,
       query: String,
       filter: Option[String],
-      specify: String,
+      specifyPath: Option[String],
       insensitive: String,
       spaceInsensitive: String,
       preciseMatch: String,
       sourcesOnly: String,
       page: String
   ): SearchRequest = {
-    val callURI: String = filter match {
-      case Some(filter) =>
+    val callURI: String = (filter, specifyPath) match {
+      case (Some(filter), Some(specifyPath)) =>
+        s"/$lang/search?query=$query&filter=$filter&specifyPath=$specifyPath&insensitive=$insensitive&space=$spaceInsensitive&precise=$preciseMatch&sources=$sourcesOnly"
+      case (Some(filter), None) =>
         s"/$lang/search?query=$query&filter=$filter&insensitive=$insensitive&space=$spaceInsensitive&precise=$preciseMatch&sources=$sourcesOnly"
-      case None =>
+      case (None, Some(specifyPath)) =>
+        s"/$lang/search?query=$query&specifyPath=$specifyPath&insensitive=$insensitive&space=$spaceInsensitive&precise=$preciseMatch&sources=$sourcesOnly"
+      case (None, None) =>
         s"/$lang/search?query=$query&insensitive=$insensitive&space=$spaceInsensitive&precise=$preciseMatch&sources=$sourcesOnly"
     }
 
     SearchRequest(
       query,
       filter,
-      specify,
+      specifyPath,
       isEnabled(insensitive),
       isEnabled(spaceInsensitive),
       isEnabled(preciseMatch),

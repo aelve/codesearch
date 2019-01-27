@@ -76,12 +76,11 @@ trait Search {
   private def arguments(request: SearchRequest): List[String] = {
     def extensionsRegex: String = extensions.sourceExtensions.mkString(".*\\.(", "|", ")$")
 
-    val forExtensions: String = if (request.specify.isEmpty) {
-      if (request.sourcesOnly) extensionsRegex else ".*"
-    } else {
-      request.specify
+    val forExtensions: String = request.specifyPath match {
+      case Some(specifyPath) => specifyPath
+      case None              => if (request.sourcesOnly) extensionsRegex else ".*"
     }
-    
+
     val query: String = {
       val preciseMatch: String = if (request.preciseMatch) Helper.preciseMatch(request.query) else request.query
       if (request.spaceInsensitive) SpaceInsensitive.spaceInsensitiveString(preciseMatch) else preciseMatch

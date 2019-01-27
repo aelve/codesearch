@@ -1,4 +1,4 @@
-@(actSearch: String, query: String, filter: Option[String], specify: String, insensitive: Boolean, space: Boolean, precise: Boolean, sources: Boolean)
+@(actSearch: String, query: String, filter: Option[String], specifyPath: Option[String], insensitive: Boolean, space: Boolean, precise: Boolean, sources: Boolean)
 
 <section class="container-fluid">
     <div class="col-lg-6 mx-auto p-3 h7 justify-content-center" style="position: relative;">
@@ -12,7 +12,7 @@
                 </span>
             </div>
             <div class="input-group" style="padding-top: 5px;">
-                <input type="text" class="form-control" name="specify" value="@specify" placeholder="[Specify the path]">
+                <input type="text" class="form-control" name="specify" value="@specifyPath" placeholder="[Specify the path]">
             </div>
             <div class="form-check form-check-inline">
                 <input type="checkbox" class="form-check-input" name="insensitive" id="insensitive-search" @(if (insensitive) "checked")>
@@ -36,6 +36,8 @@
 <script>
         const inpQuery = document.getElementsByName("query")[0]
         const inpFilter = document.getElementsByName("filter")[0]
+        const inpSpecify = document.getElementsByName("specify")[0]
+
         function focusQueryInput() {
             inpQuery.addEventListener('input', function(e){
                 if(inpQuery.value.trim().length >= 1) {
@@ -48,9 +50,21 @@
             if (inpQuery.value.trim().length) {
                 const sendArr = []
                 this.query = encodeURIComponent(inpQuery.value)
-                this.filter = inpFilter.value
+                this.filter = encodeURIComponent(inpFilter.value)
+                this.specifyPath = encodeURIComponent(inpSpecify.value)
+
                 this.inpsCheck = document.querySelectorAll('input[type="checkbox"]')
-                sendArr.push(this.filter != '' ? 'query='+this.query+'&filter='+this.filter : 'query='+this.query)
+
+                sendArr.push('query='+this.query)
+
+                if (this.filter.trim().length) {
+                    sendArr.push('filter='+this.filter)
+                }
+
+                if (this.specifyPath.trim().length) {
+                    sendArr.push('specifyPath='+this.specifyPath)
+                }
+
                 for (let i = 0; i < this.inpsCheck.length; i++) {
                     if (this.inpsCheck[i].checked) {
                         sendArr.push(`${this.inpsCheck[i].getAttribute('name')}=on`)
