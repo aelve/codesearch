@@ -6,7 +6,10 @@ import java.nio.file.{Path => NioPath}
 
 import ammonite.ops.{Path, pwd}
 import cats.effect.{ContextShift, IO}
+import cats.Order
 import cats.syntax.flatMap._
+import cats.syntax.foldable._
+import cats.instances.list._
 import codesearch.core.config.{Config, HaskellConfig}
 import codesearch.core.db.HackageDB
 import codesearch.core.index.repository.{Downloader, HackagePackage, SourcesDownloader}
@@ -61,14 +64,16 @@ class HaskellIndex(haskellConfig: HaskellConfig)(
     Stream
       .evalUnChunk(IO(Chunk.array(INDEX_SOURCE_DIR.toIO.listFiles)))
       .filter(_.isDirectory)
-      .evalMap { packageName =>
+      .evalMap { packageDir =>
         IO {
-          packageName.getName -> packageName.listFiles
+          packageDir.listFiles.toList
             .filter(_.isDirectory)
             .map(_.getName)
-            .max(Ordering.fromLessThan(Version.less))
+            .maximumOption(Order.fromLessThan(Version.less))
+            .map(version => packageDir.getName -> version)
         }
       }
+      .unNone
   }
 
   override protected def buildFsUrl(packageName: String, version: String): NioPath =
