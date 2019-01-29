@@ -14,6 +14,7 @@ object Builder {
     version := "0.1",
     scalaVersion := "2.12.4",
     resolvers += Resolver.sbtPluginRepo("releases"),
+    scalacOptions := CompilerOptions.scalacOptions,
     scalacOptions in (Compile, console) -= "-Ywarn-unused-import",
     scalacOptions in (Compile, doc) ++= Seq("-diagrams", "-implicits"),
     scalacOptions in Test ++= Seq("-Yrangepos"),

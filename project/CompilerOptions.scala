@@ -1,5 +1,5 @@
-Builder.commonSettings ++ Seq(
-    scalacOptions := Seq(
+object CompilerOptions {
+    lazy val scalacOptions = Seq(
         "-deprecation",                      // Emit warning and location for usages of deprecated APIs.
         "-encoding", "utf-8",                // Specify character encoding used by source files.
         "-explaintypes",                     // Explain type errors in more detail.
@@ -44,4 +44,4 @@ Builder.commonSettings ++ Seq(
         "-Ywarn-unused:privates",            // Warn if a private member is unused.
         "-Ywarn-value-discard",              // Warn when non-Unit expression results are unused.
     )
-)
+}
