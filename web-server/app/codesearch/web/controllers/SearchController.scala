@@ -38,9 +38,9 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
 
   def search(query: String,
              filter: Option[String],
-             specifyPath: Option[String],
+             specialPath: Option[String],
              caseInsensitive: String,
-             spaceInsenstive: String,
+             spaceInsensitive: String,
              precise: String,
              sources: String,
              page: String): Action[AnyContent] =
@@ -51,9 +51,9 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
                                lang,
                                query,
                                filter,
-                               specifyPath,
+                               specialPath,
                                caseInsensitive,
-                               spaceInsenstive,
+                               spaceInsensitive,
                                precise,
                                sources,
                                page)
@@ -67,7 +67,7 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
                 packages = results,
                 query = query,
                 filter = filter,
-                specifyPath = specifyPath,
+                specialPath = specialPath,
                 insensitive = searchRequest.insensitive,
                 space = searchRequest.spaceInsensitive,
                 precise = searchRequest.preciseMatch,
