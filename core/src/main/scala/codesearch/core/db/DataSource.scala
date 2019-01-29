@@ -1,15 +1,16 @@
 package codesearch.core.db
 
 import cats.effect.{Async, ContextShift, Resource, Sync}
+import cats.syntax.functor._
 import codesearch.core.config.DatabaseConfig
 import doobie.hikari.HikariTransactor
 import doobie.util.ExecutionContexts
-import javax.sql.DataSource
+import javax.sql.{DataSource => JavaxDataSource}
 import org.flywaydb.core.Flyway
 
 object DataSource {
 
-  def migrate[F[_]: Sync](ds: DataSource): F[Unit] = Sync[F].delay {
+  def migrate[F[_]: Sync](ds: JavaxDataSource): F[Unit] = Sync[F].delay {
     Flyway.configure().dataSource(ds).load().migrate()
   }
 
@@ -18,14 +19,14 @@ object DataSource {
     for {
       connectEC     <- ExecutionContexts.fixedThreadPool[F](32)
       transactionEC <- ExecutionContexts.cachedThreadPool[F]
-    } yield
-      HikariTransactor.newHikariTransactor(
-        config.properties.driver,
-        config.properties.url,
+      xa <- HikariTransactor.newHikariTransactor(
+        properties.driver,
+        properties.url,
         user,
         password,
         connectEC,
         transactionEC
       )
+    } yield xa
   }
 }

@@ -1,18 +1,26 @@
 package codesearch.core
 
 import cats.effect._
-import cats.instances.list._
 import cats.syntax.applicative._
-import cats.syntax.foldable._
-import cats.syntax.traverse._
+import cats.syntax.flatMap._
+import cats.syntax.functor._
 import codesearch.core.Main.{LangRep, Params}
+import codesearch.core.config.{Config, DatabaseConfig}
+import codesearch.core.db.DataSource
 import codesearch.core.model.DefaultTable
+import codesearch.core.util.manatki.Raise
+import codesearch.core.util.manatki.syntax.raise._
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
-class Program(langReps: Map[String, LangRep[_ <: DefaultTable]], logger: Logger[IO]) {
+case class InvalidLang(lang: String) extends RuntimeException(s"Unsupported language $lang")
 
-  def run(params: Params): IO[ExitCode] =
+class Program[F[_]: Async: ContextShift: Raise[?[_], InvalidLang]](
+    langReps: Map[String, LangRep[_ <: DefaultTable]],
+    logger: Logger[F]
+) {
+
+  def run(params: Params, config: Config): F[ExitCode] = {
     for {
       _ <- if (params.lang == "all") {
         logger.info("Codesearch-core started for all supported languages")
@@ -20,55 +28,53 @@ class Program(langReps: Map[String, LangRep[_ <: DefaultTable]], logger: Logger[
         logger.info(s"Codesearch-core started for language ${params.lang}")
       }
 
-      _ <- initDb(params).whenA(params.initDB)
+      _ <- migrate(config.db)
       _ <- downloadMeta(params).whenA(params.downloadMeta)
       _ <- updatePackages(params).whenA(params.updatePackages)
       _ <- buildIndex(params).whenA(params.buildIndex)
 
     } yield ExitCode.Success
+  }
 
-  object InvalidLang extends RuntimeException(s"Unsupported language")
-
-  def findRepositories(lang: String): IO[List[LangRep[_]]] = {
-    if (lang == "all") {
-      IO.pure(langReps.values.toList)
-    } else {
-      langReps.get(lang) match {
-        case Some(l) => IO.pure(List(l))
-        case None    => IO.raiseError(InvalidLang)
-      }
+  private def migrate(config: DatabaseConfig): F[Unit] = {
+    DataSource.transactor[F](config).use { xa =>
+      for { _ <- xa.configure(DataSource.migrate[F]) } yield ()
     }
   }
 
-  def initDb(params: Params): IO[Unit] =
-    for {
-      languages <- findRepositories(params.lang)
-      _         <- languages.traverse_(_.db.initDB)
-    } yield ()
+  private def findRepositories(lang: String): F[List[LangRep[_]]] = {
+    if (lang == "all")
+      langReps.values.toList.pure[F].widen
+    else
+      langReps.get(lang) match {
+        case Some(l) => List(l).pure[F].widen
+        case None    => InvalidLang(lang).raise
+      }
+  }
 
-  def downloadMeta(params: Params): IO[Unit] = {
+  private def downloadMeta(params: Params): F[Unit] = {
     for {
       languages <- findRepositories(params.lang)
-      _         <- languages.traverse_(_.langIndex.downloadMetaInformation)
+      //      _         <- languages.traverse_(_.langIndex.downloadMetaInformation)
     } yield ()
   }
 
-  def updatePackages(params: Params): IO[Unit] =
+  private def updatePackages(params: Params): F[Unit] =
     for {
       languages <- findRepositories(params.lang)
-      updated   <- languages.traverse(_.langIndex.updatePackages)
-      _         <- logger.info(s"Updated: ${updated.sum}")
+      //      updated   <- languages.traverse(_.langIndex.updatePackages)
+      //      _         <- logger.info(s"Updated: ${updated.sum}")
     } yield ()
 
-  def buildIndex(params: Params): IO[Unit] =
+  private def buildIndex(params: Params): F[Unit] =
     for {
       languages <- findRepositories(params.lang)
-      _         <- languages.traverse_(_.langIndex.buildIndex)
-      _         <- logger.info(s"${params.lang} packages successfully indexed")
+      //      _         <- languages.traverse_(_.langIndex.buildIndex)
+      _ <- logger.info(s"${params.lang} packages successfully indexed")
     } yield ()
 }
 
 object Program {
-  def apply(langReps: Map[String, LangRep[_ <: DefaultTable]]): IO[Program] =
-    Slf4jLogger.fromClass[IO](getClass).map(logger => new Program(langReps, logger))
+  def apply[F[_]: Async: ContextShift](langReps: Map[String, LangRep[_ <: DefaultTable]]): F[Program[F]] =
+    Slf4jLogger.fromClass[F](getClass).map(logger => new Program(langReps, logger))
 }
