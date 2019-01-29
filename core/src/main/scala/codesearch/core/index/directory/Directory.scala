@@ -2,7 +2,7 @@ package codesearch.core.index.directory
 
 import java.nio.file.{Path, Paths}
 
-import codesearch.core.index.directory.Preamble._
+import codesearch.core.syntax.path._
 import codesearch.core.index.repository._
 import simulacrum.typeclass
 

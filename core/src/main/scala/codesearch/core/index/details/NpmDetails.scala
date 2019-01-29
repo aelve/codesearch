@@ -8,7 +8,7 @@ import cats.effect.{ContextShift, IO}
 import codesearch.core._
 import codesearch.core.index.details.NpmDetails.FsIndexRoot
 import codesearch.core.index.directory.Directory
-import codesearch.core.index.directory.Preamble._
+import codesearch.core.syntax.path._
 import codesearch.core.index.repository.Downloader
 import com.softwaremill.sttp.{SttpBackend, _}
 import fs2.io._

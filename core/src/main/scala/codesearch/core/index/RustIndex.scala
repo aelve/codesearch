@@ -10,7 +10,7 @@ import codesearch.core.config.{Config, RustConfig}
 import codesearch.core.db.CratesDB
 import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
-import codesearch.core.index.directory.Preamble._
+import codesearch.core.syntax.path._
 import codesearch.core.index.directory.СSearchDirectory
 import codesearch.core.index.directory.СSearchDirectory.RustCSearchIndex
 import codesearch.core.index.repository.{CratesPackage, Downloader, SourcesDownloader}

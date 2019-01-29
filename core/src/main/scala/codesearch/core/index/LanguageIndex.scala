@@ -10,7 +10,7 @@ import codesearch.core.db.DefaultDB
 import codesearch.core.index.directory.{Directory, СSearchDirectory}
 import codesearch.core.index.repository._
 import codesearch.core.model.DefaultTable
-import codesearch.core.util.fs2.stream._
+import codesearch.core.syntax.stream._
 import fs2.Stream
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
