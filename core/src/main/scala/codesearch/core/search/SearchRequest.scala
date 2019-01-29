@@ -1,5 +1,7 @@
 package codesearch.core.search
 
+import com.softwaremill.sttp._
+
 /**
   * @param query input regular expression
   * @param filter filter for query
@@ -19,11 +21,12 @@ case class SearchRequest(
     preciseMatch: Boolean,
     sourcesOnly: Boolean,
     page: Int,
-    callURI: String
+    callURI: Uri
 )
 
 object SearchRequest {
   def applyRaw(
+      host: String,
       lang: String,
       query: String,
       filter: Option[String],
@@ -34,16 +37,7 @@ object SearchRequest {
       sourcesOnly: String,
       page: String
   ): SearchRequest = {
-    val callURI: String = (filter, specifyPath) match {
-      case (Some(filter), Some(specifyPath)) =>
-        s"/$lang/search?query=$query&filter=$filter&specifyPath=$specifyPath&insensitive=$insensitive&space=$spaceInsensitive&precise=$preciseMatch&sources=$sourcesOnly"
-      case (Some(filter), None) =>
-        s"/$lang/search?query=$query&filter=$filter&insensitive=$insensitive&space=$spaceInsensitive&precise=$preciseMatch&sources=$sourcesOnly"
-      case (None, Some(specifyPath)) =>
-        s"/$lang/search?query=$query&specifyPath=$specifyPath&insensitive=$insensitive&space=$spaceInsensitive&precise=$preciseMatch&sources=$sourcesOnly"
-      case (None, None) =>
-        s"/$lang/search?query=$query&insensitive=$insensitive&space=$spaceInsensitive&precise=$preciseMatch&sources=$sourcesOnly"
-    }
+    val callURI: Uri = uri"$host/$lang/search?query=$query&filter=$filter&specifyPath=$specifyPath&insensitive=$insensitive&space=$spaceInsensitive&precise=$preciseMatch&sources=$sourcesOnly"
 
     SearchRequest(
       query,
