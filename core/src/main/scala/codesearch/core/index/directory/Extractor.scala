@@ -18,10 +18,10 @@ private[index] trait Extractor {
     * @param from is file to unarchiving
     * @param to is target directory
     */
-  def unzipUsingMethod[F[_]](from: File, to: Path)(implicit F: Sync[F]): F[Unit] = F.delay(
+  def unzipUsingMethod[F[_]](from: Path, to: Path)(implicit F: Sync[F]): F[Unit] = F.delay(
     ArchiverFactory
       .createArchiver(TAR, GZIP)
-      .extract(from, to.toFile)
+      .extract(from.toFile, to.toFile)
   )
 
   /** Return directory containing all unarchived files and directories
@@ -30,7 +30,7 @@ private[index] trait Extractor {
     * @param directory is target directory
     * @return directory containing all unarchived files and directories
     */
-  def extract[F[_]: Sync](archive: File, directory: Path): F[Path] =
+  def extract[F[_]: Sync](archive: Path, directory: Path): F[Path] =
     for {
       _    <- unzipUsingMethod(archive, directory)
       path <- flatDir(directory)

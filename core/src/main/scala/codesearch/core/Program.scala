@@ -49,7 +49,7 @@ class Program(langReps: Map[String, LangRep[_ <: DefaultTable]], logger: Logger[
   def downloadMeta(params: Params): IO[Unit] = {
     for {
       languages <- findRepositories(params.lang)
-      _         <- languages.traverse_(_.langIndex.downloadMetaInformation)
+      _         <- languages.traverse_(_.metaDownloader.downloadMeta)
     } yield ()
   }
 
