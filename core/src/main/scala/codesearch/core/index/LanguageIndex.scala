@@ -10,6 +10,7 @@ import codesearch.core.db.DefaultDB
 import codesearch.core.index.directory.{Directory, СSearchDirectory}
 import codesearch.core.index.repository._
 import codesearch.core.model.DefaultTable
+import codesearch.core.syntax.stream._
 import fs2.Stream
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
@@ -83,11 +84,9 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
     */
   def updatePackages: IO[Int] = {
     for {
-      _           <- logger.debug("UPDATE PACKAGES")
-      packagesMap <- verNames.map(_.toMap)
-      packagesCount <- getLastVersions.filter {
-        case (packageName, currentVersion) =>
-          !packagesMap.get(packageName).contains(currentVersion)
+      _ <- logger.debug("UPDATE PACKAGES")
+      packagesCount <- getLastVersions.filterNotM {
+        case (packageName, packageVersion) => packageIsExists(packageName, packageVersion)
       }.mapAsyncUnordered(concurrentTasksCount)(updateSources _ tupled).compile.foldMonoid
     } yield packagesCount
   }

@@ -52,6 +52,14 @@ trait DefaultDB[T <: DefaultTable] {
     IO.fromFuture(IO(db.run(act)))
   }
 
+  def packageIsExists(packageName: String, packageVersion: String): IO[Boolean] = {
+    val act = table
+      .filter(p => p.packageName === packageName && p.lastVersion === packageVersion)
+      .exists
+      .result
+    IO.fromFuture(IO(db.run(act)))
+  }
+
   def verByName(packageName: String): Future[Option[String]] = {
     val act = table
       .filter(_.packageName === packageName)
