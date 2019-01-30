@@ -81,7 +81,7 @@ trait Search {
 
     val forExtensions: String = request.filePath match {
       case Some(filePath) => filePath
-      case None              => if (request.sourcesOnly) extensionsRegex else ".*"
+      case None           => if (request.sourcesOnly) extensionsRegex else ".*"
     }
 
     val query: String = {
