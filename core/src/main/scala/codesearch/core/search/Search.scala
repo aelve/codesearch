@@ -79,8 +79,8 @@ trait Search {
   private def arguments(request: SearchRequest): List[String] = {
     def extensionsRegex: String = extensions.sourceExtensions.mkString(".*\\.(", "|", ")$")
 
-    val forExtensions: String = request.specialPath match {
-      case Some(specialPath) => specialPath
+    val forExtensions: String = request.filePath match {
+      case Some(filePath) => filePath
       case None              => if (request.sourcesOnly) extensionsRegex else ".*"
     }
 
