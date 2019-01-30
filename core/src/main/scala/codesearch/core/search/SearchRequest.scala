@@ -21,12 +21,22 @@ case class SearchRequest(
     preciseMatch: Boolean,
     sourcesOnly: Boolean,
     page: Int,
-    callURI: Uri
-)
+) {
+
+  /**
+    * @param host host for building url
+    * @return url for next page in pagination
+    */
+  def callURI(host: String): Uri = {
+    val (insensitive, spaceInsensitive, preciseMatch, sourcesOnly) =
+      Seq(insensitive, spaceInsensitive, preciseMatch, sourcesOnly).map(v => if (v) "on" else "off")
+
+    uri"$host/$lang/search?query=$query&filter=$filter&filePath=$filePath&insensitive=$insensitive&space=$spaceInsensitive&precise=$preciseMatch&sources=$sourcesOnly"
+  }
+}
 
 object SearchRequest {
   def applyRaw(
-      host: String,
       lang: String,
       query: String,
       filter: Option[String],
@@ -37,9 +47,6 @@ object SearchRequest {
       sourcesOnly: String,
       page: String
   ): SearchRequest = {
-    val callURI: Uri =
-      uri"$host/$lang/search?query=$query&filter=$filter&filePath=$filePath&insensitive=$insensitive&space=$spaceInsensitive&precise=$preciseMatch&sources=$sourcesOnly"
-
     SearchRequest(
       query,
       filter,
@@ -49,7 +56,6 @@ object SearchRequest {
       isEnabled(preciseMatch),
       isEnabled(sourcesOnly),
       page.toInt,
-      callURI
     )
   }
 

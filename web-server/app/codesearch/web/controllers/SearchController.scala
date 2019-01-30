@@ -47,8 +47,7 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
     Action.async { implicit request =>
       val host: String = request.host
       val searchRequest =
-        SearchRequest.applyRaw(host,
-                               lang,
+        SearchRequest.applyRaw(lang,
                                query,
                                filter,
                                filePath,
@@ -74,7 +73,7 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
                 sources = searchRequest.sourcesOnly,
                 page = searchRequest.page,
                 totalMatches = total,
-                callURI = searchRequest.callURI.toString,
+                callURI = searchRequest.callURI(host).toString,
                 lang = lang
               )
             )
