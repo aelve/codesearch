@@ -13,6 +13,7 @@ import com.softwaremill.sttp._
   * @param page next pagination
   */
 case class SearchRequest(
+    lang: String,
     query: String,
     filter: Option[String],
     filePath: Option[String],
@@ -20,7 +21,7 @@ case class SearchRequest(
     spaceInsensitive: Boolean,
     preciseMatch: Boolean,
     sourcesOnly: Boolean,
-    page: Int,
+    page: Int
 ) {
 
   /**
@@ -28,10 +29,11 @@ case class SearchRequest(
     * @return url for next page in pagination
     */
   def callURI(host: String): Uri = {
-    val (insensitive, spaceInsensitive, preciseMatch, sourcesOnly) =
-      Seq(insensitive, spaceInsensitive, preciseMatch, sourcesOnly).map(v => if (v) "on" else "off")
+    def stringify(x: Boolean): String = if (x) "on" else "off"
 
-    uri"$host/$lang/search?query=$query&filter=$filter&filePath=$filePath&insensitive=$insensitive&space=$spaceInsensitive&precise=$preciseMatch&sources=$sourcesOnly"
+    val params = s"insensitive=${stringify(insensitive)}&space=${stringify(spaceInsensitive)}&precise=${stringify(preciseMatch)}&sources=${stringify(sourcesOnly)}"
+
+    uri"$host/$lang/search?query=$query&filter=$filter&filePath=$filePath&$params"
   }
 }
 
@@ -48,6 +50,7 @@ object SearchRequest {
       page: String
   ): SearchRequest = {
     SearchRequest(
+      lang,
       query,
       filter,
       filePath,
