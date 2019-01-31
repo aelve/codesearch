@@ -1,6 +1,6 @@
 @import codesearch.core.search.Search.PackageResult
 
-@(updated: String, packages: Seq[PackageResult], query: String, filter: Option[String], insensitive: Boolean, space: Boolean,
+@(updated: String, packages: Seq[PackageResult], query: String, filter: Option[String], filePath: Option[String], insensitive: Boolean, space: Boolean,
         precise: Boolean, sources: Boolean, page: Int, totalMatches: Int, callURI: String, lang: String)
 
 @headExtra = {
@@ -13,7 +13,7 @@
 }
 
 @wrapper(s"Codesearch | $lang", headExtra){
-    @searchBox(s"/$lang/search", query, filter, insensitive, space, precise, sources)
+    @searchBox(s"/$lang/search", query, filter, filePath,  insensitive, space, precise, sources)
     @resultFrame(lang, insensitive, space, precise, query, updated, packages, totalMatches)
     @pagination(page, totalMatches, callURI)
 }

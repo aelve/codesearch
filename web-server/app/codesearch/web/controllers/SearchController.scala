@@ -38,31 +38,34 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
 
   def search(query: String,
              filter: Option[String],
+             filePath: Option[String],
              caseInsensitive: String,
-             spaceInsenstive: String,
+             spaceInsensitive: String,
              precise: String,
              sources: String,
              page: String): Action[AnyContent] =
     Action.async { implicit request =>
-      val request =
-        SearchRequest.applyRaw(lang, query, filter, caseInsensitive, spaceInsenstive, precise, sources, page)
+      val host: String = request.host
+      val searchRequest =
+        SearchRequest.applyRaw(lang, query, filter, filePath, caseInsensitive, spaceInsensitive, precise, sources, page)
 
       db.updated.flatMap { updated =>
-        searchEngine.search(request) map {
+        searchEngine.search(searchRequest) map {
           case CSearchPage(results, total) =>
             Ok(
-              views.html.search_results(
+              views.html.searchResults(
                 updated = TimeAgo.using(updated.getTime),
                 packages = results,
                 query = query,
                 filter = filter,
-                insensitive = request.insensitive,
-                space = request.spaceInsensitive,
-                precise = request.preciseMatch,
-                sources = request.sourcesOnly,
-                page = request.page,
+                filePath = filePath,
+                insensitive = searchRequest.insensitive,
+                space = searchRequest.spaceInsensitive,
+                precise = searchRequest.preciseMatch,
+                sources = searchRequest.sourcesOnly,
+                page = searchRequest.page,
                 totalMatches = total,
-                callURI = request.callURI,
+                callURI = searchRequest.callURI(host).toString,
                 lang = lang
               )
             )
