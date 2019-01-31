@@ -31,7 +31,8 @@ case class SearchRequest(
   def callURI(host: String): Uri = {
     def stringify(x: Boolean): String = if (x) "on" else "off"
 
-    val params = s"insensitive=${stringify(insensitive)}&space=${stringify(spaceInsensitive)}&precise=${stringify(preciseMatch)}&sources=${stringify(sourcesOnly)}"
+    val params = s"insensitive=${stringify(insensitive)}&space=${stringify(spaceInsensitive)}&precise=${stringify(
+      preciseMatch)}&sources=${stringify(sourcesOnly)}"
 
     uri"$host/$lang/search?query=$query&filter=$filter&filePath=$filePath&$params"
   }
