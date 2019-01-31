@@ -25,8 +25,8 @@ object FileFilter {
   def apply[A: FileFilter]: FileFilter[A] = implicitly
 
   def create[A](E: Extensions): FileFilter[A] = new FileFilter[A] {
-    val maxFileSize: Int = 1024 * 1024
-    val allowedFileNames = Set("makefile", "dockerfile", "readme", "changelog", "changes")
+    val maxFileSize: Int              = 1024 * 1024
+    val allowedFileNames: Set[String] = Set("makefile", "rakefile", "dockerfile", "readme", "changelog", "changes")
 
     def filter(file: File): Boolean = {
       val fileName = file.getName.toLowerCase

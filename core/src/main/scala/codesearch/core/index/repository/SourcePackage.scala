@@ -37,6 +37,7 @@ private[index] final case class GemPackage(
       .filter(file => allowedSet.exists(file.getName.toLowerCase.endsWith))
       .foreach(file => ArchiverFactory.createArchiver(TAR, GZIP).extract(file, destDir))
   }
+  override def flatDir[F[_]](unarchived: Path)(implicit F: Sync[F]): F[Path] = F.delay(unarchived)
 }
 
 private[index] final case class CratesPackage(
