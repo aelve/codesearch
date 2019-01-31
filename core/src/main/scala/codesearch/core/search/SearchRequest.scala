@@ -29,7 +29,7 @@ case class SearchRequest(
     * @return url for next page in pagination
     */
   def callURI(host: String): Uri = {
-    def stringify(x: Boolean): String = if (x) "on" else "off"m 8
+    def stringify(x: Boolean): String = if (x) "on" else "off"
 
     uri"$host/$lang/search?query=$query&filter=$filter&filePath=$filePath&insensitive=${stringify(insensitive)}&space=${stringify(
       spaceInsensitive)}&precise=${stringify(preciseMatch)}&sources=${stringify(sourcesOnly)}"
