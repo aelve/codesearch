@@ -6,6 +6,7 @@
             <div id="input-group" class="input-group">
                 <section class="warning">Fill this field!</section>
                 <input type="text" class="form-control" name="query" value="@query" class="query">
+                <section class="warning-filter">Enter more than two characters!</section>
                 <input type="text" class="form-control" name="filter" value="@filter" class="filter" placeholder="[Filter for query]">
                 <span class="input-group-btn">
                     <input class="btn btn-secondary btn-send-from" id="btn-send-from" type="button" value="Go!">
@@ -46,39 +47,55 @@
                 }
             })
         }
+
+        function focusFilterInput() {
+            inpFilter.addEventListener('input', function(e){
+                if(inpFilter.value.trim().length > 2 || inpFilter.value.trim().length <= 0) {
+                    document.getElementsByClassName('warning-filter')[0].classList.remove('show-filter')
+                    inpFilter.classList.remove('warn')
+                }
+            })
+        }
         function FormValidate() {
             if (inpQuery.value.trim().length) {
-                const sendArr = []
-                this.query = encodeURIComponent(inpQuery.value)
-                this.filter = encodeURIComponent(inpFilter.value)
-                this.filePath = encodeURIComponent(inpPath.value)
+                if (inpFilter.value.trim().length <= 0 || inpFilter.value.trim().length > 2) {
+                    const sendArr = []
+                    this.query = encodeURIComponent(inpQuery.value)
+                    this.filter = encodeURIComponent(inpFilter.value)
+                    this.filePath = encodeURIComponent(inpPath.value)
 
-                this.inpsCheck = document.querySelectorAll('input[type="checkbox"]')
+                    this.inpsCheck = document.querySelectorAll('input[type="checkbox"]')
 
-                sendArr.push('query='+this.query)
+                    sendArr.push('query='+this.query)
 
-                if (this.filter.trim().length) {
-                    sendArr.push('filter='+this.filter)
-                }
+                    if (this.filter.trim().length > 2) {
+                        sendArr.push('filter='+this.filter)
+                    }
 
-                if (this.filePath.trim().length) {
-                    sendArr.push('filePath='+this.filePath)
-                }
+                    if (this.filePath.trim().length) {
+                        sendArr.push('filePath='+this.filePath)
+                    }
 
-                for (let i = 0; i < this.inpsCheck.length; i++) {
-                    if (this.inpsCheck[i].checked) {
-                        sendArr.push(`${this.inpsCheck[i].getAttribute('name')}=on`)
-                    } else {
-                        sendArr.push(`${this.inpsCheck[i].getAttribute('name')}=off`)
+                    for (let i = 0; i < this.inpsCheck.length; i++) {
+                        if (this.inpsCheck[i].checked) {
+                            sendArr.push(`${this.inpsCheck[i].getAttribute('name')}=on`)
+                        } else {
+                            sendArr.push(`${this.inpsCheck[i].getAttribute('name')}=off`)
+                        }
+                    }
+                    let arr = sendArr.join('&')
+                    document.location.href = document.location.pathname + '/search' + '?' + arr
+                    const pathname = document.location.pathname
+                    if(pathname.endsWith("/search"))
+                        document.location.href = pathname + '?' + arr
+                    else
+                        document.location.href = pathname + '/search' + '?' + arr
+                } else {
+                    if (!document.getElementsByClassName('warning-filter')[0].classList.contains('show-filter')) {
+                        document.getElementsByClassName('warning-filter')[0].classList.add('show-filter')
+                        inpFilter.classList.add('warn')
                     }
                 }
-                let arr = sendArr.join('&')
-                document.location.href = document.location.pathname + '/search' + '?' + arr
-                const pathname = document.location.pathname
-                if(pathname.endsWith("/search"))
-                    document.location.href = pathname + '?' + arr
-                else
-                    document.location.href = pathname + '/search' + '?' + arr
             } else {
                 if (!document.getElementsByClassName('warning')[0].classList.contains('show')) {
                     document.getElementsByClassName('warning')[0].classList.add('show')
@@ -88,4 +105,5 @@
         }
         document.getElementById('btn-send-from').addEventListener('click', FormValidate)
         inpQuery.addEventListener('click', focusQueryInput)
+        inpFilter.addEventListener('click', focusFilterInput)
 </script>
