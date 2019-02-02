@@ -19,7 +19,7 @@ import org.apache.commons.io.FileUtils
 import scala.concurrent.duration.Duration
 
 trait Downloader[F[_]] {
-  def download(from: Uri, to: Path): F[File]
+  def download(from: Uri, to: Path): F[Path]
   def download(from: Uri): Stream[F, Byte]
 }
 
@@ -39,9 +39,9 @@ object Downloader {
         * @param to is path for downloaded file. If the file does not exist for this path will be create.
         * @return downloaded archive file with sources.
         */
-      def download(from: Uri, to: Path): F[File] = {
+      def download(from: Uri, to: Path): F[Path] = {
         val packageDir = to.toFile.getParentFile
-        F.delay(packageDir.mkdirs).bracketCase(_ => save(from, to).as(to.toFile)) {
+        F.delay(packageDir.mkdirs).bracketCase(_ => save(from, to).as(to)) {
           case (_, Error(_)) => F.delay(FileUtils.deleteDirectory(packageDir.getParentFile))
           case _             => F.unit
         }

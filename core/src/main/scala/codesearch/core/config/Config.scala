@@ -1,5 +1,8 @@
 package codesearch.core.config
 
+import java.net.URI
+import java.nio.file.Path
+
 import cats.effect.Sync
 import pureconfig.module.catseffect._
 import pureconfig.{CamelCase, ConfigFieldMapping, ProductHint}
@@ -15,18 +18,41 @@ case class DatabaseConfig(
 case class SnippetConfig(pageSize: Int, linesBefore: Int, linesAfter: Int)
 
 case class LanguagesConfig(
-    haskellConfig: HaskellConfig,
-    rubyConfig: RubyConfig,
-    rustConfig: RustConfig,
-    javaScriptConfig: JavaScriptConfig
+    haskell: HaskellConfig,
+    ruby: RubyConfig,
+    rust: RustConfig,
+    javascript: JavaScriptConfig
 )
 
-case class HaskellConfig(concurrentTasksCount: Int)
-case class RubyConfig(concurrentTasksCount: Int)
-case class RustConfig(concurrentTasksCount: Int)
-case class JavaScriptConfig(concurrentTasksCount: Int)
+case class HaskellConfig(
+    repoIndexUrl: URI,
+    repoArchivePath: Path,
+    repoPath: Path,
+    concurrentTasksCount: Int
+)
 
-object Config {
+case class RubyConfig(
+    repoIndexUrl: URI,
+    repoArchivePath: Path,
+    repoJsonPath: Path,
+    scriptPath: Path,
+    concurrentTasksCount: Int
+)
+
+case class RustConfig(
+    repoIndexUrl: URI,
+    repoArchivePath: Path,
+    repoPath: Path,
+    concurrentTasksCount: Int
+)
+
+case class JavaScriptConfig(
+    repoIndexUrl: URI,
+    repoJsonPath: Path,
+    concurrentTasksCount: Int
+)
+
+object Config extends ConfigReaders {
 
   implicit def hint[T]: ProductHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
 

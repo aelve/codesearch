@@ -28,12 +28,6 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
   protected def concurrentTasksCount: Int
 
   /**
-    * Download meta information about packages from remote repository
-    * e.g. for Haskell is list of versions and cabal file for each version
-    */
-  def downloadMetaInformation: IO[Unit]
-
-  /**
     * Build new index from only latest version of each package and
     * replace old index with new one.
     *

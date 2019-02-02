@@ -29,10 +29,10 @@ private[index] final case class GemPackage(
     version: String
 ) extends SourcePackage {
   val url: Uri = uri"https://rubygems.org/downloads/$name-$version.gem"
-  override def unzipUsingMethod[F[_]](from: File, to: Path)(implicit F: Sync[F]): F[Unit] = F.delay {
+  override def unzipUsingMethod[F[_]](from: Path, to: Path)(implicit F: Sync[F]): F[Unit] = F.delay {
     val destDir    = to.toFile
     val allowedSet = Set("tgz", "tar.gz")
-    ArchiverFactory.createArchiver(TAR).extract(from, destDir)
+    ArchiverFactory.createArchiver(TAR).extract(from.toFile, destDir)
     destDir.listFiles
       .filter(file => allowedSet.exists(file.getName.toLowerCase.endsWith))
       .foreach(file => ArchiverFactory.createArchiver(TAR, GZIP).extract(file, destDir))
