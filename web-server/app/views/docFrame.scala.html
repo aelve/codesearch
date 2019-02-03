@@ -1,10 +1,66 @@
-<div class="lead h6"><a href="https://swtch.com/~rsc/regexp/regexp4.html">How it works</a></div>
-<span class="lead h6">
-    The regexp syntax is <a href="https://github.com/google/re2">RE2</a>'s:
-        <ul><li>c (single character)</li><li>e? (zero or one)</li>
-            <li>e* (zero or more)</li>
-            <li>e+ (one or more)</li>
-            <li>e1 | e2 (alternation)</li>
-            <li>e1 e2 (concatenation)</li>
-        </ul>
-</span>
+<h4 class="mt-5">Syntax</h4>
+<p>
+  The regexp engine is <a href="https://github.com/google/re2">RE2</a>. Most of
+  Perl's regexes are supported, except for lookaround and backreferences.
+  See <a href="https://github.com/google/re2/wiki/Syntax">RE2's syntax
+  guide</a>.
+</p>
+
+<h4 class="mt-5">Features</h4>
+<p>
+  We support the following filters:
+</p>
+<dl class="row ml-5">
+  <dt class="col-sm-12">Only files containing...</dt>
+  <dd class="col-sm-8">
+    Search in files containing given regex. Useful if you want to search only in
+    files importing a certain module or using a certain feature.
+  </dd>
+  <dt class="col-sm-12">Only paths matching...</dt>
+  <dd class="col-sm-8">
+    Search paths matching given regex.
+  </dd>
+</dl>
+<p>
+  And checkboxes!
+</p>
+<dl class="row ml-5">
+  <dt class="col-sm-12">Case-insensitive search</dt>
+  <dd class="col-sm-8">
+    What it says on the tin.
+  </dd>
+  <dt class="col-sm-12">Space-insensitive search</dt>
+  <dd class="col-sm-8">
+    Treat single spaces as "one or several spaces". For exactly one space, add a
+    backslash. You actually want this to be enabled most of the time you're
+    searching for code, but it's still experimental so we don't enable it by
+    default yet.
+  </dd>
+  <dt class="col-sm-12">Precise match</dt>
+  <dd class="col-sm-8">
+    Don't interpret regex syntax, just search for the string.
+  </dd>
+  <dt class="col-sm-12">Sources only</dt>
+  <dd class="col-sm-8">
+    Uncheck this checkbox to search through everything contained in the
+    packages, not just source files and package manifests.
+  </dd>
+</dl>
+
+<h4 class="mt-5">How it works</h4>
+<p>
+  We download all packages and build an index with Google's open-source
+  Codesearch engine. We've modified the engine for this project; our fork lives
+  at <a href="https://github.com/Evengining/codesearch">Evengining/codesearch</a>.
+  In the future we might switch to the more
+  modern <a href="https://github.com/google/zoekt">Zoekt</a>, abandon indexing
+  entirely and
+  embrace <a href="https://github.com/BurntSushi/ripgrep">ripgrep</a>, or
+  implement some combination of those.
+</p>
+<p>
+  If you want to understand how exactly search with regular expressions is
+  possible, take a look
+  at <a href="https://swtch.com/~rsc/regexp/regexp4.html">"Regular Expression
+  Matching with a Trigram Index"</a>.
+</p>
