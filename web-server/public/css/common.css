@@ -64,6 +64,11 @@ header .subtitle {
     text-align: right;
 }
 
+p {
+    /* slightly bigger font for paragraphs */
+    font-size: 1.2rem;
+}
+
 footer {
     margin-top: 2rem;
 }

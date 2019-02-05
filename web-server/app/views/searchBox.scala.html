@@ -3,17 +3,17 @@
 <section class="container-fluid">
     <div class="col-lg-6 mx-auto p-3 h7 justify-content-center" style="position: relative;">
         <form>
-            <div id="input-group" class="input-group">
-                <section class="warning">Fill this field!</section>
+            <section class="warning warning-query">Please provide a string to search for.</section>
+            <div class="input-group mb-2">
                 <input type="text" class="form-control" name="query" value="@query" class="query">
-                <section class="warning-filter">Enter more than two characters!</section>
-                <input type="text" class="form-control" name="filter" value="@filter" class="filter" placeholder="[Filter for query]">
-                <span class="input-group-btn">
+                <div class="input-group-append">
                     <input class="btn btn-secondary btn-send-from" id="btn-send-from" type="button" value="Go!">
-                </span>
+                </div>
             </div>
-            <div class="input-group" style="padding-top: 5px;">
-                <input type="text" class="form-control" name="path" value="@filePath" placeholder="[Path to file regex]">
+            <section class="warning warning-filter">3+ characters are required.</section>
+            <div class="input-group mb-2">
+                <input type="text" class="form-control" name="filter" value="@filter" class="filter" placeholder="Only files containing...">
+                <input type="text" class="form-control" name="path" value="@filePath" placeholder="Only paths matching...">
             </div>
             <div class="form-check form-check-inline">
                 <input type="checkbox" class="form-check-input" name="insensitive" id="insensitive-search" @(if (insensitive) "checked")>
@@ -42,7 +42,7 @@
         function focusQueryInput() {
             inpQuery.addEventListener('input', function(e){
                 if(inpQuery.value.trim().length >= 1) {
-                    document.getElementsByClassName('warning')[0].classList.remove('show')
+                    document.getElementsByClassName('warning-query')[0].classList.remove('show')
                     inpQuery.classList.remove('warn')
                 }
             })
@@ -51,7 +51,7 @@
         function focusFilterInput() {
             inpFilter.addEventListener('input', function(e){
                 if(inpFilter.value.trim().length > 2 || inpFilter.value.trim().length <= 0) {
-                    document.getElementsByClassName('warning-filter')[0].classList.remove('show-filter')
+                    document.getElementsByClassName('warning-filter')[0].classList.remove('show')
                     inpFilter.classList.remove('warn')
                 }
             })
@@ -91,14 +91,14 @@
                     else
                         document.location.href = pathname + '/search' + '?' + arr
                 } else {
-                    if (!document.getElementsByClassName('warning-filter')[0].classList.contains('show-filter')) {
-                        document.getElementsByClassName('warning-filter')[0].classList.add('show-filter')
+                    if (!document.getElementsByClassName('warning-filter')[0].classList.contains('show')) {
+                        document.getElementsByClassName('warning-filter')[0].classList.add('show')
                         inpFilter.classList.add('warn')
                     }
                 }
             } else {
-                if (!document.getElementsByClassName('warning')[0].classList.contains('show')) {
-                    document.getElementsByClassName('warning')[0].classList.add('show')
+                if (!document.getElementsByClassName('warning-query')[0].classList.contains('show')) {
+                    document.getElementsByClassName('warning-query')[0].classList.add('show')
                     inpQuery.classList.add('warn')
                 }
             }
