@@ -27,6 +27,8 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
 
   protected def concurrentTasksCount: Int
 
+  protected val batchSize: Int = 5000
+
   /**
     * Build new index from only latest version of each package and
     * replace old index with new one.
@@ -49,9 +51,14 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
     )
 
     def indexPackages(packageDirs: Seq[NioPath]) = IO {
-      val env  = Seq("CSEARCHINDEX" -> csearchDir.tempIndexDirAs[String])
-      val args = "cindex" +: packageDirs.map(_.toString)
-      Process(args, None, env: _*) !
+      val env        = Seq("CSEARCHINDEX" -> csearchDir.tempIndexDirAs[String])
+      val listOfList = packageDirs.toList.grouped(batchSize).toList
+      var exitCode = 0
+      listOfList.foreach({ x =>
+        val args = "cindex" +: x.map(_.toString)
+        exitCode = Process(args, None, env: _*) !
+      })
+      exitCode
     }
 
     def replaceIndexFile = IO(
