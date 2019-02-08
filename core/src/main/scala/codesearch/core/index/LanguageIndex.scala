@@ -77,21 +77,21 @@ trait LanguageIndex[A <: DefaultTable] {
     *
     * @return count of updated packages
     */
-  def updatePackages(count: Option[Int]): IO[Int] = {
-    val packagesCount: IO[Int] = count match {
-      case Some(n) =>
-        getLastVersions.filterNotM {
-          case (packageName, packageVersion) => packageIsExists(packageName, packageVersion)
-        }.take(n).mapAsyncUnordered(concurrentTasksCount)(updateSources _ tupled).compile.foldMonoid
-      case None =>
-        getLastVersions.filterNotM {
-          case (packageName, packageVersion) => packageIsExists(packageName, packageVersion)
-        }.mapAsyncUnordered(concurrentTasksCount)(updateSources _ tupled).compile.foldMonoid
+  def updatePackages(limit: Option[Int]): IO[Int] = {
+    val packages: Stream[IO, (String, String)] = getLastVersions.filterNotM {
+      case (packageName, packageVersion) => packageIsExists(packageName, packageVersion)
     }
+
+    val downloadPackages: IO[Int] = limit
+      .map(packages.take(_))
+      .getOrElse(packages)
+      .mapAsyncUnordered(concurrentTasksCount)(updateSources _ tupled)
+      .compile
+      .foldMonoid
 
     for {
       _             <- logger.debug("UPDATE PACKAGES")
-      packagesCount <- packagesCount
+      packagesCount <- downloadPackages
     } yield packagesCount
   }
 

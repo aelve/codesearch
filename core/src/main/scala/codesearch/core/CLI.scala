@@ -27,7 +27,7 @@ object CLI {
 
     opt[Int]("max") action { (count, c) =>
       c.copy(limitedCountPackages = Some(count))
-    }
+    } text "updates limited count of packages-sources"
 
     opt[String]('l', "lang") action { (l, c) =>
       c.copy(lang = l)
