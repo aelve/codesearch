@@ -17,7 +17,8 @@ import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
 import scala.sys.process._
 
-trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
+trait LanguageIndex[A <: DefaultTable] {
+  self: DefaultDB[A] =>
 
   protected implicit def shift: ContextShift[IO]
 
@@ -76,12 +77,21 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
     *
     * @return count of updated packages
     */
-  def updatePackages: IO[Int] = {
+  def updatePackages(count: Option[Int]): IO[Int] = {
+    val packagesCount: IO[Int] = count match {
+      case Some(n) =>
+        getLastVersions.filterNotM {
+          case (packageName, packageVersion) => packageIsExists(packageName, packageVersion)
+        }.take(n).mapAsyncUnordered(concurrentTasksCount)(updateSources _ tupled).compile.foldMonoid
+      case None =>
+        getLastVersions.filterNotM {
+          case (packageName, packageVersion) => packageIsExists(packageName, packageVersion)
+        }.mapAsyncUnordered(concurrentTasksCount)(updateSources _ tupled).compile.foldMonoid
+    }
+
     for {
-      _ <- logger.debug("UPDATE PACKAGES")
-      packagesCount <- getLastVersions.filterNotM {
-        case (packageName, packageVersion) => packageIsExists(packageName, packageVersion)
-      }.mapAsyncUnordered(concurrentTasksCount)(updateSources _ tupled).compile.foldMonoid
+      _             <- logger.debug("UPDATE PACKAGES")
+      packagesCount <- packagesCount
     } yield packagesCount
   }
 
@@ -89,7 +99,7 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
     * Create path to package in file system
     *
     * @param packageName local package name
-    * @param version of package
+    * @param version     of package
     * @return path
     */
   protected def buildFsUrl(packageName: String, version: String): NioPath
@@ -116,7 +126,7 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
     * Update source code from remote repository
     *
     * @see [[https://github.com/aelve/codesearch/wiki/Codesearch-developer-Wiki#updating-packages]]
-    * @param name of package
+    * @param name    of package
     * @param version of package
     * @return count of downloaded files (source files)
     */

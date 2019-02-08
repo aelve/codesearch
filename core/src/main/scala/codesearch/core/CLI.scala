@@ -25,7 +25,11 @@ object CLI {
       c.copy(buildIndex = true)
     } text "build index with only latest packages"
 
-    opt[String]('l', "lang").action { (l, c) =>
+    opt[Int]("max") action { (count, c) =>
+      c.copy(limitedCountPackages = Some(count))
+    }
+
+    opt[String]('l', "lang") action { (l, c) =>
       c.copy(lang = l)
     }
   }
