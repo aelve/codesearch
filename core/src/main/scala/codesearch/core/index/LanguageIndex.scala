@@ -6,6 +6,7 @@ import java.nio.file.{Files, Path => NioPath}
 import cats.effect.{ContextShift, IO}
 import cats.instances.int._
 import cats.syntax.functor._
+import cats.syntax.flatMap._
 import codesearch.core.db.DefaultDB
 import codesearch.core.index.directory.{Directory, СSearchDirectory}
 import codesearch.core.index.repository._
@@ -90,8 +91,7 @@ trait LanguageIndex[A <: DefaultTable] {
       .foldMonoid
 
     for {
-      _             <- logger.debug("UPDATE PACKAGES")
-      packagesCount <- downloadPackages
+      packagesCount <- logger.debug("UPDATE PACKAGES") >> downloadPackages
     } yield packagesCount
   }
 
