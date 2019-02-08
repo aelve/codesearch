@@ -83,16 +83,12 @@ trait LanguageIndex[A <: DefaultTable] {
       case (packageName, packageVersion) => packageIsExists(packageName, packageVersion)
     }
 
-    val downloadPackages: IO[Int] = limit
+    logger.debug("UPDATE PACKAGES") >> limit
       .map(packages.take(_))
       .getOrElse(packages)
       .mapAsyncUnordered(concurrentTasksCount)(updateSources _ tupled)
       .compile
       .foldMonoid
-
-    for {
-      packagesCount <- logger.debug("UPDATE PACKAGES") >> downloadPackages
-    } yield packagesCount
   }
 
   /**
