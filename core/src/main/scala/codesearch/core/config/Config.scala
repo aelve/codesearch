@@ -7,7 +7,13 @@ import cats.effect.Sync
 import pureconfig.module.catseffect._
 import pureconfig.{CamelCase, ConfigFieldMapping, ProductHint}
 
-case class Config(db: DatabaseConfig, snippetConfig: SnippetConfig, languagesConfig: LanguagesConfig)
+case class Config(
+    db: DatabaseConfig,
+    snippetConfig: SnippetConfig,
+    languagesConfig: LanguagesConfig,
+    metrics: MetricsConfig
+)
+
 case class DatabaseConfig(
     dataSourceClass: String,
     port: Int,
@@ -15,6 +21,7 @@ case class DatabaseConfig(
     user: String,
     password: String
 )
+
 case class SnippetConfig(pageSize: Int, linesBefore: Int, linesAfter: Int)
 
 case class LanguagesConfig(
@@ -50,6 +57,10 @@ case class JavaScriptConfig(
     repoIndexUrl: URI,
     repoJsonPath: Path,
     concurrentTasksCount: Int
+)
+
+case class MetricsConfig(
+    enableMamotoMetrics: Boolean
 )
 
 object Config extends ConfigReaders {
