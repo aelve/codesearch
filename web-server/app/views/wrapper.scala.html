@@ -4,7 +4,7 @@
         title: String,
         headExtra: Html = Html(""),
         headerLink: Boolean = true,
-        mamotoIsEnabled: Boolean = MamotoMetrics.isEnable
+        mamotoIsEnabled: Boolean = MamotoMetrics.isEnabled
 )(content: Html)
 
 <!doctype html>
@@ -22,7 +22,7 @@
 
         @headExtra
 
-         <!-- Matomo -->
+        <!-- Matomo -->
         @if(mamotoIsEnabled) {
             <script type="text/javascript">
                     var _paq = window._paq || [];
