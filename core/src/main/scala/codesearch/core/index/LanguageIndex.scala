@@ -4,8 +4,6 @@ import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 import java.nio.file.{Files, Path => NioPath}
 
 import cats.effect.{ContextShift, IO}
-import cats.instances.int._
-import cats.syntax.functor._
 import codesearch.core.db.DefaultDB
 import codesearch.core.index.directory.{Directory, СSearchDirectory}
 import codesearch.core.index.repository._
@@ -14,8 +12,9 @@ import codesearch.core.syntax.stream._
 import fs2.Stream
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+import cats.implicits._
 
-import scala.sys.process._
+import scala.sys.process.Process
 
 trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
 
@@ -26,8 +25,6 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
   protected def csearchDir: СSearchDirectory
 
   protected def concurrentTasksCount: Int
-
-  protected val batchSize: Int = 5000
 
   /**
     * Build new index from only latest version of each package and
@@ -51,14 +48,14 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
     )
 
     def indexPackages(packageDirs: Seq[NioPath]) = IO {
+      val BatchSize = 30000
       val env        = Seq("CSEARCHINDEX" -> csearchDir.tempIndexDirAs[String])
-      val listOfList = packageDirs.toList.grouped(batchSize).toList
-      var exitCode   = 0
-      listOfList.foreach({ x =>
-        val args = "cindex" +: x.map(_.toString)
-        exitCode = Process(args, None, env: _*) !
-      })
-      exitCode
+      val groupedList = packageDirs.toList.grouped(BatchSize).toList
+      val processSeq = (is: List[NioPath]) => {
+        val args = "cindex" + is.map(_.toString)
+        Process(args, None, env: _*) !
+      }
+      groupedList.foldMap(processSeq)
     }
 
     def replaceIndexFile = IO(
