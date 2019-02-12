@@ -18,6 +18,7 @@ object Main extends IOApp {
       downloadMeta: Boolean = false,
       initDB: Boolean = false,
       buildIndex: Boolean = false,
+      limitedCountPackages: Option[Int] = None,
       lang: String = "all"
   )
 

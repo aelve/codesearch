@@ -4,6 +4,9 @@ import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 import java.nio.file.{Files, Path => NioPath}
 
 import cats.effect.{ContextShift, IO}
+import cats.instances.int._
+import cats.syntax.functor._
+import cats.syntax.flatMap._
 import codesearch.core.db.DefaultDB
 import codesearch.core.index.directory.{Directory, СSearchDirectory}
 import codesearch.core.index.repository._
@@ -16,7 +19,8 @@ import cats.implicits._
 
 import scala.sys.process.Process
 
-trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
+trait LanguageIndex[A <: DefaultTable] {
+  self: DefaultDB[A] =>
 
   protected implicit def shift: ContextShift[IO]
 
@@ -80,20 +84,24 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
     *
     * @return count of updated packages
     */
-  def updatePackages: IO[Int] = {
-    for {
-      _ <- logger.debug("UPDATE PACKAGES")
-      packagesCount <- getLastVersions.filterNotM {
-        case (packageName, packageVersion) => packageIsExists(packageName, packageVersion)
-      }.mapAsyncUnordered(concurrentTasksCount)(updateSources _ tupled).compile.foldMonoid
-    } yield packagesCount
+  def updatePackages(limit: Option[Int]): IO[Int] = {
+    val packages: Stream[IO, (String, String)] = getLastVersions.filterNotM {
+      case (packageName, packageVersion) => packageIsExists(packageName, packageVersion)
+    }
+
+    logger.debug("UPDATE PACKAGES") >> limit
+      .map(packages.take(_))
+      .getOrElse(packages)
+      .mapAsyncUnordered(concurrentTasksCount)(updateSources _ tupled)
+      .compile
+      .foldMonoid
   }
 
   /**
     * Create path to package in file system
     *
     * @param packageName local package name
-    * @param version of package
+    * @param version     of package
     * @return path
     */
   protected def buildFsUrl(packageName: String, version: String): NioPath
@@ -120,7 +128,7 @@ trait LanguageIndex[A <: DefaultTable] { self: DefaultDB[A] =>
     * Update source code from remote repository
     *
     * @see [[https://github.com/aelve/codesearch/wiki/Codesearch-developer-Wiki#updating-packages]]
-    * @param name of package
+    * @param name    of package
     * @param version of package
     * @return count of downloaded files (source files)
     */

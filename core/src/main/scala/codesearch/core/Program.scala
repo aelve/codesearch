@@ -56,7 +56,7 @@ class Program(langReps: Map[String, LangRep[_ <: DefaultTable]], logger: Logger[
   def updatePackages(params: Params): IO[Unit] =
     for {
       languages <- findRepositories(params.lang)
-      updated   <- languages.traverse(_.langIndex.updatePackages)
+      updated   <- languages.traverse(_.langIndex.updatePackages(params.limitedCountPackages))
       _         <- logger.info(s"Updated: ${updated.sum}")
     } yield ()
 
