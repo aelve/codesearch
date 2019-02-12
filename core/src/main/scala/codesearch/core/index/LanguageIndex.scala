@@ -52,8 +52,8 @@ trait LanguageIndex[A <: DefaultTable] {
     )
 
     def indexPackages(packageDirs: Seq[NioPath]) = IO {
-      val BatchSize = 30000
-      val env        = Seq("CSEARCHINDEX" -> csearchDir.tempIndexDirAs[String])
+      val BatchSize   = 30000
+      val env         = Seq("CSEARCHINDEX" -> csearchDir.tempIndexDirAs[String])
       val groupedList = packageDirs.toList.grouped(BatchSize).toList
       val processSeq = (is: List[NioPath]) => {
         val args = "cindex" + is.map(_.toString)
