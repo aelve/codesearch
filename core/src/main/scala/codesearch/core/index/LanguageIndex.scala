@@ -4,6 +4,9 @@ import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 import java.nio.file.{Files, Path => NioPath}
 
 import cats.effect.{ContextShift, IO}
+import cats.implicits._
+import cats.kernel.CommutativeGroup
+import cats.kernel.instances.IntGroup
 import codesearch.core.db.DefaultDB
 import codesearch.core.index.directory.{Directory, СSearchDirectory}
 import codesearch.core.index.repository._
@@ -12,9 +15,6 @@ import codesearch.core.syntax.stream._
 import fs2.Stream
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
-import cats.implicits._
-import cats.kernel.CommutativeGroup
-import cats.kernel.instances.IntGroup
 
 import scala.sys.process.Process
 
@@ -57,7 +57,7 @@ trait LanguageIndex[A <: DefaultTable] {
       val env         = Seq("CSEARCHINDEX" -> csearchDir.tempIndexDirAs[String])
       val groupedList = packageDirs.toList.grouped(BatchSize).toList
       val processSeq = (is: List[NioPath]) => {
-        val args = "cindex" + is.map(_.toString)
+        val args = "cindex" +: is.map(_.toString)
         Process(args, None, env: _*) !
       }
       groupedList.foldMap(processSeq)
