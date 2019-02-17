@@ -4,9 +4,12 @@ import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 import java.nio.file.{Files, Path => NioPath}
 
 import cats.effect.{ContextShift, IO}
-import cats.implicits._
-import cats.kernel.CommutativeGroup
-import cats.kernel.instances.IntGroup
+import cats.instances.int._
+import cats.instances.vector._
+import cats.syntax.flatMap._
+import cats.syntax.foldable._
+import cats.syntax.functor._
+import cats.syntax.monadError._
 import codesearch.core.db.DefaultDB
 import codesearch.core.index.directory.{Directory, СSearchDirectory}
 import codesearch.core.index.repository._
@@ -23,8 +26,6 @@ trait LanguageIndex[A <: DefaultTable] {
 
   protected implicit def shift: ContextShift[IO]
 
-  implicit val catsKernelStdGroupForInt: CommutativeGroup[Int] = new IntGroup
-
   protected val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.unsafeCreate[IO]
 
   protected def csearchDir: СSearchDirectory
@@ -34,10 +35,8 @@ trait LanguageIndex[A <: DefaultTable] {
   /**
     * Build new index from only latest version of each package and
     * replace old index with new one.
-    *
-    * @return cindex exit code
     */
-  def buildIndex: IO[Int] = {
+  def buildIndex: IO[Unit] = {
     def latestPackagePaths = verNames.map { versions =>
       versions.map {
         case (packageName, version) =>
@@ -52,15 +51,16 @@ trait LanguageIndex[A <: DefaultTable] {
         Files.createDirectories(СSearchDirectory.root)
     )
 
-    def indexPackages(packageDirs: Seq[NioPath]) = IO {
-      val BatchSize   = 30000
-      val env         = Seq("CSEARCHINDEX" -> csearchDir.tempIndexDirAs[String])
-      val groupedList = packageDirs.toList.grouped(BatchSize).toList
-      val processSeq = (is: List[NioPath]) => {
-        val args = "cindex" +: is.map(_.toString)
-        Process(args, None, env: _*) !
+    def indexPackages(packageDirs: Seq[NioPath]): IO[Unit] = {
+      def cindex(packages: Seq[NioPath]) = {
+        val args = "cindex" +: packages.map(_.toString)
+        val env  = Seq("CSEARCHINDEX" -> csearchDir.tempIndexDirAs[String])
+        IO { Process(args, None, env: _*) ! }
+          .ensureOr(BadExitCode)(_ == 0)
       }
-      groupedList.foldMap(processSeq)
+
+      val batchSize = 100000
+      packageDirs.grouped(batchSize).toVector.traverse_(cindex)
     }
 
     def replaceIndexFile = IO(
@@ -75,9 +75,9 @@ trait LanguageIndex[A <: DefaultTable] {
       packageDirs <- latestPackagePaths
       _           <- createCSearchDir
       _           <- dropTempIndexFile
-      exitCode    <- indexPackages(packageDirs)
+      _           <- indexPackages(packageDirs)
       _           <- replaceIndexFile
-    } yield exitCode
+    } yield ()
   }
 
   /**
@@ -135,3 +135,5 @@ trait LanguageIndex[A <: DefaultTable] {
     */
   protected def updateSources(name: String, version: String): IO[Int]
 }
+
+case class BadExitCode(code: Int) extends Exception(s"Process returned a bad exit code: $code")
