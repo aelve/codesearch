@@ -59,7 +59,7 @@ trait LanguageIndex[A <: DefaultTable] {
           .ensureOr(BadExitCode)(_ == 0)
       }
 
-      val batchSize = 100000
+      val batchSize = 10000
       packageDirs.grouped(batchSize).toVector.traverse_(cindex)
     }
 
