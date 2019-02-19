@@ -1,21 +1,22 @@
 package codesearch.core.index
 
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
+import java.nio.file.StandardOpenOption.{CREATE, TRUNCATE_EXISTING}
 import java.nio.file.{Files, Path => NioPath}
 
 import cats.effect.{ContextShift, IO}
 import cats.instances.int._
-import cats.instances.vector._
 import cats.syntax.flatMap._
-import cats.syntax.foldable._
 import cats.syntax.functor._
-import cats.syntax.monadError._
+import codesearch.core.BlockingEC
 import codesearch.core.db.DefaultDB
-import codesearch.core.index.directory.{Directory, СSearchDirectory}
+import codesearch.core.index.directory.{Directory, СindexDirectory}
 import codesearch.core.index.repository._
 import codesearch.core.model.DefaultTable
 import codesearch.core.syntax.stream._
 import fs2.Stream
+import fs2.io.file
+import fs2.text.utf8Encode
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
@@ -28,7 +29,7 @@ trait LanguageIndex[A <: DefaultTable] {
 
   protected val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.unsafeCreate[IO]
 
-  protected def csearchDir: СSearchDirectory
+  protected def cindexDir: СindexDirectory
 
   protected def concurrentTasksCount: Int
 
@@ -44,29 +45,33 @@ trait LanguageIndex[A <: DefaultTable] {
       }
     }
 
-    def dropTempIndexFile = IO(Files.deleteIfExists(csearchDir.tempIndexDirAs[NioPath]))
+    def dropTempIndexFile = IO(Files.deleteIfExists(cindexDir.tempIndexDirAs[NioPath]))
 
     def createCSearchDir = IO(
-      if (Files.notExists(СSearchDirectory.root))
-        Files.createDirectories(СSearchDirectory.root)
+      if (Files.notExists(СindexDirectory.root))
+        Files.createDirectories(СindexDirectory.root)
     )
 
     def indexPackages(packageDirs: Seq[NioPath]): IO[Unit] = {
-      def cindex(packages: Seq[NioPath]) = {
-        val args = "cindex" +: packages.map(_.toString)
-        val env  = Seq("CSEARCHINDEX" -> csearchDir.tempIndexDirAs[String])
-        IO { Process(args, None, env: _*) ! }
-          .ensureOr(BadExitCode)(_ == 0)
-      }
-
-      val batchSize = 10000
-      packageDirs.grouped(batchSize).toVector.traverse_(cindex)
+      val args = Seq("cindex", cindexDir.dirsToIndex[String])
+      val env  = Seq("CSEARCHINDEX" -> cindexDir.tempIndexDirAs[String])
+      for {
+        _ <- Stream
+          .emits(packageDirs)
+          .covary[IO]
+          .map(_.toString + "\n")
+          .through(utf8Encode)
+          .to(file.writeAll(cindexDir.dirsToIndex[NioPath], BlockingEC, List(CREATE, TRUNCATE_EXISTING)))
+          .compile
+          .drain
+        _ <- IO(Process(args, None, env: _*) !)
+      } yield ()
     }
 
     def replaceIndexFile = IO(
       Files.move(
-        csearchDir.tempIndexDirAs[NioPath],
-        csearchDir.indexDirAs[NioPath],
+        cindexDir.tempIndexDirAs[NioPath],
+        cindexDir.indexDirAs[NioPath],
         REPLACE_EXISTING
       )
     )

@@ -7,7 +7,7 @@ import cats.data.NonEmptyVector
 import cats.effect.IO
 import cats.syntax.option._
 import codesearch.core.config.{Config, SnippetConfig}
-import codesearch.core.index.directory.СSearchDirectory
+import codesearch.core.index.directory.СindexDirectory
 import codesearch.core.index.repository.Extensions
 import codesearch.core.search.Search.{CSearchPage, CSearchResult, CodeSnippet, Package, PackageResult, snippetConfig}
 import codesearch.core.search.SnippetsGrouper.SnippetInfo
@@ -22,7 +22,7 @@ import scala.sys.process.Process
 
 trait Search {
 
-  protected def csearchDir: СSearchDirectory
+  protected def csearchDir: СindexDirectory
   protected def extensions: Extensions
   protected val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.unsafeCreate[IO]
 
