@@ -22,7 +22,7 @@ import scala.sys.process.Process
 
 trait Search {
 
-  protected def csearchDir: СindexDirectory
+  protected def cindexDir: СindexDirectory
   protected def extensions: Extensions
   protected val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.unsafeCreate[IO]
 
@@ -67,7 +67,7 @@ trait Search {
   protected def buildRepUrl(packageName: String, version: String): String
 
   private def csearch(request: SearchRequest): IO[List[String]] = {
-    val indexDir = csearchDir.indexDirAs[String]
+    val indexDir = cindexDir.indexDirAs[String]
     val env      = ("CSEARCHINDEX", indexDir)
 
     for {
