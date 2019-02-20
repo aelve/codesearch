@@ -60,16 +60,16 @@ trait DirAs[A] {
 
 object DirAs {
   implicit def asString: DirAs[String] = new DirAs[String] {
-    private def fullPath(relativePath: Path): String          = relativePath.toFile.getCanonicalPath
+    private def fullPath(relativePath: Path): String         = relativePath.toFile.getCanonicalPath
     override def dirsToIndex(packageManager: String): String = s"${asPath.dirsToIndex(packageManager)}"
-    override def dir(packageManager: String): String          = fullPath(asPath.dir(packageManager))
-    override def tempDir(packageManager: String): String      = fullPath(asPath.tempDir(packageManager))
+    override def dir(packageManager: String): String         = fullPath(asPath.dir(packageManager))
+    override def tempDir(packageManager: String): String     = fullPath(asPath.tempDir(packageManager))
   }
 
   implicit def asPath: DirAs[Path] = new DirAs[Path] {
-    private def index(packageManager: String): String       = s".${packageManager}_csearch_index"
+    private def index(packageManager: String): String      = s".${packageManager}_csearch_index"
     override def dirsToIndex(packageManager: String): Path = root / s".${packageManager}_dirs_for_index"
-    override def dir(packageManager: String): Path          = root / index(packageManager)
-    override def tempDir(packageManager: String): Path      = root / s"${index(packageManager)}.tmp"
+    override def dir(packageManager: String): Path         = root / index(packageManager)
+    override def tempDir(packageManager: String): Path     = root / s"${index(packageManager)}.tmp"
   }
 }
