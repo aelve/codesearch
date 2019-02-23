@@ -12,7 +12,7 @@ modifications). Install it from <https://github.com/Evengining/codesearch>.
 1. Install Go: `brew install go`
 2. Add `$HOME/go/bin` to the PATH
 3. Download and build `codesearch` (should take 5 to 10 seconds):
-   `go get github.com/Evengining/codesearch/cmd/...`
+   `go get github.com/aelve/codesearch-engine/cmd/...`
 
 </details>
 
