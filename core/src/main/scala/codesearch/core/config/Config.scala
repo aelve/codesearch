@@ -60,7 +60,7 @@ case class JavaScriptConfig(
 )
 
 case class MetricsConfig(
-    enableMamotoMetrics: Boolean
+    enableMatomoMetrics: Boolean
 )
 
 object Config extends ConfigReaders {
