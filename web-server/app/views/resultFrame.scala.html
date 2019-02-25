@@ -6,28 +6,46 @@
 @import codesearch.core.search.Search.PackageResult
 @import codesearch.web.SnippetHelper
 
-@(lang: String, insensitive: Boolean, space: Boolean, precise: Boolean, query: String, updated: String, packages: Seq[PackageResult], totalMatches: Int)
+@import java.net.URLEncoder
+@(
+        lang: String,
+        insensitive: Boolean,
+        space: Boolean,
+        precise: Boolean,
+        query: String,
+        updated: String,
+        packages: Seq[PackageResult],
+        totalMatches: Int
+)
+
+@regex = @{
+    Helper.buildRegex(query = query, space = space, insensitive = insensitive, precise = precise)
+}
 
 <section class="container">
     <span class="text-secondary">Index updated @updated</span> <br>
 
-    @{if (totalMatches > 1000) {
-            <h4 class="display-7" style="margin-bottom: 0em; margin-top: 2em; text-align: left;">total matches: more than 1000</h4>
-    } else {
-            <h4 class="display-7" style="margin-bottom: 0em; margin-top: 2em; text-align: left;">total matches: {totalMatches}</h4>
-    }}
+    @{
+        if(totalMatches > 1000) {
+                <h4 class="display-7" style="margin-bottom: 0em; margin-top: 2em; text-align: left;">total matches: more than 1000</h4>
+        } else {
+                <h4 class="display-7" style="margin-bottom: 0em; margin-top: 2em; text-align: left;">
+                total matches:
+                {totalMatches}
+                </h4>
+        }
+    }
 
     @for(pack <- packages) {
-        <h5 class="display-7" style="margin-bottom: 0em; margin-top: 1em;"><a href=@pack.pack.packageLink>@pack.pack.name</a></h5>
-        <span class="text-secondary" style="margin-bottom: 1em">@pack.results.size matches</span> <br>
+        <h5 class="display-7" style="margin-bottom: 0em;
+            margin-top: 1em;"><a href=@pack.pack.packageLink>@pack.pack.name</a></h5>
+        <span class="text-secondary" style="margin-bottom: 1em">@pack.results.size matches</span>
+        <br>
 
         @for(result <- pack.results) {
 
             <a href="src/@result.fileLink?query=@{
-                Helper.buildRegex(
-                    query = query,
-                    insensitive = insensitive, space = space, precise = precise
-                )
+                URLEncoder.encode(regex.toString, "UTF-8")
             }&L=@{
                 result.matchedLines.head
             }#snippet.@{
@@ -37,14 +55,10 @@
             <pre data-start=@{
                 result.numberOfFirstLine + 1
             }><code class="@("language-" + Helper.langByLink(result.fileLink, lang) + " line-numbers")">@{
-
-                val re = Helper.buildRegex(query = query, space = space, insensitive = insensitive, precise = precise)
-
                 val ids = result.matchedLines.map(lineNumber => lineNumber - result.numberOfFirstLine)
-
                 val html = result.lines.zipWithIndex.flatMap { case (line, index) =>
                     if(ids.exists(_ == index + 1)) {
-                        val matches = re.findAllMatchIn(line)
+                        val matches = regex.findAllMatchIn(line)
                         SnippetHelper.markAllMatches(line, matches)
                     } else {
                         Seq(HtmlFormat.escape(line + "\n"))
