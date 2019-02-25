@@ -3,15 +3,14 @@ package codesearch.core.util
 import java.io.File
 
 import cats.effect.{IO, Resource}
+import codesearch.core.regex.lexer._
+import codesearch.core.regex.lexer.tokens._
+import codesearch.core.regex.space.SpaceInsensitive
+import fs2.{Chunk, Stream}
 import org.apache.commons.io.FilenameUtils
-import fs2.Stream
-import fs2.Chunk
 
 import scala.io.Source
 import scala.util.matching.Regex
-import codesearch.core.regex.lexer.tokens._
-import codesearch.core.regex.lexer._
-import codesearch.core.regex.space.SpaceInsensitive
 
 object Helper {
 
@@ -56,17 +55,10 @@ object Helper {
   }
 
   def buildRegex(query: String, insensitive: Boolean, space: Boolean, precise: Boolean): Regex = {
-    val preciseAndSpace: String = {
-      val preciseMatch = if (precise) Helper.preciseMatch(query) else query
-
-      if (space) SpaceInsensitive.spaceInsensitiveString(preciseMatch) else preciseMatch
-    }
-
-    val regex: String = {
-      val insensitiveCase = if (insensitive) "(?i)" else ""
-      insensitiveCase + preciseAndSpace
-    }
-    regex.r
+    val preciseMatch     = if (precise) Helper.preciseMatch(query) else query
+    val spaceInsensitive = if (space) SpaceInsensitive.spaceInsensitiveString(preciseMatch) else preciseMatch
+    val insensitiveCase  = if (insensitive) "(?i)" else ""
+    s"$spaceInsensitive$insensitiveCase".r
   }
 
 }
