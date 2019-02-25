@@ -58,7 +58,7 @@ object Helper {
     val preciseMatch     = if (precise) Helper.preciseMatch(query) else query
     val spaceInsensitive = if (space) SpaceInsensitive.spaceInsensitiveString(preciseMatch) else preciseMatch
     val insensitiveCase  = if (insensitive) "(?i)" else ""
-    s"$spaceInsensitive$insensitiveCase".r
+    s"$insensitiveCase$spaceInsensitive".r
   }
 
 }
