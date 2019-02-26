@@ -103,6 +103,12 @@
                 }
             }
         }
+        document.getElementsByName("query")[0].addEventListener('keyup', function (event) {
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                document.getElementById('btn-send-from').click();
+            }
+        })
         document.getElementById('btn-send-from').addEventListener('click', FormValidate)
         inpQuery.addEventListener('click', focusQueryInput)
         inpFilter.addEventListener('click', focusFilterInput)
