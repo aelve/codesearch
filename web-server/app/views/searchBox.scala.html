@@ -103,13 +103,17 @@
                 }
             }
         }
-        document.getElementsByName("query")[0].addEventListener('keyup', function (event) {
+
+        function clickByEnter(event) {
             if (event.keyCode === 13) {
                 event.preventDefault();
                 document.getElementById('btn-send-from').click();
             }
-        })
+        }
         document.getElementById('btn-send-from').addEventListener('click', FormValidate)
         inpQuery.addEventListener('click', focusQueryInput)
         inpFilter.addEventListener('click', focusFilterInput)
+        inpQuery.addEventListener('keyup', clickByEnter)
+        inpFilter.addEventListener('keyup', clickByEnter)
+        inpPath.addEventListener('keyup', clickByEnter)
 </script>
