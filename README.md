@@ -5,7 +5,7 @@
 ### codesearch indexer
 
 Google's `codesearch` is the underlying search engine that we use (with some
-modifications). Install it from <https://github.com/Evengining/codesearch>.
+modifications). Install it from <https://github.com/aelve/codesearch-engine>.
 
 <details><summary>macOS instructions</summary>
 
