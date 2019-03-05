@@ -90,10 +90,10 @@ trait Search {
     }
 
     request.filter match {
-      case Some(filter) if (request.insensitive) => List("csearch", "-n", "-i", "-f", forExtensions, query, filter)
-      case Some(filter)                          => List("csearch", "-n", "-f", forExtensions, query, filter)
-      case None if (request.insensitive)         => List("csearch", "-n", "-i", "-f", forExtensions, query)
-      case None                                  => List("csearch", "-n", "-f", forExtensions, query)
+      case Some(filter) if request.insensitive => List("csearch", "-n", "-i", "-f", forExtensions, query, filter)
+      case Some(filter)                        => List("csearch", "-n", "-f", forExtensions, query, filter)
+      case None if request.insensitive         => List("csearch", "-n", "-i", "-f", forExtensions, query)
+      case None                                => List("csearch", "-n", "-f", forExtensions, query)
     }
   }
 

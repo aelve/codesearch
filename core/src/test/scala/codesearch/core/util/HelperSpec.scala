@@ -16,6 +16,13 @@ class HelperSpec extends FreeSpec with Matchers {
       preciseStringMatch(" .?*+", " \\.\\?\\*\\+")
     }
 
+    "Precise string with escaped" - {
+      preciseStringMatch("\\", "\\\\")
+      preciseStringMatch("\\\\", "\\\\\\\\")
+      preciseStringMatch("\\\\\\", "\\\\\\\\\\\\")
+      preciseStringMatch("\\\\o\\n", "\\\\\\\\o\\\\n")
+    }
+
     "Precise string with charsets match" - {
       preciseStringMatch("Hello \\ [hello]", "Hello \\\\ \\[hello]")
       preciseStringMatch("Test {1,2}", "Test \\{1,2}")

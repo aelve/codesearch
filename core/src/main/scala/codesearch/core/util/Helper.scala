@@ -42,9 +42,10 @@ object Helper {
   def preciseMatch(query: String): String = {
     val queryTokens: Seq[Token] = Tokenizer.parseStringWithSpecialSymbols(query)
     val preciseMatch: Seq[Token] = queryTokens.map {
-      case literal @ Literal(_) => literal
-      case space @ Space(_)     => space
-      case token: Token         => Escaped(token.repr)
+      case literal @ Literal(_)    => literal
+      case space @ Space(_)        => space
+      case escaped @ Escaped("\\") => Escaped("\\" + escaped.repr)
+      case token: Token            => Escaped(token.repr)
     }
     StringAssembler.buildStringFromTokens(preciseMatch)
   }
