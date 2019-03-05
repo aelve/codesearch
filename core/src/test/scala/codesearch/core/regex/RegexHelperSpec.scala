@@ -1,11 +1,12 @@
-package codesearch.core.util
+package codesearch.core.regex
 
+import codesearch.core.regex.RegexHelper
 import org.scalatest.{FreeSpec, Matchers}
 
-class HelperSpec extends FreeSpec with Matchers {
+class RegexHelperSpec extends FreeSpec with Matchers {
   def preciseStringMatch(before: String, after: String) = {
     before in {
-      Helper.preciseMatch(before) shouldBe after
+      RegexHelper.preciseMatch(before) shouldBe after
     }
   }
 
