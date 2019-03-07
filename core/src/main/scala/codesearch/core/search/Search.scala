@@ -16,7 +16,7 @@ import fs2.{Pipe, Stream}
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import codesearch.core.regex.space.SpaceInsensitive
-import codesearch.core.regex.RegexHelper
+import codesearch.core.regex.PreciseMatch
 
 import scala.sys.process.Process
 
@@ -85,7 +85,7 @@ trait Search {
     }
 
     val query: String = {
-      val preciseMatch: String = if (request.preciseMatch) RegexHelper.preciseMatch(request.query) else request.query
+      val preciseMatch: String = if (request.preciseMatch) PreciseMatch(request.query) else request.query
       if (request.spaceInsensitive) SpaceInsensitive.spaceInsensitiveString(preciseMatch) else preciseMatch
     }
 

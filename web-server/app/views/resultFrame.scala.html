@@ -1,4 +1,4 @@
-@import codesearch.core.regex.RegexHelper
+@import codesearch.core.regex.RegexConstructor
 @import codesearch.core.util.Helper
 @import scala.collection.mutable
 @import scala.collection.mutable.ListBuffer
@@ -20,7 +20,7 @@
 )
 
 @regex = @{
-    RegexHelper.buildRegex(query = query, space = space, insensitive = insensitive, precise = precise)
+    RegexConstructor(query = query, space = space, insensitive = insensitive, precise = precise)
 }
 
 <section class="container">
