@@ -9,13 +9,13 @@ class TokenizerSpec extends FreeSpec with Matchers {
   def testParseAndRender(value: String, tokens: Seq[Token]): Unit = {
     value in {
       Tokenizer.parseStringWithSpecialSymbols(value) shouldBe tokens
-      StringAssembler.buildStringFromTokens(tokens) shouldBe value
+      StringAssembler(tokens) shouldBe value
     }
   }
 
   /** Break a regex into tokens and then reassemble it from the tokens. */
   def roundTrip(caseString: String): String = {
-    StringAssembler.buildStringFromTokens(Tokenizer.parseStringWithSpecialSymbols(caseString))
+    StringAssembler(Tokenizer.parseStringWithSpecialSymbols(caseString))
   }
 
   "Roundtrip tests" - {

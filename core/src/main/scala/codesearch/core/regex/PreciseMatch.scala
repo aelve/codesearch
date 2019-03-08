@@ -10,6 +10,6 @@ object PreciseMatch {
       case literal @ Literal(_) => literal
       case token: Token         => Literal(token.repr)
     }
-    StringAssembler.buildStringFromTokens(preciseMatch)
+    StringAssembler(preciseMatch)
   }
 }

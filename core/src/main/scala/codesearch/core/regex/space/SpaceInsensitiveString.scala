@@ -5,7 +5,7 @@ import codesearch.core.regex.lexer.tokens._
 
 import scala.annotation.tailrec
 
-object SpaceInsensitive {
+object SpaceInsensitiveString {
 
   /**
     * Make a regex space-insensitive in places where one space is used.
@@ -15,7 +15,7 @@ object SpaceInsensitive {
     * @param query regex to transform. Example: "hello world   kek ?"
     * @return regex with added symbols "+" for space-insensitivity. Example: "hello +world   kek( +)?"
     */
-  def spaceInsensitiveString(query: String): String = {
+  def apply(query: String): String = {
     val tokens: List[Token] = Tokenizer.parseStringWithSpecialSymbols(query).toList
     val allocatedOneOrMoreSpaces: List[Token] =
       List(SpecialSymbol("("), Space(" "), SpecialSymbol("+"), SpecialSymbol(")")).reverse
@@ -44,6 +44,6 @@ object SpaceInsensitive {
 
     val addedRegexForSpaceInsensitive: Seq[Token] = loop(List.empty[Token], tokens).reverse
 
-    StringAssembler.buildStringFromTokens(addedRegexForSpaceInsensitive)
+    StringAssembler(addedRegexForSpaceInsensitive)
   }
 }
