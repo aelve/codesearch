@@ -10,7 +10,7 @@ class PreciseMatchSpec extends FreeSpec with Matchers {
   }
   def preciseStringWithCaseInsensitive(before: String, after: String): Unit = {
     before in {
-      RegexConstructor(before, insensitive = true, space = false, precise = true).toString shouldBe after
+      RegexConstructor(before, insensitive = true, space = false, precise = true) shouldBe after
     }
   }
 
