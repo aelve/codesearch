@@ -88,8 +88,8 @@ trait Search {
       RegexConstructor(request.query, request.insensitive, request.spaceInsensitive, request.preciseMatch)
 
     request.filter match {
-      case Some(filter)                        => List("csearch", "-n", "-f", forExtensions, query, filter)
-      case None                                => List("csearch", "-n", "-f", forExtensions, query)
+      case Some(filter) => List("csearch", "-n", "-f", forExtensions, query, filter)
+      case None         => List("csearch", "-n", "-f", forExtensions, query)
     }
   }
 
