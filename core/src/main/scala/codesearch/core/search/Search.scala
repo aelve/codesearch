@@ -11,12 +11,12 @@ import codesearch.core.index.directory.СindexDirectory
 import codesearch.core.index.repository.Extensions
 import codesearch.core.search.Search.{CSearchPage, CSearchResult, CodeSnippet, Package, PackageResult, snippetConfig}
 import codesearch.core.search.SnippetsGrouper.SnippetInfo
-import codesearch.core.util.Helper
 import codesearch.core.util.Helper.readFileAsync
 import fs2.{Pipe, Stream}
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
-import codesearch.core.regex.space.SpaceInsensitive
+import codesearch.core.regex.space.SpaceInsensitiveString
+import codesearch.core.regex.PreciseMatch
 
 import scala.sys.process.Process
 
@@ -85,15 +85,15 @@ trait Search {
     }
 
     val query: String = {
-      val preciseMatch: String = if (request.preciseMatch) Helper.preciseMatch(request.query) else request.query
-      if (request.spaceInsensitive) SpaceInsensitive.spaceInsensitiveString(preciseMatch) else preciseMatch
+      val preciseMatch: String = if (request.preciseMatch) PreciseMatch(request.query) else request.query
+      if (request.spaceInsensitive) SpaceInsensitiveString(preciseMatch) else preciseMatch
     }
 
     request.filter match {
-      case Some(filter) if (request.insensitive) => List("csearch", "-n", "-i", "-f", forExtensions, query, filter)
-      case Some(filter)                          => List("csearch", "-n", "-f", forExtensions, query, filter)
-      case None if (request.insensitive)         => List("csearch", "-n", "-i", "-f", forExtensions, query)
-      case None                                  => List("csearch", "-n", "-f", forExtensions, query)
+      case Some(filter) if request.insensitive => List("csearch", "-n", "-i", "-f", forExtensions, query, filter)
+      case Some(filter)                        => List("csearch", "-n", "-f", forExtensions, query, filter)
+      case None if request.insensitive         => List("csearch", "-n", "-i", "-f", forExtensions, query)
+      case None                                => List("csearch", "-n", "-f", forExtensions, query)
     }
   }
 

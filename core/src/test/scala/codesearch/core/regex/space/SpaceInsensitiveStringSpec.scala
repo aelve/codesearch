@@ -2,10 +2,10 @@ package codesearch.core.regex.space
 
 import org.scalatest.{FreeSpec, Matchers}
 
-class SpaceInsensitiveSpec extends FreeSpec with Matchers {
-  def addingSpaceInsensitive(before: String, after: String) = {
+class SpaceInsensitiveStringSpec extends FreeSpec with Matchers {
+  def addingSpaceInsensitive(before: String, after: String): Unit = {
     before in {
-      SpaceInsensitive.spaceInsensitiveString(before) shouldBe after
+      SpaceInsensitiveString(before) shouldBe after
     }
   }
 
