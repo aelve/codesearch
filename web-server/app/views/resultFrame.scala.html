@@ -20,7 +20,7 @@
 )
 
 @regex = @{
-    RegexConstructor(query = query, space = space, insensitive = insensitive, precise = precise).r
+    RegexConstructor(query = query, space = space, insensitive = insensitive, precise = precise)
 }
 
 <section class="container">
@@ -46,7 +46,7 @@
         @for(result <- pack.results) {
 
             <a href="src/@result.fileLink?query=@{
-                URLEncoder.encode(regex.toString, "UTF-8")
+                URLEncoder.encode(regex, "UTF-8")
             }&L=@{
                 result.matchedLines.head
             }#snippet.@{
@@ -59,7 +59,7 @@
                 val ids = result.matchedLines.map(lineNumber => lineNumber - result.numberOfFirstLine)
                 val html = result.lines.zipWithIndex.flatMap { case (line, index) =>
                     if(ids.exists(_ == index + 1)) {
-                        val matches = regex.findAllMatchIn(line)
+                        val matches = regex.r.findAllMatchIn(line)
                         SnippetHelper.markAllMatches(line, matches)
                     } else {
                         Seq(HtmlFormat.escape(line + "\n"))

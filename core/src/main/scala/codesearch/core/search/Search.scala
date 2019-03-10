@@ -15,8 +15,7 @@ import codesearch.core.util.Helper.readFileAsync
 import fs2.{Pipe, Stream}
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
-import codesearch.core.regex.space.SpaceInsensitiveString
-import codesearch.core.regex.{PreciseMatch, RegexConstructor}
+import codesearch.core.regex.RegexConstructor
 
 import scala.sys.process.Process
 
