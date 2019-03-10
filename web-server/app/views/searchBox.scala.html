@@ -48,17 +48,9 @@
             })
         }
 
-        function focusFilterInput() {
-            inpFilter.addEventListener('input', function(e){
-                if(inpFilter.value.trim().length > 2 || inpFilter.value.trim().length <= 0) {
-                    document.getElementsByClassName('warning-filter')[0].classList.remove('show')
-                    inpFilter.classList.remove('warn')
-                }
-            })
-        }
-        function FormValidate() {
+
+        function formValidate() {
             if (inpQuery.value.trim().length) {
-                if (inpFilter.value.trim().length <= 0 || inpFilter.value.trim().length > 2) {
                     const sendArr = []
                     this.query = encodeURIComponent(inpQuery.value)
                     this.filter = encodeURIComponent(inpFilter.value)
@@ -68,7 +60,7 @@
 
                     sendArr.push('query='+this.query)
 
-                    if (this.filter.trim().length > 2) {
+                    if (this.filter.trim().length > 0) {
                         sendArr.push('filter='+this.filter)
                     }
 
@@ -90,12 +82,6 @@
                         document.location.href = pathname + '?' + arr
                     else
                         document.location.href = pathname + '/search' + '?' + arr
-                } else {
-                    if (!document.getElementsByClassName('warning-filter')[0].classList.contains('show')) {
-                        document.getElementsByClassName('warning-filter')[0].classList.add('show')
-                        inpFilter.classList.add('warn')
-                    }
-                }
             } else {
                 if (!document.getElementsByClassName('warning-query')[0].classList.contains('show')) {
                     document.getElementsByClassName('warning-query')[0].classList.add('show')
@@ -110,9 +96,8 @@
                 document.getElementById('btn-send-from').click();
             }
         }
-        document.getElementById('btn-send-from').addEventListener('click', FormValidate)
+        document.getElementById('btn-send-from').addEventListener('click', formValidate)
         inpQuery.addEventListener('click', focusQueryInput)
-        inpFilter.addEventListener('click', focusFilterInput)
         inpQuery.addEventListener('keyup', clickByEnter)
         inpFilter.addEventListener('keyup', clickByEnter)
         inpPath.addEventListener('keyup', clickByEnter)
