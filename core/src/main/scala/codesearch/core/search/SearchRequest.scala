@@ -61,7 +61,8 @@ object SearchRequest {
     )
   }
 
-  private def clean(string: String) = new String(string.trim.toArray.filter(_ != '\u0000'))
+  private def clean(string: String): String =
+    string.trim.replaceAll("[\\\\p{Cc}\\\\p{Cf}\\\\p{Co}\\\\p{Cn}]", "")
 
   private def isEnabled(param: String): Boolean = param == "on"
 }
