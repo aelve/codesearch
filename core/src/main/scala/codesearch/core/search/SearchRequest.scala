@@ -62,7 +62,7 @@ object SearchRequest {
   }
 
   private def clean(string: String): String =
-    string.trim.replaceAll("[\\\\p{Cc}\\\\p{Cf}\\\\p{Co}\\\\p{Cn}]", "")
+    string.trim.replaceAll("[[\\x00-\\x1F\\x7F]&&[^\\r\\n\\t]]", "")
 
   private def isEnabled(param: String): Boolean = param == "on"
 }
