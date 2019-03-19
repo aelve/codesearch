@@ -34,14 +34,16 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
     )
   }
 
-  def search(query: String,
-             filter: Option[String],
-             filePath: Option[String],
-             caseInsensitive: String,
-             spaceInsensitive: String,
-             precise: String,
-             sources: String,
-             page: String): Action[AnyContent] =
+  def search(
+      query: String,
+      filter: Option[String],
+      filePath: Option[String],
+      caseInsensitive: String,
+      spaceInsensitive: String,
+      precise: String,
+      sources: String,
+      page: String
+  ): Action[AnyContent] =
     Action.async { implicit request =>
       val host: String = request.host
       val searchRequest =

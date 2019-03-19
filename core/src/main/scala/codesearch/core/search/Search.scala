@@ -138,7 +138,7 @@ trait Search {
 
 object Search {
 
-  private[search] val snippetConfig: SnippetConfig =
+  val snippetConfig: SnippetConfig =
     Config
       .load[IO]
       .map(_.snippetConfig)
