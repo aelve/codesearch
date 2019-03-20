@@ -16,8 +16,10 @@ import codesearch.core.index.directory.СSearchDirectory
 import codesearch.core.index.directory.СSearchDirectory.HaskellCSearchIndex
 import codesearch.core.model.{HackageTable, Version}
 import fs2.{Chunk, Stream}
+import slick.jdbc.PostgresProfile.api._
 
-class HaskellIndex(haskellConfig: HaskellConfig)(
+
+class HaskellIndex(haskellConfig: HaskellConfig, val db: Database)(
     implicit val shift: ContextShift[IO],
     sourcesDownloader: SourcesDownloader[IO, HackagePackage]
 ) extends LanguageIndex[HackageTable] with HackageDB {
@@ -51,8 +53,8 @@ class HaskellIndex(haskellConfig: HaskellConfig)(
 }
 
 object HaskellIndex {
-  def apply(config: Config)(
+  def apply(config: Config, db: Database)(
       implicit shift: ContextShift[IO],
       sourcesDownloader: SourcesDownloader[IO, HackagePackage]
-  ) = new HaskellIndex(config.languagesConfig.haskell)
+  ) = new HaskellIndex(config.languagesConfig.haskell, db)
 }

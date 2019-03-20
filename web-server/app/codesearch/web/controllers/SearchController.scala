@@ -12,6 +12,7 @@ import codesearch.core.search.{Search, SearchRequest}
 import codesearch.core.util.Helper
 import com.github.marlonlom.utilities.timeago.TimeAgo
 import play.api.mvc.{Action, AnyContent, InjectedController}
+import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -23,6 +24,17 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
   def db: DefaultDB[V]
   def searchEngine: Search
   def lang: String
+
+  val database = Config
+    .load[IO]
+    .map { config =>
+      val dbConfig = config.db
+      Database.forURL(
+        driver = "org.postgresql.Driver",
+        url = s"jdbc:postgresql://${dbConfig.host}:${dbConfig.port}/${dbConfig.name}?user=${dbConfig.user}&password=${dbConfig.password}"
+      )
+    }
+    .unsafeRunSync()
 
   def index: Action[AnyContent] = Action.async { implicit request =>
     db.updated.map(

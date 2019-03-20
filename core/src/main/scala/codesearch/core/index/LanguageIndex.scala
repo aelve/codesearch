@@ -15,11 +15,14 @@ import codesearch.core.syntax.stream._
 import fs2.Stream
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+import slick.jdbc.PostgresProfile.api._
 
 import scala.sys.process._
 
 trait LanguageIndex[A <: DefaultTable] {
   self: DefaultDB[A] =>
+
+  def initDB: IO[Unit]
 
   protected implicit def shift: ContextShift[IO]
 

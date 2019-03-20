@@ -1,9 +1,12 @@
 package codesearch.web.controllers
 
+import cats.effect.IO
+import codesearch.core.config.Config
 import codesearch.core.db.{CratesDB, GemDB, HackageDB, NpmDB}
 import com.github.marlonlom.utilities.timeago.TimeAgo
 import javax.inject.Inject
 import play.api.mvc.{Action, AnyContent, InjectedController}
+import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.ExecutionContext
 
@@ -14,6 +17,24 @@ case class LangInfo(updatedMills: Long, totalPackages: Int) {
 class Application @Inject()(
     implicit val executionContext: ExecutionContext
 ) extends InjectedController {
+
+  val database: Database = Config
+    .load[IO]
+    .map { config =>
+      val dbConfig = config.db
+      Database.forURL(
+        driver = "org.postgresql.Driver",
+        url =
+          s"jdbc:postgresql://${dbConfig.host}:${dbConfig.port}/${dbConfig.name}?user=${dbConfig.user}&password=${dbConfig.password}"
+      )
+    }
+    .unsafeRunSync()
+
+  val HackageDB: HackageDB = new HackageDB { val db: Database = database }
+  val CratesDB: CratesDB = new CratesDB { val db: Database = database }
+  val NpmDB: NpmDB = new NpmDB { val db: Database = database }
+  val GemDB: GemDB = new GemDB { val db: Database = database }
+
 
   def index: Action[AnyContent] = Action.async { implicit request =>
     HackageDB.updated

@@ -14,8 +14,10 @@ import codesearch.core.index.directory.СSearchDirectory
 import codesearch.core.index.directory.СSearchDirectory.JavaScriptCSearchIndex
 import codesearch.core.model.NpmTable
 import fs2.Stream
+import slick.jdbc.PostgresProfile.api._
 
-class JavaScriptIndex(config: JavaScriptConfig)(
+
+class JavaScriptIndex(config: JavaScriptConfig, val db: Database)(
     implicit val shift: ContextShift[IO],
     sourcesDownloader: SourcesDownloader[IO, NpmPackage]
 ) extends LanguageIndex[NpmTable] with NpmDB {
@@ -35,8 +37,8 @@ class JavaScriptIndex(config: JavaScriptConfig)(
 }
 
 object JavaScriptIndex {
-  def apply(config: Config)(
+  def apply(config: Config, db: Database)(
       implicit shift: ContextShift[IO],
       sourcesDownloader: SourcesDownloader[IO, NpmPackage]
-  ) = new JavaScriptIndex(config.languagesConfig.javascript)
+  ) = new JavaScriptIndex(config.languagesConfig.javascript, db)
 }

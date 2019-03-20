@@ -10,6 +10,7 @@ import pureconfig.{CamelCase, ConfigFieldMapping, ProductHint}
 case class Config(db: DatabaseConfig, snippetConfig: SnippetConfig, languagesConfig: LanguagesConfig)
 case class DatabaseConfig(
     dataSourceClass: String,
+    host: String,
     port: Int,
     name: String,
     user: String,

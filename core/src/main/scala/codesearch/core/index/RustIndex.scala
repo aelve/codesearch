@@ -16,8 +16,10 @@ import codesearch.core.util.Helper
 import fs2.Stream
 import io.circe.Decoder
 import io.circe.fs2._
+import slick.jdbc.PostgresProfile.api._
 
-class RustIndex(rustConfig: RustConfig)(
+
+class RustIndex(rustConfig: RustConfig, val db: Database)(
     implicit val shift: ContextShift[IO],
     sourcesDownloader: SourcesDownloader[IO, CratesPackage]
 ) extends LanguageIndex[CratesTable] with CratesDB {
@@ -58,8 +60,8 @@ class RustIndex(rustConfig: RustConfig)(
 }
 
 object RustIndex {
-  def apply(config: Config)(
+  def apply(config: Config, db: Database)(
       implicit shift: ContextShift[IO],
       sourcesDownloader: SourcesDownloader[IO, CratesPackage]
-  ) = new RustIndex(config.languagesConfig.rust)
+  ) = new RustIndex(config.languagesConfig.rust, db)
 }

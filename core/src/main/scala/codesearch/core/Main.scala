@@ -10,6 +10,8 @@ import codesearch.core.meta._
 import codesearch.core.model._
 import codesearch.core.util.Unarchiver
 import com.softwaremill.sttp.asynchttpclient.fs2.AsyncHttpClientFs2Backend
+import slick.jdbc.PostgresProfile.api._
+
 
 object Main extends IOApp {
 
@@ -23,7 +25,6 @@ object Main extends IOApp {
   )
 
   case class LangRep[A <: DefaultTable](
-      db: DefaultDB[A],
       langIndex: LanguageIndex[A],
       metaDownloader: MetaDownloader[IO]
   )
@@ -34,6 +35,14 @@ object Main extends IOApp {
         params <- CLI.params(args)
         config <- Config.load[IO]
 
+        dbConfig = config.db
+
+        val db = Database.forURL(
+          driver = "org.postgresql.Driver",
+          url =
+            s"jdbc:postgresql://${dbConfig.host}:${dbConfig.port}/${dbConfig.name}?user=${dbConfig.user}&password=${dbConfig.password}"
+        )
+
         unarchiver                            = Unarchiver[IO]
         implicit0(downloader: Downloader[IO]) = Downloader.create[IO]
 
@@ -43,10 +52,10 @@ object Main extends IOApp {
         npmMeta     <- NpmMetaDownloader(config.languagesConfig.javascript, downloader)
 
         langReps = Map(
-          "haskell"    -> LangRep[HackageTable](HackageDB, HaskellIndex(config), hackageMeta),
-          "rust"       -> LangRep[CratesTable](CratesDB, RustIndex(config), cratesMeta),
-          "ruby"       -> LangRep[GemTable](GemDB, RubyIndex(config), gemMeta),
-          "javascript" -> LangRep[NpmTable](NpmDB, JavaScriptIndex(config), npmMeta)
+          "haskell"    -> LangRep[HackageTable](HaskellIndex(config, db), hackageMeta),
+          "rust"       -> LangRep[CratesTable](RustIndex(config, db), cratesMeta),
+          "ruby"       -> LangRep[GemTable](RubyIndex(config, db), gemMeta),
+          "javascript" -> LangRep[NpmTable](JavaScriptIndex(config, db), npmMeta)
         )
         exitCode <- Program(langReps) >>= (_.run(params))
       } yield exitCode

@@ -16,8 +16,9 @@ import codesearch.core.model.GemTable
 import io.circe.fs2._
 import fs2.Stream
 import fs2.io.file
+import slick.jdbc.PostgresProfile.api._
 
-class RubyIndex(rubyConfig: RubyConfig)(
+class RubyIndex(rubyConfig: RubyConfig, val db: Database)(
     implicit val shift: ContextShift[IO],
     sourcesDownloader: SourcesDownloader[IO, GemPackage]
 ) extends LanguageIndex[GemTable] with GemDB {
@@ -43,8 +44,8 @@ class RubyIndex(rubyConfig: RubyConfig)(
 }
 
 object RubyIndex {
-  def apply(config: Config)(
+  def apply(config: Config, db: Database)(
       implicit shift: ContextShift[IO],
       sourcesDownloader: SourcesDownloader[IO, GemPackage]
-  ) = new RubyIndex(config.languagesConfig.ruby)
+  ) = new RubyIndex(config.languagesConfig.ruby, db)
 }

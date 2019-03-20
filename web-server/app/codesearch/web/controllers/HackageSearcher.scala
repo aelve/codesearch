@@ -11,7 +11,7 @@ import scala.concurrent.ExecutionContext
 class HackageSearcher @Inject()(
     implicit override val executionContext: ExecutionContext
 ) extends InjectedController with SearchController[HackageTable] {
-  override def db: DefaultDB[HackageTable]      = HackageDB
+  override def db: DefaultDB[HackageTable]      = new HackageDB { val db = database }
   override lazy val searchEngine: HaskellSearch = new HaskellSearch()
   override def lang: String                     = "haskell"
 }
