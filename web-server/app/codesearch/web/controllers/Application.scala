@@ -31,10 +31,9 @@ class Application @Inject()(
     .unsafeRunSync()
 
   val HackageDB: HackageDB = new HackageDB { val db: Database = database }
-  val CratesDB: CratesDB = new CratesDB { val db: Database = database }
-  val NpmDB: NpmDB = new NpmDB { val db: Database = database }
-  val GemDB: GemDB = new GemDB { val db: Database = database }
-
+  val CratesDB: CratesDB   = new CratesDB  { val db: Database = database }
+  val NpmDB: NpmDB         = new NpmDB     { val db: Database = database }
+  val GemDB: GemDB         = new GemDB     { val db: Database = database }
 
   def index: Action[AnyContent] = Action.async { implicit request =>
     HackageDB.updated

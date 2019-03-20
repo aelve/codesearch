@@ -16,7 +16,6 @@ import codesearch.core.model.NpmTable
 import fs2.Stream
 import slick.jdbc.PostgresProfile.api._
 
-
 class JavaScriptIndex(config: JavaScriptConfig, val db: Database)(
     implicit val shift: ContextShift[IO],
     sourcesDownloader: SourcesDownloader[IO, NpmPackage]

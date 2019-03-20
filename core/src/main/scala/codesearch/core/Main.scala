@@ -12,7 +12,6 @@ import codesearch.core.util.Unarchiver
 import com.softwaremill.sttp.asynchttpclient.fs2.AsyncHttpClientFs2Backend
 import slick.jdbc.PostgresProfile.api._
 
-
 object Main extends IOApp {
 
   final case class Params(

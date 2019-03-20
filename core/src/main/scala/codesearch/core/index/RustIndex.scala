@@ -18,7 +18,6 @@ import io.circe.Decoder
 import io.circe.fs2._
 import slick.jdbc.PostgresProfile.api._
 
-
 class RustIndex(rustConfig: RustConfig, val db: Database)(
     implicit val shift: ContextShift[IO],
     sourcesDownloader: SourcesDownloader[IO, CratesPackage]

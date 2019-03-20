@@ -18,7 +18,6 @@ import codesearch.core.model.{HackageTable, Version}
 import fs2.{Chunk, Stream}
 import slick.jdbc.PostgresProfile.api._
 
-
 class HaskellIndex(haskellConfig: HaskellConfig, val db: Database)(
     implicit val shift: ContextShift[IO],
     sourcesDownloader: SourcesDownloader[IO, HackagePackage]
