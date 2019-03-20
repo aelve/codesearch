@@ -22,7 +22,11 @@ case class DatabaseConfig(
     password: String
 )
 
-case class SnippetConfig(pageSize: Int, linesBefore: Int, linesAfter: Int)
+case class SnippetConfig(
+    pageSize: Int,
+    linesBefore: Int,
+    linesAfter: Int
+)
 
 case class LanguagesConfig(
     haskell: HaskellConfig,
