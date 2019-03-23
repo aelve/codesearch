@@ -50,9 +50,9 @@ object SearchRequest {
   ): SearchRequest = {
     SearchRequest(
       lang,
-      query,
-      filter,
-      filePath,
+      clean(query),
+      filter.map(clean),
+      filePath.map(clean),
       isEnabled(insensitive),
       isEnabled(spaceInsensitive),
       isEnabled(preciseMatch),
@@ -60,6 +60,9 @@ object SearchRequest {
       page.toInt,
     )
   }
+
+  private def clean(string: String): String =
+    string.trim.replaceAll("[[\\x00-\\x1F\\x7F]&&[^\\r\\n\\t]]", "")
 
   private def isEnabled(param: String): Boolean = param == "on"
 }

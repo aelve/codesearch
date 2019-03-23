@@ -1,6 +1,5 @@
 package codesearch.core.index.repository
 
-import java.io.File
 import java.net.URLEncoder
 import java.nio.file.Path
 

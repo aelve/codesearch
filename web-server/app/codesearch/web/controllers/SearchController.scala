@@ -56,9 +56,9 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
               views.html.searchResults(
                 updated = TimeAgo.using(updated.getTime),
                 packages = results,
-                query = query,
-                filter = filter,
-                filePath = filePath,
+                query = searchRequest.query,
+                filter = searchRequest.filter,
+                filePath = searchRequest.filePath,
                 insensitive = searchRequest.insensitive,
                 space = searchRequest.spaceInsensitive,
                 precise = searchRequest.preciseMatch,
