@@ -2,13 +2,14 @@ version: '3.3'
 
 services:
   portainer:
-    image: portainer/portainer
+    image: portainer/portainer:latest
     deploy:
       mode: global
       restart_policy:
         condition: any
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - /mnt/vol/portainer/data:/data
     ports:
       - 9080:9000
     networks:
