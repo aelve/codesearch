@@ -2,26 +2,15 @@
 
 workflows:
   version: 2
-  build_and_push:
+  build_and_push_and_deploy:
     jobs:
       - build
       - build_and_publish_docker_images:
           requires:
             - build
-          filters:
-            branches:
-              only:
-                - develop
-                - master
-                - 229-auto-deployment
       - deploy:
           requires:
             - build_and_publish_docker_images
-          branches:
-            only:
-              - develop
-              - master
-              - 229-auto-deployment
 
 version: 2
 jobs:
