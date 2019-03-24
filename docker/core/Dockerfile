@@ -15,6 +15,7 @@ RUN apk --no-cache add \
 COPY codesearch-core.jar /
 COPY /scripts/update_index.rb /scripts/
 COPY /docker/core/Makefile /
+COPY /docker/core/wait-for /
 
 RUN go get github.com/aelve/codesearch-engine/cmd/...
 RUN rm -rf /var/cache/apk/*

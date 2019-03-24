@@ -53,6 +53,12 @@ serve:
 
 # Build a Docker image (the project must be built already)
 build-docker-%:
+	if [ "$(branch)" == "229-auto-deployment" ]; \
+	then \
+		docker build \
+			-f "docker/$*/Dockerfile" \
+			-t "quay.io/aelve/codesearch-$*:test" . ; \
+
 	if [ "$(branch)" == "master" ] || [ "$(branch)" == "develop" ]; \
 	then \
 		docker build \
@@ -79,6 +85,9 @@ push-docker-%:
 		then \
 			docker push "quay.io/aelve/codesearch-$*:master"; \
 			docker push "quay.io/aelve/codesearch-$*:latest"; \
+		if [ "$(branch)" == "229-auto-deployment" ]; \
+		then \
+			docker push "quay.io/aelve/codesearch-$*:test"; \
 		else \
 			docker push "quay.io/aelve/codesearch-$*:$(branch)"; \
 		fi \
