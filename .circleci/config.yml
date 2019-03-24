@@ -89,22 +89,21 @@ jobs:
 
   deploy:
     working_directory: ~/codesearch
-    docker:
-      - image: docker:git
+    machine: true
     environment:
       DOCKER_HOST: $REMOTE_DOCKER_SWARM_TEST_HOST
       DOCKER_TLS_VERIFY: 1
     steps:
       - attach_workspace:
           at: ~/codesearch
-      - run: ls -a ~/
-      - run: docker login quay.io -u "$DOCKER_USER" -p "$DOCKER_PASS"
       - run: mkdir -p ~/.docker
       - run: ls -a ~/
       - run: echo "$TLSCACERT" > ~/.docker/ca.pem
-      - run: ls -a ~/.docker
+      - run: ls -a ~/.docker/
       - run: echo "$TLSCERT" > ~/.docker/cert.pem
       - run: echo "$TLSKEY" > ~/.docker/key.pem
+      - run: ls -a ~/.docker/
+      - run: docker login quay.io -u "$DOCKER_USER" -p "$DOCKER_PASS"
       - run:
           name: Deploy to swarm
           command: |
