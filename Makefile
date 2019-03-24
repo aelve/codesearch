@@ -58,8 +58,7 @@ build-docker-%:
 		docker build \
 			-f "docker/$*/Dockerfile" \
 			-t "quay.io/aelve/codesearch-$*:test" . ; \
-
-	if [ "$(branch)" == "master" ] || [ "$(branch)" == "develop" ]; \
+	elif [ "$(branch)" == "master" ] || [ "$(branch)" == "develop" ]; \
 	then \
 		docker build \
 			-f "docker/$*/Dockerfile" \
@@ -85,7 +84,7 @@ push-docker-%:
 		then \
 			docker push "quay.io/aelve/codesearch-$*:master"; \
 			docker push "quay.io/aelve/codesearch-$*:latest"; \
-		if [ "$(branch)" == "229-auto-deployment" ]; \
+		elif [ "$(branch)" == "229-auto-deployment" ]; \
 		then \
 			docker push "quay.io/aelve/codesearch-$*:test"; \
 		else \
