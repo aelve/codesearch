@@ -31,7 +31,8 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
       val dbConfig = config.db
       Database.forURL(
         driver = "org.postgresql.Driver",
-        url = s"jdbc:postgresql://${dbConfig.host}:${dbConfig.port}/${dbConfig.name}?user=${dbConfig.user}&password=${dbConfig.password}"
+        url =
+          s"jdbc:postgresql://${dbConfig.host}:${dbConfig.port}/${dbConfig.name}?user=${dbConfig.user}&password=${dbConfig.password}"
       )
     }
     .unsafeRunSync()
