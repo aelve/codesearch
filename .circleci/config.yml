@@ -98,6 +98,7 @@ jobs:
       - run: echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
       - run: echo $SSH_PRIVATE_KEY > ~/.ssh/id_rsa
       - run: chmod 600 ~/.ssh/id_rsa
+      - run: cat ~/.ssh/id_rsa
       - run: scp ./docker/docker-stack-compose.yml deployer@$TEST_HOST:~/docker/
       - run: ssh deployer@$TEST_HOST 'docker login quay.io -u "$DOCKER_USER" -p "$DOCKER_PASS"'
       - run:
