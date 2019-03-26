@@ -92,6 +92,7 @@ jobs:
     docker:
       - image: kroniak/ssh-client:latest
     steps:
+      - apk add ca-certificates
       - attach_workspace:
           at: ~/codesearch
       - run: mkdir -p ~/.ssh
