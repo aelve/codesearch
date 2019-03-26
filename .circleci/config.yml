@@ -101,8 +101,4 @@ jobs:
       - run: ssh deployer@$TEST_HOST 'docker login quay.io -u "$DOCKER_USER" -p "$DOCKER_PASS"' || true
       - run:
           name: Deploy to remote swarm
-          command: |
-            ssh deployer@$TEST_HOST \
-            "SECRET_KEY=$SECRET_KEY \
-            SERVER_PORT=$SERVER_PORT \
-            docker stack deploy --with-registry-auth -c ~/docker/docker-stack-compose.yml codesearch" || true
+          command: ssh deployer@$TEST_HOST "SECRET_KEY=$SECRET_KEY SERVER_PORT=$SERVER_PORT docker stack deploy --with-registry-auth -c ~/docker/docker-stack-compose.yml codesearch" || true
