@@ -89,25 +89,22 @@ jobs:
 
   deploy:
     working_directory: ~/codesearch
-    machine: true
-    environment:
-      DOCKER_HOST: $REMOTE_DOCKER_SWARM_TEST_HOST
-      DOCKER_TLS_VERIFY: 1
+    docker:
+      - image: kroniak/ssh-client:latest
     steps:
       - attach_workspace:
           at: ~/codesearch
-      - run: mkdir -p ~/.docker
-      - run: ls -a ~/
-      - run: echo "$TLSCACERT" > ~/.docker/ca.pem
-      - run: ls -a ~/.docker/
-      - run: cat ~/.docker/ca.pem
-      - run: echo "$TLSCERT" > ~/.docker/cert.pem
-      - run: echo "$TLSKEY" > ~/.docker/key.pem
-      - run: ls -a ~/.docker/
-      - run: docker login quay.io -u "$DOCKER_USER" -p "$DOCKER_PASS"
+      - run: mkdir -p ~/.ssh
+      - run: chmod 700 ~/.ssh
+      - run: echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+      - run: echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+      - run: chmod 600 ~/.ssh/id_rsa
+      - run: scp ./docker/docker-stack-compose.yml deploy@$TEST_HOST:~/docker/
+      - run: ssh deploy@$TEST_HOST 'docker login quay.io -u "$DOCKER_USER" -p "$DOCKER_PASS"'
       - run:
-          name: Deploy to swarm
+          name: Deploy to remote swarm
           command: |
-            SECRET_KEY="$SECRET_KEY"\
-            SERVER_PORT="$SERVER_PORT"\
-            docker stack deploy --with-registry-auth -c ./docker/docker-stack-compose.yml codesearch
+            ssh deployer@$TEST_HOST \
+            "SECRET_KEY=$SECRET_KEY \
+            SERVER_PORT=$SERVER_PORT \
+            docker stack deploy --with-registry-auth -c ~/docker/docker-stack-compose.yml codesearch"
