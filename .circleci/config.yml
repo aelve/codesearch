@@ -91,7 +91,7 @@ jobs:
     working_directory: ~/codesearch
     machine: true
     environment:
-      DOCKER_CERT_PATH: "/certs"
+      DOCKER_CERT_PATH: "./certs"
     steps:
       - attach_workspace:
           at: ~/codesearch
@@ -100,7 +100,6 @@ jobs:
       - run: echo "$TLSCACERT" > $DOCKER_CERT_PATH/ca.pem
       - run: echo "$TLSCERT" > $DOCKER_CERT_PATH/cert.pem
       - run: echo "$TLSKEY" > $DOCKER_CERT_PATH/key.pem
-      - run: cd docker
       - run:
           name: Deploy to remote swarm
-          command: SECRET_KEY=$SECRET_KEY SERVER_PORT=$SERVER_PORT docker -H=$TEST_HOST:2376 --tlsverify --tlscacert=$DOCKER_CERT_PATH/ca.pem --tlscert=$DOCKER_CERT_PATH/cert.pem --tlskey=$DOCKER_CERT_PATH/key.pem stack deploy --with-registry-auth -c docker-stack-compose.yml codesearch
+          command: SECRET_KEY=$SECRET_KEY SERVER_PORT=$SERVER_PORT docker -H=$TEST_HOST:2376 --tlsverify --tlscacert=$DOCKER_CERT_PATH/ca.pem --tlscert=$DOCKER_CERT_PATH/cert.pem --tlskey=$DOCKER_CERT_PATH/key.pem stack deploy --with-registry-auth -c docker/docker-stack-compose.yml codesearch
