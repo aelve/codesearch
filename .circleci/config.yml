@@ -8,7 +8,7 @@ workflows:
       - build_and_publish_docker_images:
           requires:
             - build
-      - deploy:
+      - deploy-to-swarm:
           requires:
             - build_and_publish_docker_images
 
@@ -87,18 +87,20 @@ jobs:
           name: Running push web-server image
           command: make push-docker-web-server "branch=${CIRCLE_BRANCH}"
 
-  deploy:
+  deploy-to-swarm:
     working_directory: ~/codesearch
     machine: true
+    environment:
+      DOCKER_CERT_PATH: "/certs"
     steps:
       - attach_workspace:
           at: ~/codesearch
-      - add_ssh_keys:
-          fingerprints:
-            - "27:51:c3:38:40:b1:c2:db:ea:9d:bf:d6:c4:93:a2:e5"
-      - run: ssh deployer@$TEST_HOST "mkdir -p ~/docker" || true
-      - run: scp ./docker/docker-stack-compose.yml deployer@$TEST_HOST:~/docker
-      - run: ssh deployer@$TEST_HOST "docker login quay.io -u $DOCKER_USER -p $DOCKER_PASS" || true
+      - run: docker login quay.io -u "$DOCKER_USER" -p "$DOCKER_PASS"
+      - run: mkdir -p $DOCKER_CERT_PATH
+      - run: echo "$TLSCACERT" > $DOCKER_CERT_PATH/ca.pem
+      - run: echo "$TLSCERT" > $DOCKER_CERT_PATH/cert.pem
+      - run: echo "$TLSKEY" > $DOCKER_CERT_PATH/key.pem
+      - run: cd docker
       - run:
           name: Deploy to remote swarm
-          command: ssh deployer@$TEST_HOST "SECRET_KEY=$SECRET_KEY SERVER_PORT=$SERVER_PORT docker stack deploy --with-registry-auth -c ~/docker/docker-stack-compose.yml codesearch" || true
+          command: SECRET_KEY=$SECRET_KEY SERVER_PORT=$SERVER_PORT docker -H=$TEST_HOST:2376 --tlsverify --tlscacert=$DOCKER_CERT_PATH/ca.pem --tlscert=$DOCKER_CERT_PATH/cert.pem --tlskey=$DOCKER_CERT_PATH/key.pem stack deploy --with-registry-auth -c docker-stack-compose.yml codesearch
