@@ -17,6 +17,7 @@ COPY /scripts/update_index.rb /scripts/
 COPY /docker/core/Makefile /
 COPY /docker/core/wait-for /
 
+RUN chmod +x wait-for
 RUN go get github.com/aelve/codesearch-engine/cmd/...
 RUN rm -rf /var/cache/apk/*
 
