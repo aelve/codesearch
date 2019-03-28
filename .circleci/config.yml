@@ -18,11 +18,10 @@ version: 2
 jobs:
   build:
     working_directory: ~/codesearch
-    docker:
-    - image: quay.io/aelve/codesearch-ci-test-env
+    machine:
+      image: quay.io/aelve/codesearch-ci-test-env
     steps:
       - checkout
-      - setup_remote_docker
       - restore_cache:
           keys:
             - codesearch-{{ checksum "project/Builder.scala" }}-{{ checksum "build.sbt" }}
