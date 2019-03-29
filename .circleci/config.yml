@@ -19,7 +19,7 @@ jobs:
   build:
     working_directory: ~/codesearch
     machine:
-      image: quay.io/aelve/codesearch-ci-test-env
+      - image: quay.io/aelve/codesearch-ci-test-env
     steps:
       - checkout
       - restore_cache:
