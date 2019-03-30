@@ -89,7 +89,8 @@ jobs:
 
   deploy-to-swarm:
     working_directory: ~/codesearch
-    machine: true
+    docker:
+      - image: docker:latest
     environment:
       DOCKER_CERT_PATH: "./certs"
     steps:
