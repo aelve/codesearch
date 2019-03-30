@@ -87,7 +87,7 @@ jobs:
           name: Running push web-server image
           command: make push-docker-web-server "branch=${CIRCLE_BRANCH}"
 
-  deploy:
+  deploy-to-swarm:
     working_directory: ~/codesearch
     machine: true
     steps:
