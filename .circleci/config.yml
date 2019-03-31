@@ -18,10 +18,11 @@ version: 2
 jobs:
   build:
     working_directory: ~/codesearch
-    machine:
-      - image: quay.io/aelve/codesearch-ci-test-env
+    docker:
+      - image: codestar/circleci-scala-sbt-git:scala-2.12.6-sbt-1.1.6
     steps:
       - checkout
+      - setup_remote_docker
       - restore_cache:
           keys:
             - codesearch-{{ checksum "project/Builder.scala" }}-{{ checksum "build.sbt" }}
