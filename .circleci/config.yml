@@ -96,7 +96,7 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "27:51:c3:38:40:b1:c2:db:ea:9d:bf:d6:c4:93:a2:e5"
-      - run: ssh deployer@$STAGING_HOST "mkdir -p ~/docker && mkdir -p /mnt/vol/{portainer/data,postgresql,data,index,logs}" || true
+      - run: ssh deployer@$STAGING_HOST "mkdir -p ~/docker && echo $DEPLOYER_PASS | sudo -S mkdir -p /mnt/vol/{portainer/data,postgresql,data,index,logs}" || true
       - run: scp ./docker/docker-stack-compose.yml deployer@$STAGING_HOST:~/docker
       - run: ssh deployer@$STAGING_HOST "docker login quay.io -u $DOCKER_USER -p $DOCKER_PASS" || true
       - run:
