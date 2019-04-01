@@ -36,7 +36,7 @@ services:
       mode: global
       restart_policy:
         condition: any
-        delay: 6h
+        delay: 5h
       update_config:
         failure_action: rollback
     depends_on:

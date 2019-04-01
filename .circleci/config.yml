@@ -8,9 +8,23 @@ workflows:
       - build_and_publish_docker_images:
           requires:
             - build
+          filters:
+            branches:
+              only:
+                - develop
+                - master
+      - staging-deploy-to-swarm:
+          requires:
+            - build_and_publish_docker_images
+          filters:
+            branches:
+              only: develop
       - deploy-to-swarm:
           requires:
             - build_and_publish_docker_images
+          filters:
+            branches:
+              only: master
 
 version: 2
 jobs:
@@ -87,7 +101,7 @@ jobs:
           name: Running push web-server image
           command: make push-docker-web-server "branch=${CIRCLE_BRANCH}"
 
-  deploy-to-swarm:
+  staging-deploy-to-swarm:
     working_directory: ~/codesearch
     machine: true
     steps:
@@ -101,4 +115,20 @@ jobs:
       - run: ssh deployer@$STAGING_HOST "docker login quay.io -u $DOCKER_USER -p $DOCKER_PASS" || true
       - run:
           name: Deploy to remote swarm
-          command: ssh deployer@$STAGING_HOST "SECRET_KEY=$SECRET_KEY SERVER_PORT=$SERVER_PORT docker stack deploy --with-registry-auth -c ~/docker/docker-stack-compose.yml codesearch" || true
+          command: ssh deployer@$STAGING_HOST "SECRET_KEY=$STAGING_SECRET_KEY SERVER_PORT=$SERVER_PORT docker stack deploy --with-registry-auth -c ~/docker/docker-stack-compose.yml codesearch" || true
+
+  deploy-to-swarm:
+    working_directory: ~/codesearch
+    machine: true
+    steps:
+      - attach_workspace:
+          at: ~/codesearch
+      - add_ssh_keys:
+          fingerprints:
+            - "27:51:c3:38:40:b1:c2:db:ea:9d:bf:d6:c4:93:a2:e5"
+      - run: ssh deployer@$HOST "mkdir -p ~/docker && echo $DEPLOYER_PASS | sudo -S mkdir -p /mnt/vol/{portainer/data,postgresql,data,index,logs}" || true
+      - run: scp ./docker/docker-stack-compose.yml deployer@$HOST:~/docker
+      - run: ssh deployer@$HOST "docker login quay.io -u $DOCKER_USER -p $DOCKER_PASS" || true
+      - run:
+          name: Deploy to remote swarm
+          command: ssh deployer@$HOST "SECRET_KEY=$SECRET_KEY SERVER_PORT=$SERVER_PORT docker stack deploy --with-registry-auth -c ~/docker/docker-stack-compose.yml codesearch" || true
