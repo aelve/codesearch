@@ -72,5 +72,34 @@ class IntegrationHaskellSpec extends FreeSpec with ForAllTestContainer with Inte
         )
       )
     )
+
+    searchResultsMustBe(
+      SearchRequest(
+        lang = "haskell",
+        query = "#!/usr.*runghc",
+        filter = None,
+        filePath = Some(".*hs"),
+        insensitive = false,
+        spaceInsensitive = false,
+        preciseMatch = false,
+        sourcesOnly = true,
+        page = 1
+      ),
+      1,
+      Seq(
+        PackageResult(
+          Package("3d-graphics-examples-0.0.0.2", "https://hackage.haskell.org/package/3d-graphics-examples-0.0.0.2"),
+          Seq(
+            CodeSnippet(
+              "Setup.lhs",
+              "hackage/3d-graphics-examples/0.0.0.2/Setup.lhs",
+              0,
+              NonEmptyVector.of(1),
+              Seq("#!/usr/bin/env runghc", "", "> import Distribution.Simple", "> main = defaultMain")
+            )
+          )
+        )
+      )
+    )
   }
 }

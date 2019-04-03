@@ -89,5 +89,44 @@ class IntegrationRustSpec extends FreeSpec with ForAllTestContainer with Integra
         )
       )
     )
+
+    searchResultsMustBe(
+      SearchRequest(
+        lang = "rust",
+        query = "Box::new(AMQP",
+        filter = Some("amqpFrame"),
+        filePath = None,
+        insensitive = true,
+        spaceInsensitive = false,
+        preciseMatch = true,
+        sourcesOnly = true,
+        page = 1
+      ),
+      1,
+      Seq(
+        PackageResult(
+          Package("lapin-futures-0.17.0", "https://docs.rs/crate/lapin-futures/0.17.0"),
+          Seq(
+            CodeSnippet(
+              "src/transport.rs",
+              "crates/lapin-futures/0.17.0/src/transport.rs",
+              337,
+              NonEmptyVector.of(341),
+              Seq(
+                "",
+                "    let mut codec = AMQPCodec { frame_max: 8192 };",
+                "    let mut buffer = BytesMut::with_capacity(8192);",
+                "    let frame = AMQPFrame::Header(0, 10, Box::new(AMQPContentHeader {",
+                "      class_id: 10,",
+                "      weight: 0,",
+                "      body_size: 64,",
+                "      properties: BasicProperties::default()",
+                "    }));"
+              )
+            )
+          )
+        )
+      )
+    )
   }
 }

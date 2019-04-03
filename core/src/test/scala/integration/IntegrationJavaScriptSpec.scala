@@ -74,5 +74,44 @@ class IntegrationJavaScriptSpec extends FreeSpec with ForAllTestContainer with I
         )
       )
     )
+
+    searchResultsMustBe(
+      SearchRequest(
+        lang = "javascript",
+        query = "import styled",
+        filter = Some("css"),
+        filePath = None,
+        insensitive = false,
+        spaceInsensitive = false,
+        preciseMatch = true,
+        sourcesOnly = true,
+        page = 1
+      ),
+      1,
+      Seq(
+        PackageResult(
+          Package("00-components-0.5.0", "https://www.npmjs.com/package/00-components/v/0.5.0"),
+          Seq(
+            CodeSnippet(
+              "dist/Button.js",
+              "npm/00-components/0.5.0/dist/Button.js",
+              19,
+              NonEmptyVector.of(23),
+              Seq(
+                "  return data;",
+                "}",
+                "",
+                "import styled, { css } from \"styled-components\";",
+                "import defaultTheme from \"./theme/default\";",
+                "var Button = styled.a(_templateObject(), function (_ref) {",
+                "  var theme = _ref.theme;",
+                "  return theme.fontFamily;",
+                "}, function (props) {"
+              )
+            )
+          )
+        )
+      )
+    )
   }
 }

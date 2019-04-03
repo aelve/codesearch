@@ -19,7 +19,7 @@ jobs:
   build:
     working_directory: ~/codesearch
     docker:
-      - image: codestar/circleci-scala-sbt-git:scala-2.12.6-sbt-1.1.6
+      - image: quay.io/aelve/codesearch-ci-test-env
     steps:
       - checkout
       - setup_remote_docker
