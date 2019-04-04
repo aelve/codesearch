@@ -29,17 +29,17 @@ trait Search {
 
   def search(request: SearchRequest): IO[CSearchPage] = {
     val entity = csearch(request)
-      if (entity.error.isEmpty) {
+    if (entity.error.isEmpty) {
       for {
         results <- Stream
-            .emits(entity.lists)
-            .through(SnippetsGrouper.groupLines(snippetConfig))
-            .drop(snippetConfig.pageSize * (request.page - 1))
-            .take(snippetConfig.pageSize)
-            .evalMap(createSnippet)
-            .through(groupByPackage)
-            .compile
-            .toList
+          .emits(entity.lists)
+          .through(SnippetsGrouper.groupLines(snippetConfig))
+          .drop(snippetConfig.pageSize * (request.page - 1))
+          .take(snippetConfig.pageSize)
+          .evalMap(createSnippet)
+          .through(groupByPackage)
+          .compile
+          .toList
       } yield CSearchPage(results.sortBy(_.pack.name), entity.lists.size, "")
     } else {
       IO(CSearchPage(Seq.empty[Search.PackageResult], 0, entity.error))
@@ -162,7 +162,6 @@ object Search {
     * @param data code snippets grouped by package
     * @param total number of total matches
     */
-
   /**
     *
     * @param relativePath path into package sources
@@ -208,11 +207,10 @@ object Search {
       result: CodeSnippet
   )
 }
-case class ListError(lists: List[String],
-                     error: String)
+case class ListError(lists: List[String], error: String)
 
 final case class CSearchPage(
-                              data: Seq[PackageResult],
-                              total: Int,
-                              errorMessage: String
-                            )
+    data: Seq[PackageResult],
+    total: Int,
+    errorMessage: String
+)
