@@ -65,16 +65,6 @@ trait Search {
     */
   protected def buildRepUrl(packageName: String, version: String): String
 
-  private def csearch(request: SearchRequest): IO[List[String]] = {
-    val indexDir = cindexDir.indexDirAs[String]
-    val env      = ("CSEARCHINDEX", indexDir)
-
-    for {
-      _       <- logger.debug(s"running CSEARCHINDEX=$indexDir ${arguments(request).mkString(" ")}")
-      results <- IO((Process(arguments(request), None, env) #| Seq("head", "-1001")).lineStream.toList)
-    } yield results
-  }
-
   private def arguments(request: SearchRequest): List[String] = {
     def extensionsRegex: String = extensions.sourceExtensions.mkString(".*\\.(", "|", ")$")
 
