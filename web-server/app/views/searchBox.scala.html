@@ -1,18 +1,12 @@
-@(
-        actSearch: String,
-        query: String,
-        filter: Option[String],
-        filePath: Option[String],
-        insensitive: Boolean,
-        space: Boolean,
-        precise: Boolean,
-        sources: Boolean
-)
+@(actSearch: String, query: String, filter: Option[String], filePath: Option[String], insensitive: Boolean,
+        space: Boolean, precise: Boolean, sources: Boolean, errorMessageT: String)
 
 <section class="container-fluid">
     <div class="col-lg-6 mx-auto p-3 h7 justify-content-center" style="position: relative;">
         <form>
             <section class="warning warning-query">Please provide a string to search for.</section>
+            <section class="error error-query">You have error @{errorMessageT}</section>
+            <section class="error error-hide">@{errorMessageT}</section>
             <div class="input-group mb-2">
                 <input type="text" class="form-control" name="query" value="@query" class="query">
                 <div class="input-group-append">

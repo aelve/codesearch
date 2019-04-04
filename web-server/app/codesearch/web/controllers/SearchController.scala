@@ -5,8 +5,7 @@ import cats.instances.future._
 import codesearch.core.db.DefaultDB
 import codesearch.core.index.directory.Directory
 import codesearch.core.model.DefaultTable
-import codesearch.core.search.Search.CSearchPage
-import codesearch.core.search.{Search, SearchRequest}
+import codesearch.core.search.{CSearchPage, Search, SearchRequest}
 import codesearch.core.util.Helper
 import com.github.marlonlom.utilities.timeago.TimeAgo
 import play.api.mvc.{Action, AnyContent, InjectedController}
@@ -51,7 +50,7 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
 
       db.updated.flatMap { updated =>
         searchEngine.search(searchRequest) map {
-          case CSearchPage(results, total) =>
+          case CSearchPage(results, total, errorMessage) =>
             Ok(
               views.html.searchResults(
                 updated = TimeAgo.using(updated.getTime),
@@ -66,7 +65,8 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
                 page = searchRequest.page,
                 totalMatches = total,
                 callURI = searchRequest.callURI(host).toString,
-                lang = lang
+                lang = lang,
+                errorMessageT = errorMessage
               )
             )
         } unsafeToFuture

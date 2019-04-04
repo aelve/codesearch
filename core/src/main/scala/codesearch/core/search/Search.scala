@@ -9,7 +9,9 @@ import cats.syntax.option._
 import codesearch.core.config.{Config, SnippetConfig}
 import codesearch.core.index.directory.СindexDirectory
 import codesearch.core.index.repository.Extensions
-import codesearch.core.search.Search.{CSearchPage, CSearchResult, CodeSnippet, Package, PackageResult, snippetConfig}
+import codesearch.core.regex.PreciseMatch
+import codesearch.core.regex.space.SpaceInsensitiveString
+import codesearch.core.search.Search.{CSearchResult, CodeSnippet, Package, PackageResult, snippetConfig}
 import codesearch.core.search.SnippetsGrouper.SnippetInfo
 import codesearch.core.util.Helper.readFileAsync
 import fs2.{Pipe, Stream}
@@ -17,7 +19,7 @@ import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import codesearch.core.regex.RegexConstructor
 
-import scala.sys.process.Process
+import scala.sys.process.{Process, ProcessLogger}
 
 trait Search {
 
@@ -26,18 +28,34 @@ trait Search {
   protected val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.unsafeCreate[IO]
 
   def search(request: SearchRequest): IO[CSearchPage] = {
-    for {
-      lines <- csearch(request)
-      results <- Stream
-        .emits(lines)
-        .through(SnippetsGrouper.groupLines(snippetConfig))
-        .drop(snippetConfig.pageSize * (request.page - 1))
-        .take(snippetConfig.pageSize)
-        .evalMap(createSnippet)
-        .through(groupByPackage)
-        .compile
-        .toList
-    } yield CSearchPage(results.sortBy(_.pack.name), lines.size)
+    val entity = csearch(request)
+      if (entity.error.isEmpty) {
+      for {
+        results <- Stream
+            .emits(entity.lists)
+            .through(SnippetsGrouper.groupLines(snippetConfig))
+            .drop(snippetConfig.pageSize * (request.page - 1))
+            .take(snippetConfig.pageSize)
+            .evalMap(createSnippet)
+            .through(groupByPackage)
+            .compile
+            .toList
+      } yield CSearchPage(results.sortBy(_.pack.name), entity.lists.size, "")
+    } else {
+      IO(CSearchPage(Seq.empty[Search.PackageResult], 0, entity.error))
+    }
+  }
+
+  private def csearch(request: SearchRequest): ListError = {
+    val indexDir = cindexDir.indexDirAs[String]
+    val env      = ("CSEARCHINDEX", indexDir)
+    var stderr   = new String
+    val log      = ProcessLogger((o: String) => o, (e: String) => stderr = e)
+    val test = for {
+      _       <- logger.debug(s"running CSEARCHINDEX=$indexDir ${arguments(request).mkString(" ")}")
+      results <- IO((Process(arguments(request), None, env) #| Seq("head", "-1001")).lineStream_!(log).toList)
+    } yield ListError(results, stderr)
+    test.unsafeRunSync()
   }
 
   /**
@@ -73,12 +91,16 @@ trait Search {
       case None           => if (request.sourcesOnly) extensionsRegex else ".*"
     }
 
-    val query: String =
-      RegexConstructor(request.query, request.insensitive, request.spaceInsensitive, request.preciseMatch)
+    val query: String = {
+      val preciseMatch: String = if (request.preciseMatch) PreciseMatch(request.query) else request.query
+      if (request.spaceInsensitive) SpaceInsensitiveString(preciseMatch) else preciseMatch
+    }
 
     request.filter match {
-      case Some(filter) => List("csearch", "-n", "-f", forExtensions, query, filter)
-      case None         => List("csearch", "-n", "-f", forExtensions, query)
+      case Some(filter) if request.insensitive => List("csearch", "-n", "-i", "-f", forExtensions, query, filter)
+      case Some(filter)                        => List("csearch", "-n", "-f", forExtensions, query, filter)
+      case None if request.insensitive         => List("csearch", "-n", "-i", "-f", forExtensions, query)
+      case None                                => List("csearch", "-n", "-f", forExtensions, query)
     }
   }
 
@@ -140,10 +162,6 @@ object Search {
     * @param data code snippets grouped by package
     * @param total number of total matches
     */
-  final case class CSearchPage(
-      data: Seq[PackageResult],
-      total: Int
-  )
 
   /**
     *
@@ -190,3 +208,11 @@ object Search {
       result: CodeSnippet
   )
 }
+case class ListError(lists: List[String],
+                     error: String)
+
+final case class CSearchPage(
+                              data: Seq[PackageResult],
+                              total: Int,
+                              errorMessage: String
+                            )
