@@ -1,6 +1,6 @@
 stages:
-- build
-- deploy
+  - build
+  - deploy
 
 variables:
   DOCKER_HOST: tcp://docker:2375/
@@ -9,47 +9,50 @@ variables:
 pullimage_and_build:
   stage: build
   image: registry.gitlab.com/aelve/codesearch/ci-test-env
+  services:
+    - docker:dind
+  cache: {}
   script:
-  - sbt compile
-  - sbt core/assembly
-  - sbt web-server/assembly
-  - sbt scalafmt exit
-  - git diff --exit-code
+    - sbt compile
+    - sbt core/assembly
+    - sbt web-server/assembly
+    - sbt scalafmt exit
+    - git diff --exit-code
   artifacts:
     paths:
-    - target/resolution-cache
-    - target/streams
-    - project/target/resolution-cache
-    - project/target/streams
-    - ~/.sbt
-    - ~/.iv2/cache
-    - ~/.m2
-    - .dockerignore
-    - docker
-    - scripts
-    - Makefile
-    - codesearch-core.jar
-    - codesearch-server.jar
+      - target/resolution-cache
+      - target/streams
+      - project/target/resolution-cache
+      - project/target/streams
+      - ~/.sbt
+      - ~/.iv2/cache
+      - ~/.m2
+      - .dockerignore
+      - docker
+      - scripts
+      - Makefile
+      - codesearch-core.jar
+      - codesearch-server.jar
   only:
-  - develop
-  - master
-  - 188-added-integration-test
+    - develop
+    - master
+    - 188-added-integration-test
 
 build_and_publish_docker_images:
   stage: deploy
   image: registry.gitlab.com/aelve/codesearch/ci-test-env
   services:
-  - docker:dind
+    - docker:dind
   cache: {}
   before_script:
-  - docker info
-  - cat /etc/issue
+    - docker info
+    - cat /etc/issue
   script:
-  - make build-docker-core
-  - make build-docker-web-server
-  - make push-docker-core
-  - make push-docker-web-server
+    - make build-docker-core
+    - make build-docker-web-server
+    - make push-docker-core
+    - make push-docker-web-server
   only:
-  - develop
-  - master
-  - 188-added-integration-test
+    - develop
+    - master
+    - 188-added-integration-test
