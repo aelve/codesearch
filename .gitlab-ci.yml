@@ -52,3 +52,4 @@ build_and_publish_docker_images:
   only:
   - develop
   - master
+  - 188-added-integration-test
