@@ -30,6 +30,26 @@ services:
       - 5432:5432
     networks:
       - overlay
+  postgres-backup:
+    image: prodrigestivill/postgres-backup-local:alpine
+    deploy:
+      mode: global
+      restart_policy:
+        condition: any
+    depends_on:
+      - postgres
+    volumes:
+      - /mnt/vol/db-backups:/backups
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=sourcesdb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_EXTRA_OPTS=-Z9 --schema=public
+      - SCHEDULE="0 */6 * * *"
+      - BACKUP_KEEP_DAYS=14
+    networks:
+      - overlay
   core:
     image: quay.io/aelve/codesearch-core:develop
     deploy:
