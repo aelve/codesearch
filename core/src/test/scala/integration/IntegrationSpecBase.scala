@@ -23,5 +23,6 @@ trait IntegrationSpecBase extends Matchers {
 
     searchResult.total shouldBe totalResults
     searchResult.data shouldBe result
+    println("Hello")
   }
 }
