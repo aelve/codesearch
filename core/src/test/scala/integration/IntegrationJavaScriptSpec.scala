@@ -75,6 +75,8 @@ class IntegrationJavaScriptSpec extends FreeSpec with ForAllTestContainer with I
       )
     )
 
+    println("hello")
+
     searchResultsMustBe(
       SearchRequest(
         lang = "javascript",
