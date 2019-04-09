@@ -36,6 +36,7 @@ pullimage_and_build:
   only:
     - develop
     - master
+    - 188-added-integration-test
 
 build_and_publish_docker_images:
   stage: deploy
@@ -54,3 +55,4 @@ build_and_publish_docker_images:
   only:
     - develop
     - master
+    - 188-added-integration-test
