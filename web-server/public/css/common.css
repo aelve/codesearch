@@ -70,5 +70,10 @@ p {
 }
 
 footer {
-    margin-top: 2rem;
+    /* just a footer */
+    margin-top: 4rem;
+    padding-top: 3rem;
+    padding-bottom: 2rem;
+    text-align: center;
+    background-color: #eae6e1;
 }

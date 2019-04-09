@@ -16,7 +16,7 @@ object SnippetHelper {
     var lastR                         = 0
     val htmlBuilder: ListBuffer[Html] = mutable.ListBuffer.empty[Html]
 
-    matches.map(m => (m.start, m.end)).foreach {
+    matches.map(m => (m.start, m.end)).filter { case (l, r) => r > l }.foreach {
       case (l, r) =>
         if (lastR < l || l == 0) {
           if (lastR != 0) {

@@ -1,23 +1,27 @@
 package codesearch.core.index
 
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
+import java.nio.file.StandardOpenOption.{CREATE, TRUNCATE_EXISTING}
 import java.nio.file.{Files, Path => NioPath}
 
 import cats.effect.{ContextShift, IO}
 import cats.instances.int._
-import cats.syntax.functor._
 import cats.syntax.flatMap._
+import cats.syntax.functor._
+import codesearch.core.BlockingEC
 import codesearch.core.db.DefaultDB
-import codesearch.core.index.directory.{Directory, СSearchDirectory}
+import codesearch.core.index.directory.{Directory, СindexDirectory}
 import codesearch.core.index.repository._
 import codesearch.core.model.DefaultTable
 import codesearch.core.syntax.stream._
 import fs2.Stream
+import fs2.io.file
+import fs2.text.utf8Encode
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import slick.jdbc.PostgresProfile.api._
 
-import scala.sys.process._
+import scala.sys.process.Process
 
 trait LanguageIndex[A <: DefaultTable] {
   self: DefaultDB[A] =>
@@ -28,17 +32,15 @@ trait LanguageIndex[A <: DefaultTable] {
 
   protected val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.unsafeCreate[IO]
 
-  protected def csearchDir: СSearchDirectory
+  protected def cindexDir: СindexDirectory
 
   protected def concurrentTasksCount: Int
 
   /**
     * Build new index from only latest version of each package and
     * replace old index with new one.
-    *
-    * @return cindex exit code
     */
-  def buildIndex: IO[Int] = {
+  def buildIndex: IO[Unit] = {
     def latestPackagePaths = verNames.map { versions =>
       versions.map {
         case (packageName, version) =>
@@ -46,23 +48,33 @@ trait LanguageIndex[A <: DefaultTable] {
       }
     }
 
-    def dropTempIndexFile = IO(Files.deleteIfExists(csearchDir.tempIndexDirAs[NioPath]))
+    def dropTempIndexFile = IO(Files.deleteIfExists(cindexDir.tempIndexDirAs[NioPath]))
 
     def createCSearchDir = IO(
-      if (Files.notExists(СSearchDirectory.root))
-        Files.createDirectories(СSearchDirectory.root)
+      if (Files.notExists(СindexDirectory.root))
+        Files.createDirectories(СindexDirectory.root)
     )
 
-    def indexPackages(packageDirs: Seq[NioPath]) = IO {
-      val env  = Seq("CSEARCHINDEX" -> csearchDir.tempIndexDirAs[String])
-      val args = "cindex" +: packageDirs.map(_.toString)
-      Process(args, None, env: _*) !
+    def indexPackages(packageDirs: Seq[NioPath]): IO[Unit] = {
+      val args = Seq("cindex", cindexDir.dirsToIndex[String])
+      val env  = Seq("CSEARCHINDEX" -> cindexDir.tempIndexDirAs[String])
+      for {
+        _ <- Stream
+          .emits(packageDirs)
+          .covary[IO]
+          .map(_.toString + "\n")
+          .through(utf8Encode)
+          .to(file.writeAll(cindexDir.dirsToIndex[NioPath], BlockingEC, List(CREATE, TRUNCATE_EXISTING)))
+          .compile
+          .drain
+        _ <- IO(Process(args, None, env: _*) !)
+      } yield ()
     }
 
     def replaceIndexFile = IO(
       Files.move(
-        csearchDir.tempIndexDirAs[NioPath],
-        csearchDir.indexDirAs[NioPath],
+        cindexDir.tempIndexDirAs[NioPath],
+        cindexDir.indexDirAs[NioPath],
         REPLACE_EXISTING
       )
     )
@@ -71,9 +83,9 @@ trait LanguageIndex[A <: DefaultTable] {
       packageDirs <- latestPackagePaths
       _           <- createCSearchDir
       _           <- dropTempIndexFile
-      exitCode    <- indexPackages(packageDirs)
+      _           <- indexPackages(packageDirs)
       _           <- replaceIndexFile
-    } yield exitCode
+    } yield ()
   }
 
   /**
@@ -131,3 +143,5 @@ trait LanguageIndex[A <: DefaultTable] {
     */
   protected def updateSources(name: String, version: String): IO[Int]
 }
+
+case class BadExitCode(code: Int) extends Exception(s"Process returned a bad exit code: $code")

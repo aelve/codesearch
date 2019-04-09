@@ -3,15 +3,10 @@ package codesearch.core.util
 import java.io.File
 
 import cats.effect.{IO, Resource}
+import fs2.{Chunk, Stream}
 import org.apache.commons.io.FilenameUtils
-import fs2.Stream
-import fs2.Chunk
 
 import scala.io.Source
-import scala.util.matching.Regex
-import codesearch.core.regex.lexer.tokens._
-import codesearch.core.regex.lexer._
-import codesearch.core.regex.space.SpaceInsensitive
 
 object Helper {
 
@@ -40,33 +35,8 @@ object Helper {
   def readFileAsync(path: String): IO[List[String]] =
     Resource.fromAutoCloseable(IO(Source.fromFile(path, "UTF-8"))).use(source => IO.delay(source.getLines.toList))
 
-  def preciseMatch(query: String): String = {
-    val queryTokens: Seq[Token] = Tokenizer.parseStringWithSpecialSymbols(query)
-    val preciseMatch: Seq[Token] = queryTokens.map {
-      case literal @ Literal(_) => literal
-      case space @ Space(_)     => space
-      case token: Token         => Escaped(token.repr)
-    }
-    StringAssembler.buildStringFromTokens(preciseMatch)
-  }
-
   def langByLink(fileLink: String, defaultLang: String): String = {
     val ext = FilenameUtils.getExtension(fileLink)
     langByExt.getOrElse(ext, defaultLang)
   }
-
-  def buildRegex(query: String, insensitive: Boolean, space: Boolean, precise: Boolean): Regex = {
-    val preciseAndSpace: String = {
-      val preciseMatch = if (precise) Helper.preciseMatch(query) else query
-
-      if (space) SpaceInsensitive.spaceInsensitiveString(preciseMatch) else preciseMatch
-    }
-
-    val regex: String = {
-      val insensitiveCase = if (insensitive) "(?i)" else ""
-      insensitiveCase + preciseAndSpace
-    }
-    regex.r
-  }
-
 }

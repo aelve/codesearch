@@ -12,8 +12,8 @@ import codesearch.core.db.HackageDB
 import codesearch.core.index.repository.{HackagePackage, SourcesDownloader}
 import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
-import codesearch.core.index.directory.СSearchDirectory
-import codesearch.core.index.directory.СSearchDirectory.HaskellCSearchIndex
+import codesearch.core.index.directory.СindexDirectory
+import codesearch.core.index.directory.СindexDirectory.HaskellCindex
 import codesearch.core.model.{HackageTable, Version}
 import fs2.{Chunk, Stream}
 import slick.jdbc.PostgresProfile.api._
@@ -23,7 +23,7 @@ class HaskellIndex(haskellConfig: HaskellConfig, val db: Database)(
     sourcesDownloader: SourcesDownloader[IO, HackagePackage]
 ) extends LanguageIndex[HackageTable] with HackageDB {
 
-  override protected val csearchDir: СSearchDirectory = HaskellCSearchIndex
+  override protected val cindexDir: СindexDirectory = HaskellCindex
 
   override protected def concurrentTasksCount: Int = haskellConfig.concurrentTasksCount
 

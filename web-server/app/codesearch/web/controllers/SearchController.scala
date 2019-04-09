@@ -1,9 +1,7 @@
 package codesearch.web.controllers
 
 import cats.data.OptionT
-import cats.effect.IO
 import cats.instances.future._
-import codesearch.core.config.{Config, SnippetConfig}
 import codesearch.core.db.DefaultDB
 import codesearch.core.index.directory.Directory
 import codesearch.core.model.DefaultTable
@@ -49,14 +47,16 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
     )
   }
 
-  def search(query: String,
-             filter: Option[String],
-             filePath: Option[String],
-             caseInsensitive: String,
-             spaceInsensitive: String,
-             precise: String,
-             sources: String,
-             page: String): Action[AnyContent] =
+  def search(
+      query: String,
+      filter: Option[String],
+      filePath: Option[String],
+      caseInsensitive: String,
+      spaceInsensitive: String,
+      precise: String,
+      sources: String,
+      page: String
+  ): Action[AnyContent] =
     Action.async { implicit request =>
       val host: String = request.host
       val searchRequest =
@@ -69,9 +69,9 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
               views.html.searchResults(
                 updated = TimeAgo.using(updated.getTime),
                 packages = results,
-                query = query,
-                filter = filter,
-                filePath = filePath,
+                query = searchRequest.query,
+                filter = searchRequest.filter,
+                filePath = searchRequest.filePath,
                 insensitive = searchRequest.insensitive,
                 space = searchRequest.spaceInsensitive,
                 precise = searchRequest.preciseMatch,
@@ -107,11 +107,4 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
         }
         .getOrElse(NotFound.apply("Not found"))
     }
-}
-
-object SearchController {
-  lazy implicit val snippetConfig: SnippetConfig = Config
-    .load[IO]
-    .map(_.snippetConfig)
-    .unsafeRunSync() //TODO: pass config here as parameter
 }

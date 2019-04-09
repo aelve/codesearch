@@ -9,8 +9,8 @@ import codesearch.core.config.{Config, RubyConfig}
 import codesearch.core.db.GemDB
 import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
-import codesearch.core.index.directory.СSearchDirectory
-import codesearch.core.index.directory.СSearchDirectory.RubyCSearchIndex
+import codesearch.core.index.directory.СindexDirectory
+import codesearch.core.index.directory.СindexDirectory.RubyCindex
 import codesearch.core.index.repository.{GemPackage, SourcesDownloader}
 import codesearch.core.model.GemTable
 import io.circe.fs2._
@@ -23,7 +23,7 @@ class RubyIndex(rubyConfig: RubyConfig, val db: Database)(
     sourcesDownloader: SourcesDownloader[IO, GemPackage]
 ) extends LanguageIndex[GemTable] with GemDB {
 
-  override protected val csearchDir: СSearchDirectory = RubyCSearchIndex
+  override protected val cindexDir: СindexDirectory = RubyCindex
 
   override protected def concurrentTasksCount: Int = rubyConfig.concurrentTasksCount
 

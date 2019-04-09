@@ -10,8 +10,8 @@ import codesearch.core.index.details.NpmDetails
 import codesearch.core.index.repository.{NpmPackage, SourcesDownloader}
 import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
-import codesearch.core.index.directory.СSearchDirectory
-import codesearch.core.index.directory.СSearchDirectory.JavaScriptCSearchIndex
+import codesearch.core.index.directory.СindexDirectory
+import codesearch.core.index.directory.СindexDirectory.JavaScriptCindex
 import codesearch.core.model.NpmTable
 import fs2.Stream
 import slick.jdbc.PostgresProfile.api._
@@ -21,7 +21,7 @@ class JavaScriptIndex(config: JavaScriptConfig, val db: Database)(
     sourcesDownloader: SourcesDownloader[IO, NpmPackage]
 ) extends LanguageIndex[NpmTable] with NpmDB {
 
-  override protected val csearchDir: СSearchDirectory = JavaScriptCSearchIndex
+  override protected val cindexDir: СindexDirectory = JavaScriptCindex
 
   override protected def concurrentTasksCount: Int = config.concurrentTasksCount
 

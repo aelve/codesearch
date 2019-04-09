@@ -8,8 +8,8 @@ import codesearch.core.config.{Config, RustConfig}
 import codesearch.core.db.CratesDB
 import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
-import codesearch.core.index.directory.СSearchDirectory
-import codesearch.core.index.directory.СSearchDirectory.RustCSearchIndex
+import codesearch.core.index.directory.СindexDirectory
+import codesearch.core.index.directory.СindexDirectory.RustCindex
 import codesearch.core.index.repository.{CratesPackage, SourcesDownloader}
 import codesearch.core.model.CratesTable
 import codesearch.core.util.Helper
@@ -30,7 +30,7 @@ class RustIndex(rustConfig: RustConfig, val db: Database)(
     "archive.zip"
   )
 
-  override protected val csearchDir: СSearchDirectory = RustCSearchIndex
+  override protected val cindexDir: СindexDirectory = RustCindex
 
   override protected def concurrentTasksCount: Int = rustConfig.concurrentTasksCount
 
