@@ -17,7 +17,6 @@ import codesearch.core.util.Helper.readFileAsync
 import fs2.{Pipe, Stream}
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
-import codesearch.core.regex.RegexConstructor
 
 import scala.sys.process.{Process, ProcessLogger}
 
@@ -29,7 +28,7 @@ trait Search {
 
   def search(request: SearchRequest): IO[CSearchPage] = {
     val entity = csearch(request)
-    if (entity.error.isEmpty) {
+    if (entity.error.error.isEmpty) {
       for {
         results <- Stream
           .emits(entity.lists)
@@ -40,13 +39,13 @@ trait Search {
           .through(groupByPackage)
           .compile
           .toList
-      } yield CSearchPage(results.sortBy(_.pack.name), entity.lists.size, "")
+      } yield CSearchPage(results.sortBy(_.pack.name), entity.lists.size, new ErrorMessageFromSearchByIndex)
     } else {
       IO(CSearchPage(Seq.empty[Search.PackageResult], 0, entity.error))
     }
   }
 
-  private def csearch(request: SearchRequest): ListError = {
+  private def csearch(request: SearchRequest): SearchByIndexResult = {
     val indexDir = cindexDir.indexDirAs[String]
     val env      = ("CSEARCHINDEX", indexDir)
     var stderr   = new String
@@ -54,7 +53,7 @@ trait Search {
     val test = for {
       _       <- logger.debug(s"running CSEARCHINDEX=$indexDir ${arguments(request).mkString(" ")}")
       results <- IO((Process(arguments(request), None, env) #| Seq("head", "-1001")).lineStream_!(log).toList)
-    } yield ListError(results, stderr)
+    } yield SearchByIndexResult(results, ErrorMessageFromSearchByIndex(stderr))
     test.unsafeRunSync()
   }
 
@@ -97,10 +96,8 @@ trait Search {
     }
 
     request.filter match {
-      case Some(filter) if request.insensitive => List("csearch", "-n", "-i", "-f", forExtensions, query, filter)
-      case Some(filter)                        => List("csearch", "-n", "-f", forExtensions, query, filter)
-      case None if request.insensitive         => List("csearch", "-n", "-i", "-f", forExtensions, query)
-      case None                                => List("csearch", "-n", "-f", forExtensions, query)
+      case Some(filter) => List("csearch", "-n", "-f", forExtensions, query, filter)
+      case None         => List("csearch", "-n", "-f", forExtensions, query)
     }
   }
 
@@ -207,10 +204,11 @@ object Search {
       result: CodeSnippet
   )
 }
-case class ListError(lists: List[String], error: String)
-
+sealed trait ErrorMessage
+final case class SearchByIndexResult(lists: List[String], error: ErrorMessageFromSearchByIndex)
+final case class ErrorMessageFromSearchByIndex(error: String = "") extends ErrorMessage
 final case class CSearchPage(
     data: Seq[PackageResult],
     total: Int,
-    errorMessage: String
+    errorMessage: ErrorMessageFromSearchByIndex
 )
