@@ -34,9 +34,10 @@ pullimage_and_build:
       - codesearch-core.jar
       - codesearch-server.jar
   only:
-    - develop
-    - master
-    - 188-added-integration-test
+    - merge_requests
+    #- develop
+    #- master
+    #- 188-added-integration-test
 
 build_and_publish_docker_images:
   stage: deploy
@@ -53,6 +54,7 @@ build_and_publish_docker_images:
     - make push-docker-core
     - make push-docker-web-server
   only:
-    - develop
-    - master
-    - 188-added-integration-test
+     - merge_requests
+    #- develop
+    #- master
+    #- 188-added-integration-test
