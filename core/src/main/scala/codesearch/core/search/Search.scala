@@ -28,7 +28,7 @@ trait Search {
 
   def search(request: SearchRequest): IO[CSearchPage] = {
     val entity = csearch(request)
-    if (entity.error.error.isEmpty) {
+    if (entity.error.message.isEmpty) {
       for {
         results <- Stream
           .emits(entity.lists)
@@ -39,7 +39,7 @@ trait Search {
           .through(groupByPackage)
           .compile
           .toList
-      } yield CSearchPage(results.sortBy(_.pack.name), entity.lists.size, new ErrorMessageFromSearchByIndex)
+      } yield CSearchPage(results.sortBy(_.pack.name), entity.lists.size, ErrorResponse(""))
     } else {
       IO(CSearchPage(Seq.empty[Search.PackageResult], 0, entity.error))
     }
@@ -53,7 +53,7 @@ trait Search {
     val test = for {
       _       <- logger.debug(s"running CSEARCHINDEX=$indexDir ${arguments(request).mkString(" ")}")
       results <- IO((Process(arguments(request), None, env) #| Seq("head", "-1001")).lineStream_!(log).toList)
-    } yield SearchByIndexResult(results, ErrorMessageFromSearchByIndex(stderr))
+    } yield SearchByIndexResult(results, ErrorResponse(stderr))
     test.unsafeRunSync()
   }
 
@@ -204,11 +204,11 @@ object Search {
       result: CodeSnippet
   )
 }
-sealed trait ErrorMessage
-final case class SearchByIndexResult(lists: List[String], error: ErrorMessageFromSearchByIndex)
-final case class ErrorMessageFromSearchByIndex(error: String = "") extends ErrorMessage
+sealed trait Response
+final case class SearchByIndexResult(lists: List[String], error: ErrorResponse)
+final case class ErrorResponse(message: String) extends Response
 final case class CSearchPage(
     data: Seq[PackageResult],
     total: Int,
-    errorMessage: ErrorMessageFromSearchByIndex
-)
+    error: ErrorResponse
+) extends Response
