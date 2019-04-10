@@ -5,7 +5,7 @@ import java.nio.ByteBuffer
 import java.nio.file.Paths
 
 import cats.effect.{IO, Resource}
-import codesearch.core.BlockingEC
+import codesearch.core.{BlockingEC, config}
 import codesearch.core.config._
 import com.softwaremill.sttp.SttpBackend
 import com.softwaremill.sttp.asynchttpclient.fs2.AsyncHttpClientFs2Backend
@@ -65,6 +65,7 @@ trait TestFixture {
         Paths.get("./data/test/meta/npm/npm_packages_index.json"),
         30
       )
-    )
+    ),
+    MetricsConfig(false)
   )
 }
