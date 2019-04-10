@@ -11,7 +11,6 @@ pullimage_and_build:
   image: registry.gitlab.com/aelve/codesearch/ci-test-env
   services:
     - docker:dind
-  cache: {}
   script:
     - sbt compile
     - sbt core/assembly
@@ -33,18 +32,13 @@ pullimage_and_build:
       - Makefile
       - codesearch-core.jar
       - codesearch-server.jar
-  only:
-    - merge_requests
-    #- develop
-    #- master
-    #- 188-added-integration-test
+
 
 build_and_publish_docker_images:
   stage: deploy
   image: registry.gitlab.com/aelve/codesearch/ci-test-env
   services:
     - docker:dind
-  cache: {}
   before_script:
     - docker info
     - cat /etc/issue
@@ -54,7 +48,5 @@ build_and_publish_docker_images:
     - make push-docker-core
     - make push-docker-web-server
   only:
-     - merge_requests
-    #- develop
-    #- master
-    #- 188-added-integration-test
+    - develop
+    - master
