@@ -35,13 +35,10 @@ pullimage_and_build:
 
 
 build_and_publish_docker_images:
-  stage: deploy
+  stage: publish
   image: registry.gitlab.com/aelve/codesearch/ci-test-env
   services:
     - docker:dind
-  before_script:
-    - docker info
-    - cat /etc/issue
   script:
     - make build-docker-core
     - make build-docker-web-server
