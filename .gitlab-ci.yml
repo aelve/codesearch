@@ -1,6 +1,6 @@
 stages:
   - build
-  - deploy
+  - publish
 
 variables:
   DOCKER_HOST: tcp://docker:2375/
