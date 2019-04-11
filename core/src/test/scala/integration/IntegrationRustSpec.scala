@@ -38,7 +38,7 @@ class IntegrationRustSpec extends FreeSpec with ForAllTestContainer with Integra
       SearchRequest(
         lang = "rust",
         query = "#[derive",
-        filter = Some("errorKind"),
+        filter = Some("ErrorKind"),
         filePath = Some("lapin-futures-tls-internal.*6"),
         insensitive = true,
         spaceInsensitive = false,
@@ -94,7 +94,7 @@ class IntegrationRustSpec extends FreeSpec with ForAllTestContainer with Integra
       SearchRequest(
         lang = "rust",
         query = "Box::new(AMQP",
-        filter = Some("amqpFrame"),
+        filter = Some("AMQPFrame"),
         filePath = None,
         insensitive = true,
         spaceInsensitive = false,
