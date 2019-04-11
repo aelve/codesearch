@@ -12,7 +12,7 @@ RUN apk --no-cache add \
   ruby-json
 
 
-RUN go get github.com/Evengining/codesearch/cmd/...
+RUN go get github.com/aelve/codesearch-engine/cmd/...
 RUN rm -rf /var/cache/apk/*
 
 ENV PATH /root/go/bin:$PATH
