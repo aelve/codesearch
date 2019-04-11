@@ -76,7 +76,11 @@ object Builder {
         "com.github.pureconfig" %% "pureconfig-cats-effect"        % "0.9.2",
         "io.chrisdavenport"     %% "log4cats-slf4j"                % "0.2.0-RC2",
         "org.scalactic"         %% "scalactic"                     % "3.0.5",
-        "org.scalatest"         %% "scalatest"                     % "3.0.5" % "test"
+        "org.scalatest"         %% "scalatest"                     % "3.0.5" % "test",
+        "org.flywaydb"          % "flyway-core"                    % "5.2.4",
+        "org.tpolecat"          %% "doobie-core"                   % "0.6.0",
+        "org.tpolecat"          %% "doobie-hikari"                 % "0.6.0",
+        "org.tpolecat"          %% "doobie-postgres"               % "0.6.0",
       ),
       assemblyMergeStrategy in assembly := {
         case PathList("META-INF", _ @_*) => MergeStrategy.discard
