@@ -34,13 +34,7 @@ object Main extends IOApp {
         params <- CLI.params(args)
         config <- Config.load[IO]
 
-        dbConfig = config.db
-
-        val db = Database.forURL(
-          driver = "org.postgresql.Driver",
-          url =
-            s"jdbc:postgresql://${dbConfig.host}:${dbConfig.port}/${dbConfig.name}?user=${dbConfig.user}&password=${dbConfig.password}"
-        )
+        val db = Database.forConfig("db")
 
         unarchiver                            = Unarchiver[IO]
         implicit0(downloader: Downloader[IO]) = Downloader.create[IO]
