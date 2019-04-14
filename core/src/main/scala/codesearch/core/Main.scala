@@ -34,8 +34,6 @@ object Main extends IOApp {
         params <- CLI.params(args)
         config <- Config.load[IO]
 
-        val db = Database.forConfig("db")
-
         unarchiver                            = Unarchiver[IO]
         implicit0(downloader: Downloader[IO]) = Downloader.create[IO]
 
@@ -43,6 +41,8 @@ object Main extends IOApp {
         cratesMeta  <- CratesMetaDownloader(config.languagesConfig.rust, unarchiver, downloader)
         gemMeta     <- GemMetaDownloader(config.languagesConfig.ruby, downloader)
         npmMeta     <- NpmMetaDownloader(config.languagesConfig.javascript, downloader)
+
+        db = Database.forConfig("db")
 
         langReps = Map(
           "haskell"    -> LangRep[HackageTable](HaskellIndex(config, db), hackageMeta),

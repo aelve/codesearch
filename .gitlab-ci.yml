@@ -33,7 +33,6 @@ build_and_test:
       - codesearch-core.jar
       - codesearch-server.jar
 
-
 build_and_publish_docker_images:
   stage: publish
   image: registry.gitlab.com/aelve/codesearch/ci-test-env
