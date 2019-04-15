@@ -3,7 +3,6 @@ package codesearch.core.db
 import java.sql.Timestamp
 
 import cats.effect.IO
-import codesearch.core.config.DatabaseConfig
 import codesearch.core.index.repository.SourcePackage
 import codesearch.core.model._
 import slick.jdbc.PostgresProfile.api._

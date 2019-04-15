@@ -1,7 +1,5 @@
 package codesearch.web.controllers
 
-import cats.effect.IO
-import codesearch.core.config.Config
 import codesearch.core.db.{CratesDB, GemDB, HackageDB, NpmDB}
 import com.github.marlonlom.utilities.timeago.TimeAgo
 import javax.inject.Inject

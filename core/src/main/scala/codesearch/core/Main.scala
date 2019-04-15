@@ -3,7 +3,6 @@ package codesearch.core
 import cats.effect.{ExitCode, IO, IOApp, Resource}
 import cats.syntax.flatMap._
 import codesearch.core.config.Config
-import codesearch.core.db._
 import codesearch.core.index._
 import codesearch.core.index.repository.Downloader
 import codesearch.core.meta._
