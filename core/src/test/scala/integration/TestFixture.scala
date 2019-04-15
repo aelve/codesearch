@@ -28,42 +28,42 @@ trait TestFixture {
 
   def config = Config(
     DatabaseConfig(
-      "slick.jdbc.DatabaseUrlDataSource",
-      "localhost",
-      5432,
-      "sourcesdb",
-      "postgres",
-      "postgres",
+      dataSourceClass = "slick.jdbc.DatabaseUrlDataSource",
+      host = "localhost",
+      port = 5432,
+      name = "sourcesdb",
+      user = "postgres",
+      password = "postgres",
     ),
     SnippetConfig(
-      1,
-      1,
-      1
+      30,
+      3,
+      5
     ),
     LanguagesConfig(
       HaskellConfig(
-        new URI("http://hackage.haskell.org/packages/index.tar.gz"),
-        Paths.get("./data/test/meta/haskell/index.tar.gz"),
-        Paths.get("./data/test/meta/haskell/"),
-        30
+        repoIndexUrl = new URI("http://hackage.haskell.org/packages/index.tar.gz"),
+        repoArchivePath = Paths.get("./data/test/meta/haskell/index.tar.gz"),
+        repoPath = Paths.get("./data/test/meta/haskell/"),
+        concurrentTasksCount = 30
       ),
       RubyConfig(
-        new URI("http://rubygems.org/latest_specs.4.8.gz"),
-        Paths.get("./data/test/meta/ruby/ruby_index.gz"),
-        Paths.get("./data/test/meta/ruby/ruby_index.json"),
-        Paths.get("./scripts/update_index.rb"),
-        30
+        repoIndexUrl = new URI("http://rubygems.org/latest_specs.4.8.gz"),
+        repoArchivePath = Paths.get("./data/test/meta/ruby/ruby_index.gz"),
+        repoJsonPath = Paths.get("./data/test/meta/ruby/ruby_index.json"),
+        scriptPath = Paths.get("./scripts/update_index.rb"),
+        concurrentTasksCount = 30
       ),
       RustConfig(
-        new URI("https://github.com/rust-lang/crates.io-index/archive/master.zip"),
-        Paths.get("./data/test/meta/rust/archive.zip"),
-        Paths.get("./data/test/meta/rust/"),
-        30
+        repoIndexUrl = new URI("https://github.com/rust-lang/crates.io-index/archive/master.zip"),
+        repoArchivePath = Paths.get("./data/test/meta/rust/archive.zip"),
+        repoPath = Paths.get("./data/test/meta/rust/"),
+        concurrentTasksCount = 30
       ),
       JavaScriptConfig(
-        new URI("https://replicate.npmjs.com/_all_docs?include_docs=true"),
-        Paths.get("./data/test/meta/npm/npm_packages_index.json"),
-        30
+        repoIndexUrl = new URI("https://replicate.npmjs.com/_all_docs?include_docs=true"),
+        repoJsonPath = Paths.get("./data/test/meta/npm/npm_packages_index.json"),
+        concurrentTasksCount = 30
       )
     ),
     MetricsConfig(false)

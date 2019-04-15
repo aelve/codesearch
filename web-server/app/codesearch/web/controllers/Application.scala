@@ -18,17 +18,7 @@ class Application @Inject()(
     implicit val executionContext: ExecutionContext
 ) extends InjectedController {
 
-  val database: Database = Config
-    .load[IO]
-    .map { config =>
-      val dbConfig = config.db
-      Database.forURL(
-        driver = "org.postgresql.Driver",
-        url =
-          s"jdbc:postgresql://${dbConfig.host}:${dbConfig.port}/${dbConfig.name}?user=${dbConfig.user}&password=${dbConfig.password}"
-      )
-    }
-    .unsafeRunSync()
+  val database: Database = Database.forConfig("db")
 
   val HackageDB: HackageDB = new HackageDB { val db: Database = database }
   val CratesDB: CratesDB   = new CratesDB  { val db: Database = database }
