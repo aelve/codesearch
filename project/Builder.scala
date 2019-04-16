@@ -65,8 +65,8 @@ object Builder {
         "com.typesafe.slick"    %% "slick-hikaricp"                % "3.2.3",
         "org.postgresql"        % "postgresql"                     % "42.2.2",
         "com.softwaremill.sttp" %% "async-http-client-backend-fs2" % "1.3.8",
-        "co.fs2"                %% "fs2-core"                      % "1.0.0",
-        "co.fs2"                %% "fs2-io"                        % "1.0.0",
+        "co.fs2"                %% "fs2-core"                      % "1.0.4",
+        "co.fs2"                %% "fs2-io"                        % "1.0.4",
         "io.circe"              %% "circe-fs2"                     % "0.10.0",
         "io.circe"              %% "circe-core"                    % "0.10.0",
         "io.circe"              %% "circe-generic"                 % "0.10.0",
@@ -75,6 +75,7 @@ object Builder {
         "com.github.pureconfig" %% "pureconfig"                    % "0.9.2",
         "com.github.pureconfig" %% "pureconfig-cats-effect"        % "0.9.2",
         "io.chrisdavenport"     %% "log4cats-slf4j"                % "0.2.0-RC2",
+        "org.apache.commons"    % "commons-compress"               % "1.18",
         "org.scalactic"         %% "scalactic"                     % "3.0.5",
         "org.scalatest"         %% "scalatest"                     % "3.0.5" % "test"
       ),

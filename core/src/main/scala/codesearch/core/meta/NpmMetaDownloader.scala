@@ -40,7 +40,7 @@ class NpmMetaDownloader[F[_]: Sync: ContextShift](
         .through(decoder[NpmRegistryPackage])
         .map(_.asJson.noSpaces + "\n")
         .through(utf8Encode)
-        .to(file.writeAll(config.repoJsonPath, BlockingEC, List(CREATE, TRUNCATE_EXISTING)))
+        .through(file.writeAll(config.repoJsonPath, BlockingEC, List(CREATE, TRUNCATE_EXISTING)))
         .compile
         .drain
       _ <- logger.info("Downloading finished")

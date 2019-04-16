@@ -15,6 +15,7 @@ import codesearch.core.index.repository._
 import codesearch.core.model.DefaultTable
 import codesearch.core.syntax.stream._
 import fs2.Stream
+import fs2.Chunk
 import fs2.io.file
 import fs2.text.utf8Encode
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
@@ -61,7 +62,7 @@ trait LanguageIndex[A <: DefaultTable] {
           .covary[IO]
           .map(_.toString + "\n")
           .through(utf8Encode)
-          .to(file.writeAll(cindexDir.dirsToIndex[NioPath], BlockingEC, List(CREATE, TRUNCATE_EXISTING)))
+          .through(file.writeAll(cindexDir.dirsToIndex[NioPath], BlockingEC, List(CREATE, TRUNCATE_EXISTING)))
           .compile
           .drain
         _ <- IO(Process(args, None, env: _*) !)
@@ -91,8 +92,10 @@ trait LanguageIndex[A <: DefaultTable] {
     * @return count of updated packages
     */
   def updatePackages(limit: Option[Int]): IO[Int] = {
-    val packages: Stream[IO, (String, String)] = getLastVersions.filterNotM {
-      case (packageName, packageVersion) => packageIsExists(packageName, packageVersion)
+    val chunkSize = 10000
+    val packages: Stream[IO, (String, String)] = getLastVersions.chunkN(chunkSize).flat.filterNotM {
+      case (packageName, packageVersion) =>
+        packageIsExists(packageName, packageVersion)
     }
 
     logger.debug("UPDATE PACKAGES") >> limit
