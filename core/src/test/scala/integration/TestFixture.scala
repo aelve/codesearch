@@ -36,9 +36,9 @@ trait TestFixture {
       password = "postgres",
     ),
     SnippetConfig(
-      30,
-      3,
-      5
+      pageSize = 30,
+      linesBefore = 3,
+      linesAfter = 5
     ),
     LanguagesConfig(
       HaskellConfig(
