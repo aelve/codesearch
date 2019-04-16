@@ -1,8 +1,11 @@
 package integration
 
+import java.nio.file.Paths
+
 import cats.data.NonEmptyVector
 import cats.effect.IO
 import codesearch.core.index._
+import codesearch.core.index.directory.RubyCindex
 import codesearch.core.index.repository.Downloader
 import codesearch.core.meta._
 import codesearch.core.search.Search.{CodeSnippet, Package, PackageResult}
@@ -15,7 +18,8 @@ import com.dimafeng.testcontainers.{ForAllTestContainer, PostgreSQLContainer}
 class IntegrationRubySpec extends FreeSpec with ForAllTestContainer with IntegrationSpecBase {
 
   override val container = PostgreSQLContainer()
-  val searcher: Search   = new RubySearch
+  val rubyCindex         = RubyCindex(Paths.get("./index/test/cindex/"))
+  val searcher: Search   = new RubySearch(rubyCindex)
 
   "Integration Ruby Spec" in new TestFixture {
 
@@ -23,7 +27,7 @@ class IntegrationRubySpec extends FreeSpec with ForAllTestContainer with Integra
       implicit val downloader: Downloader[IO] = Downloader.create[IO]
       val gemDownloader: FakeDownloader[IO]   = FakeDownloader[IO](getMetaData("integration/meta/ruby.gz"))
       val unarchiver                          = Unarchiver[IO]
-      val rubyIndex                           = RubyIndex(config, database)
+      val rubyIndex                           = RubyIndex(config, database, rubyCindex)
 
       for {
         gemMeta <- GemMetaDownloader(config.languagesConfig.ruby, gemDownloader)

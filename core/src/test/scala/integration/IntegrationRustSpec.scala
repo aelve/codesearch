@@ -1,8 +1,11 @@
 package integration
 
+import java.nio.file.Paths
+
 import cats.data.NonEmptyVector
 import cats.effect.IO
 import codesearch.core.index._
+import codesearch.core.index.directory.RustCindex
 import codesearch.core.index.repository.Downloader
 import codesearch.core.meta._
 import codesearch.core.search.Search.{CodeSnippet, Package, PackageResult}
@@ -15,7 +18,8 @@ import com.dimafeng.testcontainers.{ForAllTestContainer, PostgreSQLContainer}
 class IntegrationRustSpec extends FreeSpec with ForAllTestContainer with IntegrationSpecBase {
 
   override val container = PostgreSQLContainer()
-  val searcher: Search   = new RustSearch
+  val rustCindex         = RustCindex(Paths.get("./index/test/cindex/"))
+  val searcher: Search   = new RustSearch(rustCindex)
 
   "Integration Rust Spec" in new TestFixture {
 
@@ -23,7 +27,7 @@ class IntegrationRustSpec extends FreeSpec with ForAllTestContainer with Integra
       implicit val downloader: Downloader[IO]  = Downloader.create[IO]
       val cratesDownloader: FakeDownloader[IO] = FakeDownloader[IO](getMetaData("integration/meta/rust.zip"))
       val unarchiver                           = Unarchiver[IO]
-      val rustIndex                            = RustIndex(config, database)
+      val rustIndex                            = RustIndex(config, database, rustCindex)
 
       for {
         hackageMeta <- CratesMetaDownloader(config.languagesConfig.rust, unarchiver, cratesDownloader)

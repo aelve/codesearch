@@ -1,9 +1,12 @@
 package codesearch.core
 
+import java.nio.file.Paths
+
 import cats.effect.{ExitCode, IO, IOApp, Resource}
 import cats.syntax.flatMap._
 import codesearch.core.config.Config
 import codesearch.core.index._
+import codesearch.core.index.directory._
 import codesearch.core.index.repository.Downloader
 import codesearch.core.meta._
 import codesearch.core.model._
@@ -43,11 +46,18 @@ object Main extends IOApp {
 
         db = Database.forConfig("db")
 
+        cindexPath = Paths.get("./index/cindex/")
+
+        haskellCindex    = HaskellCindex(cindexPath)
+        rustCindex       = RustCindex(cindexPath)
+        rubyCindex       = RubyCindex(cindexPath)
+        javaScriptCindex = JavaScriptCindex(cindexPath)
+
         langReps = Map(
-          "haskell"    -> LangRep[HackageTable](HaskellIndex(config, db), hackageMeta),
-          "rust"       -> LangRep[CratesTable](RustIndex(config, db), cratesMeta),
-          "ruby"       -> LangRep[GemTable](RubyIndex(config, db), gemMeta),
-          "javascript" -> LangRep[NpmTable](JavaScriptIndex(config, db), npmMeta)
+          "haskell"    -> LangRep[HackageTable](HaskellIndex(config, db, haskellCindex), hackageMeta),
+          "rust"       -> LangRep[CratesTable](RustIndex(config, db, rustCindex), cratesMeta),
+          "ruby"       -> LangRep[GemTable](RubyIndex(config, db, rubyCindex), gemMeta),
+          "javascript" -> LangRep[NpmTable](JavaScriptIndex(config, db, javaScriptCindex), npmMeta)
         )
         exitCode <- Program(langReps) >>= (_.run(params))
       } yield exitCode

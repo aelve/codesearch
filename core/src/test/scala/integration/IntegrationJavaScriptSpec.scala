@@ -1,8 +1,11 @@
 package integration
 
+import java.nio.file.Paths
+
 import cats.data.NonEmptyVector
 import cats.effect.IO
 import codesearch.core.index._
+import codesearch.core.index.directory.JavaScriptCindex
 import codesearch.core.index.repository.Downloader
 import codesearch.core.meta._
 import codesearch.core.search.Search.{CodeSnippet, Package, PackageResult}
@@ -15,7 +18,8 @@ import com.dimafeng.testcontainers.{ForAllTestContainer, PostgreSQLContainer}
 class IntegrationJavaScriptSpec extends FreeSpec with ForAllTestContainer with IntegrationSpecBase {
 
   override val container = PostgreSQLContainer()
-  val searcher: Search   = new JavaScriptSearch
+  val javaScriptCindex   = JavaScriptCindex(Paths.get("./index/test/cindex/"))
+  val searcher: Search   = new JavaScriptSearch(javaScriptCindex)
 
   "Integration JavaScript Spec" in new TestFixture {
 
@@ -23,7 +27,7 @@ class IntegrationJavaScriptSpec extends FreeSpec with ForAllTestContainer with I
       implicit val downloader: Downloader[IO] = Downloader.create[IO]
       val npmDownloader: FakeDownloader[IO]   = FakeDownloader[IO](getMetaData("integration/meta/node.json"))
       val unarchiver                          = Unarchiver[IO]
-      val nodeIndex                           = JavaScriptIndex(config, database)
+      val nodeIndex                           = JavaScriptIndex(config, database, javaScriptCindex)
 
       for {
         hackageMeta <- NpmMetaDownloader(config.languagesConfig.javascript, npmDownloader)

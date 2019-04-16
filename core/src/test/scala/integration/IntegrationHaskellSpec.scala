@@ -1,8 +1,11 @@
 package integration
 
+import java.nio.file.Paths
+
 import cats.data.NonEmptyVector
 import cats.effect.IO
 import codesearch.core.index._
+import codesearch.core.index.directory.HaskellCindex
 import codesearch.core.index.repository.Downloader
 import codesearch.core.meta._
 import codesearch.core.search.Search.{CodeSnippet, Package, PackageResult}
@@ -15,7 +18,8 @@ import com.dimafeng.testcontainers.{ForAllTestContainer, PostgreSQLContainer}
 class IntegrationHaskellSpec extends FreeSpec with ForAllTestContainer with IntegrationSpecBase {
 
   override val container = PostgreSQLContainer()
-  val searcher: Search   = new HaskellSearch
+  val haskellCindex      = HaskellCindex(Paths.get("./index/test/cindex/"))
+  val searcher: Search   = new HaskellSearch(haskellCindex)
 
   "Integration Haskell Spec" in new TestFixture {
 
@@ -23,7 +27,7 @@ class IntegrationHaskellSpec extends FreeSpec with ForAllTestContainer with Inte
       implicit val downloader: Downloader[IO]   = Downloader.create[IO]
       val hackageDownloader: FakeDownloader[IO] = FakeDownloader[IO](getMetaData("integration/meta/haskell.tar.gz"))
       val unarchiver                            = Unarchiver[IO]
-      val haskellIndex                          = HaskellIndex(config, database)
+      val haskellIndex                          = HaskellIndex(config, database, haskellCindex)
 
       for {
         hackageMeta <- HackageMetaDownloader(config.languagesConfig.haskell, unarchiver, hackageDownloader)

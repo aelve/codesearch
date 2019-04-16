@@ -31,7 +31,9 @@ trait LanguageIndex[A <: DefaultTable] {
 
   protected val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.unsafeCreate[IO]
 
-  protected def cindexDir: СindexDirectory
+  def cindexDir: СindexDirectory
+
+  implicit val root: NioPath = cindexDir.root
 
   protected def concurrentTasksCount: Int
 
@@ -50,8 +52,8 @@ trait LanguageIndex[A <: DefaultTable] {
     def dropTempIndexFile = IO(Files.deleteIfExists(cindexDir.tempIndexDirAs[NioPath]))
 
     def createCSearchDir = IO(
-      if (Files.notExists(СindexDirectory.root))
-        Files.createDirectories(СindexDirectory.root)
+      if (Files.notExists(cindexDir.root))
+        Files.createDirectories(cindexDir.root)
     )
 
     def indexPackages(packageDirs: Seq[NioPath]): IO[Unit] = {
