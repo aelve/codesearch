@@ -16,7 +16,6 @@ object Main extends IOApp {
   final case class Params(
       updatePackages: Boolean = false,
       downloadMeta: Boolean = false,
-      initDB: Boolean = true,
       buildIndex: Boolean = false,
       limitedCountPackages: Option[Int] = None,
       lang: String = "all"

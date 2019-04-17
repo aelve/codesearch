@@ -31,7 +31,6 @@ Docker installed, you can do this:
 
     $ make build   # Build the project
     $ make db      # Download and start Postgres (wait a bit after this step)
-    $ make tables  # Create tables
     $ make serve   # Run the server
 
 If you head to <http://localhost:9000> now, you should see the project

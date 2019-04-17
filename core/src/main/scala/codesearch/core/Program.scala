@@ -20,7 +20,7 @@ class Program(langReps: Map[String, LangRep[_ <: DefaultTable]], logger: Logger[
         logger.info(s"Codesearch-core started for language ${params.lang}")
       }
 
-      _ <- initDb(params).whenA(params.initDB)
+      _ <- initDb(params)
       _ <- downloadMeta(params).whenA(params.downloadMeta)
       _ <- updatePackages(params).whenA(params.updatePackages)
       _ <- buildIndex(params).whenA(params.buildIndex)

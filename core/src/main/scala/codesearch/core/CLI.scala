@@ -17,10 +17,6 @@ object CLI {
       c.copy(downloadMeta = true)
     } text "update package meta information"
 
-    opt[Unit]('i', "init-database") action { (_, c) =>
-      c.copy(initDB = true)
-    } text "create tables for database"
-
     opt[Unit]('b', "build-index") action { (_, c) =>
       c.copy(buildIndex = true)
     } text "build index with only latest packages"
