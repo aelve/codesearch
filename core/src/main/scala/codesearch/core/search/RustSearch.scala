@@ -10,5 +10,5 @@ class RustSearch extends Search {
   override protected def extensions: Extensions     = RustExtensions
   override protected def buildRepUrl(packageName: String, version: String): String =
     s"https://docs.rs/crate/$packageName/$version"
-  def ifTestInPath(path: String): Boolean = path.contains("/test/")
+  def isTestInPath(path: String): Boolean = path.contains("/test/")
 }

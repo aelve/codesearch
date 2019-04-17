@@ -10,5 +10,5 @@ class RubySearch extends Search {
   override protected def extensions: Extensions     = RubyExtensions
   override protected def buildRepUrl(packageName: String, version: String): String =
     s"https://rubygems.org/gems/$packageName/versions/$version"
-  def ifTestInPath(path: String): Boolean = path.contains("/spec/") || path.contains("/test/")
+  def isTestInPath(path: String): Boolean = path.contains("/spec/") || path.contains("/test/")
 }

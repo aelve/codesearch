@@ -24,14 +24,22 @@ trait Search {
   protected def cindexDir: СindexDirectory
   protected def extensions: Extensions
   protected val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.unsafeCreate[IO]
-  def ifTestInPath(path: String): Boolean
+  def isTestInPath(path: String): Boolean
 
   def search(request: SearchRequest): IO[CSearchPage] = {
     for {
       lines <- csearch(request)
-      results <- Stream
+
+      shippetsInfo = Stream
         .emits(lines)
         .through(SnippetsGrouper.groupLines(snippetConfig))
+
+      filteredShippetsInfo = if (request.withoutTests)
+        shippetsInfo.filter(shippetInfo => !isTestInPath(shippetInfo.filePath))
+      else
+        shippetsInfo
+
+      results <- filteredShippetsInfo
         .drop(snippetConfig.pageSize * (request.page - 1))
         .take(snippetConfig.pageSize)
         .evalMap(createSnippet)
