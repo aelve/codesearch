@@ -24,6 +24,7 @@ trait Search {
   protected def cindexDir: СindexDirectory
   protected def extensions: Extensions
   protected val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.unsafeCreate[IO]
+  def ifTestInPath(path: String): Boolean
 
   def search(request: SearchRequest): IO[CSearchPage] = {
     for {
