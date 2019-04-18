@@ -50,7 +50,7 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
 
       db.updated.flatMap { updated =>
         searchEngine.search(searchRequest) map {
-          case CSearchPage(results, total, errorMessage) =>
+          case CSearchPage(results, total, errorResponse) =>
             Ok(
               views.html.searchResults(
                 updated = TimeAgo.using(updated.getTime),
@@ -66,7 +66,7 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
                 totalMatches = total,
                 callURI = searchRequest.callURI(host).toString,
                 lang = lang,
-                errorMessageT = errorMessage
+                errorMessageT = errorResponse.message
               )
             )
         } unsafeToFuture

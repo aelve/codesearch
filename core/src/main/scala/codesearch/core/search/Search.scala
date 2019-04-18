@@ -19,6 +19,9 @@ import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
 import scala.sys.process.{Process, ProcessLogger}
+import com.google.re2j._
+
+import scala.util.{Success, Try}
 
 trait Search {
 
@@ -26,22 +29,27 @@ trait Search {
   protected def extensions: Extensions
   protected val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.unsafeCreate[IO]
 
+  def checkRegexpForValid(regexp: String): Try[Pattern] = {
+    Try(Pattern.compile(regexp))
+  }
+
   def search(request: SearchRequest): IO[CSearchPage] = {
-    val entity = csearch(request)
-    if (entity.error.message.isEmpty) {
-      for {
-        results <- Stream
-          .emits(entity.lists)
-          .through(SnippetsGrouper.groupLines(snippetConfig))
-          .drop(snippetConfig.pageSize * (request.page - 1))
-          .take(snippetConfig.pageSize)
-          .evalMap(createSnippet)
-          .through(groupByPackage)
-          .compile
-          .toList
-      } yield CSearchPage(results.sortBy(_.pack.name), entity.lists.size, ErrorResponse(""))
-    } else {
-      IO(CSearchPage(Seq.empty[Search.PackageResult], 0, entity.error))
+    checkRegexpForValid(request.query) match {
+      case Success(_) => {
+        val entity = csearch(request)
+        for {
+          results <- Stream
+            .emits(entity.lists)
+            .through(SnippetsGrouper.groupLines(snippetConfig))
+            .drop(snippetConfig.pageSize * (request.page - 1))
+            .take(snippetConfig.pageSize)
+            .evalMap(createSnippet)
+            .through(groupByPackage)
+            .compile
+            .toList
+        } yield CSearchPage(results.sortBy(_.pack.name), entity.lists.size, ErrorResponse(""))
+      }
+      case scala.util.Failure(exception) => IO(CSearchPage(Seq.empty[Search.PackageResult], 0, ErrorResponse(exception.getMessage)))
     }
   }
 
