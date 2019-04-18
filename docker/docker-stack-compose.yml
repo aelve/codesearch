@@ -46,8 +46,7 @@ services:
       - /mnt/vol/index:/index
       - /mnt/vol/logs:/logs
     command: >
-      sh -c "./wait-for postgres:5432 -- make tables && \
-            make download-haskell update-haskell index-haskell && \
+      sh -c "./wait-for postgres:5432 -- make download-haskell update-haskell index-haskell && \
             make download-rust update-rust index-rust && \
             make download-ruby update-ruby index-ruby"
     networks:

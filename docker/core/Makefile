@@ -1,8 +1,3 @@
-# Create tables
-.PHONY: tables
-tables:
-	java -Dconfig.resource=production.conf -jar codesearch-core.jar -i
-
 # Download package index. Acceptable values: {haskell, rust, ruby, javascript}
 download-%:
 	java -Dconfig.resource=production.conf -jar codesearch-core.jar -d -l "$*"
