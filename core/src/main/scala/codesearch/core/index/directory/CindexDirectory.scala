@@ -1,13 +1,13 @@
 package codesearch.core.index.directory
 
-import java.nio.file.{Path, Paths}
+import java.nio.file.Path
 
 import codesearch.core.syntax.path._
 
 trait СindexDirectory {
 
   /** Defined main path to index */
-  implicit val root: Path
+  def root: Path
 
   /** Defines package repository name */
   def packageRepository: String
@@ -17,21 +17,21 @@ trait СindexDirectory {
     * @param D is implicit instance of [[DirAs]] trait
     * @tparam O is return type
     */
-  def indexDirAs[O](implicit D: DirAs[O]): O = D.dir(packageRepository)
+  def indexDirAs[O](implicit D: DirAs[O]): O = D.dir(packageRepository, root)
 
   /** Function returns temporary index directory in representation depending from type parameter
     *
     * @param D is implicit instance of [[DirAs]] trait
     * @tparam O is return type
     */
-  def tempIndexDirAs[O](implicit D: DirAs[O]): O = D.tempDir(packageRepository)
+  def tempIndexDirAs[O](implicit D: DirAs[O]): O = D.tempDir(packageRepository, root)
 
   /** Function returns path to file that contains directories to index in representation depending from type parameter
     *
     * @param D is implicit instance of [[DirAs]] trait
     * @tparam O is return type
     */
-  def dirsToIndex[O](implicit D: DirAs[O]): O = D.dirsToIndex(packageRepository)
+  def dirsToIndex[O](implicit D: DirAs[O]): O = D.dirsToIndex(packageRepository, root)
 }
 
 case class HaskellCindex(root: Path) extends СindexDirectory {
@@ -51,23 +51,23 @@ case class RustCindex(root: Path) extends СindexDirectory {
 }
 
 trait DirAs[A] {
-  def dir(packageManager: String): A
-  def tempDir(packageManager: String): A
-  def dirsToIndex(packageManager: String): A
+  def dir(packageManager: String, root: Path): A
+  def tempDir(packageManager: String, root: Path): A
+  def dirsToIndex(packageManager: String, root: Path): A
 }
 
 object DirAs {
-  implicit def asString(implicit root: Path): DirAs[String] = new DirAs[String] {
+  implicit def asString(root: Path): DirAs[String] = new DirAs[String] {
     private def fullPath(relativePath: Path): String         = relativePath.toFile.getCanonicalPath
-    override def dirsToIndex(packageManager: String): String = s"${asPath.dirsToIndex(packageManager)}"
-    override def dir(packageManager: String): String         = fullPath(asPath.dir(packageManager))
-    override def tempDir(packageManager: String): String     = fullPath(asPath.tempDir(packageManager))
+    override def dirsToIndex(packageManager: String, root: Path): String = s"${asPath.dirsToIndex(packageManager, root)}"
+    override def dir(packageManager: String, root: Path): String         = fullPath(asPath.dir(packageManager, root))
+    override def tempDir(packageManager: String, root: Path): String     = fullPath(asPath.tempDir(packageManager, root))
   }
 
-  implicit def asPath(implicit root: Path): DirAs[Path] = new DirAs[Path] {
-    private def index(packageManager: String): String      = s".${packageManager}_csearch_index"
-    override def dirsToIndex(packageManager: String): Path = root / s".${packageManager}_dirs_for_index"
-    override def dir(packageManager: String): Path         = root / index(packageManager)
-    override def tempDir(packageManager: String): Path     = root / s"${index(packageManager)}.tmp"
+  implicit def asPath: DirAs[Path] = new DirAs[Path] {
+    private def index(packageManager: String, root: Path): String      = s".${packageManager}_csearch_index"
+    override def dirsToIndex(packageManager: String, root: Path): Path = root / s".${packageManager}_dirs_for_index"
+    override def dir(packageManager: String, root: Path): Path         = root / index(packageManager, root)
+    override def tempDir(packageManager: String, root: Path): Path     = root / s"${index(packageManager, root)}.tmp"
   }
 }

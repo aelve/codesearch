@@ -70,7 +70,7 @@ trait Search {
   protected def buildRepUrl(packageName: String, version: String): String
 
   private def csearch(request: SearchRequest): IO[List[String]] = {
-    val indexDir = cindexDir.indexDirAs[String]
+    val indexDir = cindexDir.indexDirAs[String](cindexDir.root)
     val env      = ("CSEARCHINDEX", indexDir)
 
     for {
