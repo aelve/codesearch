@@ -30,6 +30,7 @@ You can run Postgres by yourself, but it's better to use Docker. If you have
 Docker installed, you can do this:
 
     $ make build   # Build the project
+    $ make db      # Download and start Postgres (wait a bit after this step)
     $ make serve   # Run the server
 
 If you head to <http://localhost:9000> now, you should see the project
@@ -37,7 +38,7 @@ running. The port can be changed:
 
     $ make serve port=7000
 
-Note: if you get an error at the `make tables` stage, you probably haven't
+Note: if you get an error at the `make serve` stage, you probably haven't
 waited enough. Do `make db-kill` and start from `make serve` again.
 
 ### Indexing packages
