@@ -6,7 +6,7 @@
         <form>
             <section class="warning warning-query">Please provide a string to search for.</section>
               @if(errorMessageT.nonEmpty) {
-                  <section class="error error-query" style="color:red;">⚠️@{errorMessageT}</section>
+                  <section class="error error-query" style="color:#f44336;">️⚠️ @{errorMessageT}</section>
               }
             <div class="input-group mb-2">
                 <input type="text" class="form-control" name="query" value="@query" class="query">

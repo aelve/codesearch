@@ -49,7 +49,12 @@ trait Search {
             .toList
         } yield CSearchPage(results.sortBy(_.pack.name), entity.lists.size, ErrorResponse(""))
       }
-      case scala.util.Failure(exception) => IO(CSearchPage(Seq.empty[Search.PackageResult], 0, ErrorResponse(exception.getMessage)))
+      case scala.util.Failure(exception) =>
+         {
+           val message = exception.getMessage
+           IO(CSearchPage(Seq.empty[Search.PackageResult], 0,
+             ErrorResponse(message.substring(0,1).toUpperCase + message.substring(1, message.size))))
+         }
     }
   }
 
