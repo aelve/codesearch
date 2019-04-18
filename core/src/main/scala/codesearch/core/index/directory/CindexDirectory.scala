@@ -58,10 +58,11 @@ trait DirAs[A] {
 
 object DirAs {
   implicit def asString(root: Path): DirAs[String] = new DirAs[String] {
-    private def fullPath(relativePath: Path): String         = relativePath.toFile.getCanonicalPath
-    override def dirsToIndex(packageManager: String, root: Path): String = s"${asPath.dirsToIndex(packageManager, root)}"
-    override def dir(packageManager: String, root: Path): String         = fullPath(asPath.dir(packageManager, root))
-    override def tempDir(packageManager: String, root: Path): String     = fullPath(asPath.tempDir(packageManager, root))
+    private def fullPath(relativePath: Path): String = relativePath.toFile.getCanonicalPath
+    override def dirsToIndex(packageManager: String, root: Path): String =
+      s"${asPath.dirsToIndex(packageManager, root)}"
+    override def dir(packageManager: String, root: Path): String     = fullPath(asPath.dir(packageManager, root))
+    override def tempDir(packageManager: String, root: Path): String = fullPath(asPath.tempDir(packageManager, root))
   }
 
   implicit def asPath: DirAs[Path] = new DirAs[Path] {
