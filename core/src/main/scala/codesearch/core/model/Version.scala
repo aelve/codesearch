@@ -1,10 +1,9 @@
 package codesearch.core.model
 
+import scala.math.Ordered.orderingToOrdered
+
 case class Version(verString: String) extends Ordered[Version] {
-  import scala.math.Ordered.orderingToOrdered
-
   val version: Iterable[Long] = ("""\d+""".r findAllIn verString).toSeq.map(_.toLong)
-
   override def compare(that: Version): Int = this.version compare that.version
 }
 

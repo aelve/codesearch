@@ -63,6 +63,7 @@ object Builder {
       libraryDependencies ++= Seq(
         "com.typesafe.slick"    %% "slick"                         % "3.2.3",
         "com.typesafe.slick"    %% "slick-hikaricp"                % "3.2.3",
+        "com.github.tminglei"   %% "slick-pg"                      % "0.17.2",
         "org.postgresql"        % "postgresql"                     % "42.2.2",
         "com.softwaremill.sttp" %% "async-http-client-backend-fs2" % "1.3.8",
         "co.fs2"                %% "fs2-core"                      % "1.0.4",
@@ -77,7 +78,12 @@ object Builder {
         "io.chrisdavenport"     %% "log4cats-slf4j"                % "0.2.0-RC2",
         "org.apache.commons"    % "commons-compress"               % "1.18",
         "org.scalactic"         %% "scalactic"                     % "3.0.5",
-        "org.scalatest"         %% "scalatest"                     % "3.0.5" % "test"
+        "org.scalatest"         %% "scalatest"                     % "3.0.5" % "test",
+        "org.tpolecat"          %% "doobie-core"                   % "0.6.0",
+        "org.tpolecat"          %% "doobie-hikari"                 % "0.6.0",
+        "org.tpolecat"          %% "doobie-postgres"               % "0.6.0",
+        "org.tpolecat"          %% "doobie-specs2"                 % "0.6.0",
+        "org.flywaydb"          % "flyway-core"                    % "5.2.4",
       ),
       assemblyMergeStrategy in assembly := {
         case PathList("META-INF", _ @_*) => MergeStrategy.discard

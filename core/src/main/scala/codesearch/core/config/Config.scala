@@ -1,7 +1,6 @@
 package codesearch.core.config
 
 import java.net.URI
-import java.nio.file.Path
 
 import cats.effect.Sync
 import pureconfig.module.catseffect._
@@ -19,7 +18,13 @@ case class DatabaseConfig(
     port: Int,
     name: String,
     user: String,
-    password: String
+    password: String,
+    properties: DatabaseProperties
+)
+
+case class DatabaseProperties(
+    driver: String,
+    url: String
 )
 
 case class SnippetConfig(
@@ -29,37 +34,15 @@ case class SnippetConfig(
 )
 
 case class LanguagesConfig(
-    haskell: HaskellConfig,
-    ruby: RubyConfig,
-    rust: RustConfig,
-    javascript: JavaScriptConfig
+    haskell: LanguageConfig,
+    ruby: LanguageConfig,
+    rust: LanguageConfig,
+    javascript: LanguageConfig
 )
 
-case class HaskellConfig(
+case class LanguageConfig(
+    repository: String,
     repoIndexUrl: URI,
-    repoArchivePath: Path,
-    repoPath: Path,
-    concurrentTasksCount: Int
-)
-
-case class RubyConfig(
-    repoIndexUrl: URI,
-    repoArchivePath: Path,
-    repoJsonPath: Path,
-    scriptPath: Path,
-    concurrentTasksCount: Int
-)
-
-case class RustConfig(
-    repoIndexUrl: URI,
-    repoArchivePath: Path,
-    repoPath: Path,
-    concurrentTasksCount: Int
-)
-
-case class JavaScriptConfig(
-    repoIndexUrl: URI,
-    repoJsonPath: Path,
     concurrentTasksCount: Int
 )
 

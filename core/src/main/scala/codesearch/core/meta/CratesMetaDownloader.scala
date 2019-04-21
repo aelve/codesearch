@@ -19,7 +19,7 @@ class CratesMetaDownloader[F[_]: Monad](
     logger: Logger[F]
 ) extends MetaDownloader[F] {
 
-  def downloadMeta: F[Unit] = {
+  def download: F[Unit] = {
     for {
       _       <- logger.info("Downloading rust meta information")
       archive <- downloader.download(Uri(config.repoIndexUrl), config.repoArchivePath)

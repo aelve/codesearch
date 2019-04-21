@@ -14,7 +14,7 @@ import scala.sys.process._
 class GemMetaDownloader[F[_]: Sync](config: RubyConfig, downloader: Downloader[F], logger: Logger[F])
     extends MetaDownloader[F] {
 
-  def downloadMeta: F[Unit] =
+  def download: F[Unit] =
     for {
       _ <- logger.info("Downloading ruby meta information")
       _ <- downloader.download(Uri(config.repoIndexUrl), config.repoArchivePath)

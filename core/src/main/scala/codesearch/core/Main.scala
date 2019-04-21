@@ -22,33 +22,39 @@ object Main extends IOApp {
       lang: String = "all"
   )
 
-  case class LangRep[A <: DefaultTable](
+  case class LangRep[A, F[_]](
       db: DefaultDB[A],
       langIndex: LanguageIndex[A],
-      metaDownloader: MetaDownloader[IO]
+      metaDownloader: MetaDownloader[F]
   )
 
-  def run(args: List[String]): IO[ExitCode] =
+  def run(args: List[String]): IO[ExitCode] = {
     Resource.make(IO(AsyncHttpClientFs2Backend[IO]()))(client => IO(client.close())).use { implicit httpClient =>
       for {
-        params <- CLI.params(args)
         config <- Config.load[IO]
+        _      <- FlywayMigration.migrate[IO](config.db)
+        exitCode <- Transactor.create[IO](config.db).use { xa =>
+          for {
+            params <- CLI.params(args)
 
-        unarchiver                            = Unarchiver[IO]
-        implicit0(downloader: Downloader[IO]) = Downloader.create[IO]
+            unarchiver                            = Unarchiver[IO]
+            implicit0(downloader: Downloader[IO]) = Downloader.create[IO]
 
-        hackageMeta <- HackageMetaDownloader(config.languagesConfig.haskell, unarchiver, downloader)
-        cratesMeta  <- CratesMetaDownloader(config.languagesConfig.rust, unarchiver, downloader)
-        gemMeta     <- GemMetaDownloader(config.languagesConfig.ruby, downloader)
-        npmMeta     <- NpmMetaDownloader(config.languagesConfig.javascript, downloader)
+            hackageMeta <- HackageMetaDownloader(config.languagesConfig.haskell, unarchiver, downloader, xa)
+            cratesMeta  <- CratesMetaDownloader(config.languagesConfig.rust, unarchiver, downloader)
+            gemMeta     <- GemMetaDownloader(config.languagesConfig.ruby, downloader)
+            npmMeta     <- NpmMetaDownloader(config.languagesConfig.javascript, downloader)
 
-        langReps = Map(
-          "haskell"    -> LangRep[HackageTable](HackageDB, HaskellIndex(config), hackageMeta),
-          "rust"       -> LangRep[CratesTable](CratesDB, RustIndex(config), cratesMeta),
-          "ruby"       -> LangRep[GemTable](GemDB, RubyIndex(config), gemMeta),
-          "javascript" -> LangRep[NpmTable](NpmDB, JavaScriptIndex(config), npmMeta)
-        )
-        exitCode <- Program(langReps) >>= (_.run(params))
+            langReps = Map(
+              "haskell"    -> LangRep[HackageTable, IO](HackageDB, HaskellIndex(config), hackageMeta),
+              "rust"       -> LangRep[CratesTable, IO](CratesDB, RustIndex(config), cratesMeta),
+              "ruby"       -> LangRep[GemTable, IO](GemDB, RubyIndex(config), gemMeta),
+              "javascript" -> LangRep[NpmTable, IO](NpmDB, JavaScriptIndex(config), npmMeta)
+            )
+            exitCode <- Program(langReps) >>= (_.run(params))
+          } yield exitCode
+        }
       } yield exitCode
     }
+  }
 }
