@@ -1,16 +1,14 @@
-package codesearch.core.meta.unarchiver
+package codesearch.core.meta.parser
 
 import cats.effect.Sync
-import codesearch.core.config.LanguageConfig
+import codesearch.core.config.JavaScriptConfig
 import codesearch.core.db.repository.PackageIndex
 import fs2.{Pipe, Stream}
 import fs2json.{JsonToken, TokenFilter, prettyPrinter, tokenParser}
 import io.circe.fs2.byteArrayParser
 import io.circe.{Decoder, Json}
 
-final class JavaScriptUnarchiver[F[_]: Sync](
-    config: LanguageConfig
-) extends StreamIndexUnarchiver[F] {
+final class JavaScriptIndexParser[F[_]: Sync](config: JavaScriptConfig) extends IndexByteStreamParser[F] {
 
   private implicit val docDecoder: Decoder[PackageIndex] = { cursor =>
     val doc = cursor.downField("doc")
@@ -21,14 +19,15 @@ final class JavaScriptUnarchiver[F[_]: Sync](
     } yield PackageIndex(name, tag, config.repository)
   }
 
-  def packages: Pipe[F, Byte, PackageIndex] = { input =>
-    input
-      .through(tokenParser[F])
-      .through(tokenFilter)
-      .through(prettyPrinter())
-      .through(cutStream)
-      .through(byteArrayParser[F])
-      .through(decoder)
+  def parse(stream: Stream[F, Byte]): F[Stream[F, PackageIndex]] = {
+    Sync[F].pure(
+      stream
+        .through(tokenParser[F])
+        .through(tokenFilter)
+        .through(prettyPrinter())
+        .through(cutStream)
+        .through(byteArrayParser[F])
+        .through(decoder))
   }
 
   private def tokenFilter: Pipe[F, JsonToken, JsonToken] =
@@ -66,17 +65,17 @@ final class JavaScriptUnarchiver[F[_]: Sync](
     }
   }
 
-  private def decoder(implicit decode: Decoder[PackageIndex]): Pipe[F, Json, PackageIndex] =
-    _.flatMap { json =>
+  private def decoder(implicit decode: Decoder[PackageIndex]): Pipe[F, Json, PackageIndex] = { input =>
+    input.flatMap { json =>
       decode(json.hcursor) match {
         case Left(_)  => Stream.empty
         case Right(a) => Stream.emit(a)
       }
     }
+  }
 }
 
-object JavaScriptUnarchiver {
-  def apply[F[_]: Sync](
-      config: LanguageConfig
-  ): JavaScriptUnarchiver[F] = new JavaScriptUnarchiver(config)
+object JavaScriptIndexParser {
+  def apply[F[_]: Sync](config: JavaScriptConfig): JavaScriptIndexParser[F] =
+    new JavaScriptIndexParser(config)
 }

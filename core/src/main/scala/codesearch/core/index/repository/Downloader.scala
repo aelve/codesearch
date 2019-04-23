@@ -28,7 +28,10 @@ object Downloader {
 
   def apply[F[_]: Downloader]: Downloader[F] = implicitly
 
-  def create[F[_]: ContextShift](implicit http: SttpBackend[F, Stream[F, ByteBuffer]], F: Sync[F]): Downloader[F] =
+  def create[F[_]: ContextShift](
+      implicit http: SttpBackend[F, Stream[F, ByteBuffer]],
+      F: Sync[F]
+  ): Downloader[F] =
     new Downloader[F] {
 
       /**

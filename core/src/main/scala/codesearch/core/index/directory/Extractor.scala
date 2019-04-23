@@ -1,6 +1,5 @@
 package codesearch.core.index.directory
 
-import java.io.File
 import java.nio.file.Path
 
 import cats.effect.Sync
@@ -18,7 +17,7 @@ private[index] trait Extractor {
     * @param from is file to unarchiving
     * @param to is target directory
     */
-  def unzipUsingMethod[F[_]](from: Path, to: Path)(implicit F: Sync[F]): F[Unit] = F.delay(
+  def unzipUsingMethod[F[_]: Sync](from: Path, to: Path): F[Unit] = Sync[F].delay(
     ArchiverFactory
       .createArchiver(TAR, GZIP)
       .extract(from.toFile, to.toFile)
@@ -41,7 +40,7 @@ private[index] trait Extractor {
     * @param unarchived is directory contains unarchived files
     * @return same directory containing all files and directories from unarchived files
     */
-  def flatDir[F[_]](unarchived: Path)(implicit F: Sync[F]): F[Path] = F.delay {
+  def flatDir[F[_]: Sync](unarchived: Path): F[Path] = Sync[F].delay {
     val dir = unarchived.toFile
     dir.listFiles
       .filter(_.isDirectory)

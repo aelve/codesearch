@@ -4,6 +4,7 @@ import cats.Monad
 import cats.implicits._
 import doobie._
 import doobie.implicits._
+import fs2.Stream
 
 final case class PackageIndex(
     name: String,
@@ -12,7 +13,8 @@ final case class PackageIndex(
 )
 
 trait PackageIndexRep[F[_]] {
-  def insertRepIndexes(packages: List[PackageIndex]): F[Int]
+  def insertIndexes(packages: List[PackageIndex]): F[Int]
+  def insertIndexes(stream: Stream[F, PackageIndex]): F[Int]
 }
 
 object PackageIndexRep {
@@ -25,9 +27,20 @@ object PackageIndexRep {
       |  SET version = excluded.version
     """.stripMargin
 
-  def apply[F[_]: Monad](xa: Transactor[F]): PackageIndexRep[F] =
-    (packages: List[PackageIndex]) =>
+  def apply[F[_]: Monad](xa: Transactor[F]): PackageIndexRep[F] = new PackageIndexRep[F] {
+
+    def insertIndexes(packages: List[PackageIndex]): F[Int] =
       Update[PackageIndex](batchInsertQuery)
         .updateMany(packages)
         .transact(xa)
+
+    def insertIndexes(stream: Stream[F, PackageIndex]): F[Int] = {
+      val batchSize = 10000
+      stream
+        .chunkN(batchSize)
+        .map(packages => insertIndexes(packages.toList))
+        .compile
+        .drain
+    }
+  }
 }

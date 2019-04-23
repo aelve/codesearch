@@ -26,7 +26,8 @@ class RustIndex(rustConfig: RustConfig)(
     "test-max-version-example-crate",
     "version-length-checking-is-overrated",
     "config.json",
-    "archive.zip"
+    "archive.zip",
+    ".git"
   )
 
   override protected val cindexDir: СindexDirectory = RustCindex

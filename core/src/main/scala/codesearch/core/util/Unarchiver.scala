@@ -21,19 +21,19 @@ trait Unarchiver[F[_]] {
 }
 
 object Unarchiver {
-  def apply[F[_]](implicit F: Sync[F]): Unarchiver[F] = new Unarchiver[F] {
+  def apply[F[_]: Sync]: Unarchiver[F] = new Unarchiver[F] {
     def extract(
         archive: Path,
         to: Path,
         format: ArchiveFormat,
         compressionType: CompressionType
-    ): F[Unit] = F.delay {
+    ): F[Unit] = Sync[F].delay {
       ArchiverFactory
         .createArchiver(format, compressionType)
         .extract(archive.toFile, to.toFile)
     }
 
-    def extract(archive: Path, to: Path, archiveFormat: ArchiveFormat): F[Unit] = F.delay {
+    def extract(archive: Path, to: Path, archiveFormat: ArchiveFormat): F[Unit] = Sync[F].delay {
       ArchiverFactory
         .createArchiver(archiveFormat)
         .extract(archive.toFile, to.toFile)

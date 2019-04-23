@@ -1,53 +1,49 @@
 package codesearch.core.meta.unarchiver
 
-import java.io.InputStream
-import java.util.zip.ZipInputStream
+import java.nio.file.Path
 
-import cats.effect.{ConcurrentEffect, Sync}
-import codesearch.core.config.LanguageConfig
+import cats.effect.Sync
+import cats.syntax.functor._
+import codesearch.core.config.RustConfig
 import codesearch.core.db.repository.PackageIndex
-import fs2.{Pipe, Stream}
-import fs2.io.toInputStream
-import org.apache.commons.compress.archivers.zip.{ZipArchiveEntry, ZipArchiveInputStream, ZipFile}
+import codesearch.core.util.{FsUtils, Unarchiver}
+import fs2.Stream
+import io.circe.Decoder
+import io.circe.fs2._
+import org.rauschig.jarchivelib.ArchiveFormat.ZIP
 
-final class RustIndexUnarchiver[F[_]: ConcurrentEffect](
-    config: LanguageConfig
+final class RustIndexUnarchiver[F[_]: Sync](
+    unarchiver: Unarchiver[F],
+    config: RustConfig
 ) extends StreamIndexUnarchiver[F] {
 
-  def packages: Pipe[F, Byte, PackageIndex] = { input =>
-    input
-      .through(toInputStream)
-      .through(zipEntries)
-      .through(flatPackages)
+  private implicit val packageDecoder: Decoder[PackageIndex] = { cursor =>
+    for {
+      name    <- cursor.get[String]("name")
+      version <- cursor.get[String]("vers")
+    } yield PackageIndex(name, version, config.repository)
   }
 
-  private def zipEntries: Pipe[F, InputStream, ZipArchiveEntry] = { input =>
-    input.flatMap { inputStream =>
-      Stream
-        .bracket(Sync[F].delay(new ZipArchiveInputStream(inputStream)))(zis => Sync[F].delay(zis.close()))
-        .flatMap { zipStream =>
-          Stream.unfoldEval[F, ZipArchiveInputStream, ZipArchiveEntry](zipStream) { zipStream =>
-            Sync[F].delay {
-              zipStream.getNextZipEntry match {
-                case entry: ZipArchiveEntry => Some(entry, zipStream)
-                case _                      => None
-              }
-            }
-          }
-        }
-    }
+  def unarchive(path: Path): F[Stream[F, PackageIndex]] = {
+    for {
+      _ <- unarchiver.extract(path, config.repoPath, ZIP)
+    } yield flatPackages
   }
 
-  private def flatPackages: Pipe[F, ZipArchiveEntry, PackageIndex] = { input =>
-  val a = ZipInputStream
-    val b = ZipFile
-      input.flatMap(_.)
-    }
-
+  private def flatPackages: F[Stream[F, PackageIndex]] = {
+    Sync[F].delay(
+      FsUtils
+        .recursiveListFiles(config.repoPath.toFile)
+        .filter(file => !config.ignoreFiles.contains(file.getName))
+        .evalMap(file => FsUtils.readFileAsync(file.getAbsolutePath).map(_.last))
+        .through(stringStreamParser)
+        .through(decoder[F, PackageIndex]))
+  }
 }
 
 object RustIndexUnarchiver {
-  def apply[F[_]: ConcurrentEffect](
-      config: LanguageConfig
-  ): RustIndexUnarchiver[F] = new RustIndexUnarchiver(config)
+  def apply[F[_]: Sync](
+      unarchiver: Unarchiver[F],
+      config: RustConfig
+  ): RustIndexUnarchiver[F] = new RustIndexUnarchiver(unarchiver, config)
 }

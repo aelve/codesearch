@@ -1,10 +1,20 @@
 package codesearch.core.config
 
 import java.net.URI
+import java.nio.file.Path
 
 import cats.effect.Sync
 import pureconfig.module.catseffect._
 import pureconfig.{CamelCase, ConfigFieldMapping, ProductHint}
+
+trait RemoteIndexConfig {
+  def repository: String
+  def repoIndexUrl: URI
+}
+
+trait IndexArchiveConfig extends RemoteIndexConfig {
+  def repoArchivePath: Path
+}
 
 case class Config(
     db: DatabaseConfig,
@@ -18,13 +28,7 @@ case class DatabaseConfig(
     port: Int,
     name: String,
     user: String,
-    password: String,
-    properties: DatabaseProperties
-)
-
-case class DatabaseProperties(
-    driver: String,
-    url: String
+    password: String
 )
 
 case class SnippetConfig(
@@ -34,17 +38,43 @@ case class SnippetConfig(
 )
 
 case class LanguagesConfig(
-    haskell: LanguageConfig,
-    ruby: LanguageConfig,
-    rust: LanguageConfig,
-    javascript: LanguageConfig
+    haskell: HaskellConfig,
+    ruby: RubyConfig,
+    rust: RustConfig,
+    javascript: JavaScriptConfig
 )
 
-case class LanguageConfig(
+case class HaskellConfig(
+    repository: String,
+    repoIndexUrl: URI,
+    repoArchivePath: Path,
+    repoPath: Path,
+    concurrentTasksCount: Int
+) extends IndexArchiveConfig
+
+case class RubyConfig(
+    repository: String,
+    repoIndexUrl: URI,
+    repoArchivePath: Path,
+    repoJsonPath: Path,
+    scriptPath: Path,
+    concurrentTasksCount: Int
+) extends IndexArchiveConfig
+
+case class RustConfig(
+    repository: String,
+    repoIndexUrl: URI,
+    repoArchivePath: Path,
+    repoPath: Path,
+    concurrentTasksCount: Int,
+    ignoreFiles: Set[String]
+) extends IndexArchiveConfig
+
+case class JavaScriptConfig(
     repository: String,
     repoIndexUrl: URI,
     concurrentTasksCount: Int
-)
+) extends RemoteIndexConfig
 
 case class MetricsConfig(
     enableMatomoMetrics: Boolean
