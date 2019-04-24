@@ -6,7 +6,8 @@
         insensitive: Boolean,
         space: Boolean,
         precise: Boolean,
-        sources: Boolean
+        sources: Boolean,
+        withoutTests: Boolean,
 )
 
 <section class="container-fluid">
@@ -39,6 +40,10 @@
             <div class="form-check form-check-inline">
                 <input type="checkbox" class="form-check-input" name="sources" id="sources" @(if (sources) "checked")>
                 <label class="form-check-label" for="sources">Sources only</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input type="checkbox" class="form-check-input" name="withoutTests" id="without-tests" @(if (withoutTests) "checked")>
+                <label class="form-check-label" for="without-tests">Without tests search</label>
             </div>
         </form>
     </div>

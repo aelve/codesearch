@@ -10,6 +10,7 @@
         space: Boolean,
         precise: Boolean,
         sources: Boolean,
+        withoutTests: Boolean,
         page: Int,
         totalMatches: Int,
         callURI: String,
@@ -23,7 +24,7 @@
     }
 
     @wrapper(s"Codesearch | $lang", headExtra) {
-        @searchBox(s"/$lang/search", query, filter, filePath, insensitive, space, precise, sources)
+        @searchBox(s"/$lang/search", query, filter, filePath, insensitive, space, precise, sources, withoutTests)
         @resultFrame(lang, insensitive, space, precise, query, updated, packages, totalMatches)
         @pagination(page, totalMatches, callURI)
     }
