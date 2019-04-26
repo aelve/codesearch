@@ -47,7 +47,8 @@ trait Search {
         .through(groupByPackage)
         .compile
         .toList
-    } yield CSearchPage(results.sortBy(_.pack.name), filteredSnippetsInfo.compile.toList.size)
+      totalMatches = filteredSnippetsInfo.fold(0)((total, snippet) => total + snippet.totalMatches).compile.toList.last
+    } yield CSearchPage(results.sortBy(_.pack.name), totalMatches)
   }
 
   /**
