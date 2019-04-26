@@ -28,7 +28,8 @@ class SnippetsGrouperSpec extends WordSpec with Matchers {
     snippets should contain theSameElementsAs List(
       SnippetInfo(
         filePath = "3models/0.3.0/Graphics/Model/DirectX.hs",
-        lines = NonEmptyVector.of(13, 14, 15, 16, 17)
+        lines = NonEmptyVector.of(13, 14, 15, 16, 17),
+        totalMatches = 5
       )
     )
   }
@@ -51,11 +52,13 @@ class SnippetsGrouperSpec extends WordSpec with Matchers {
     snippets should contain theSameElementsAs List(
       SnippetInfo(
         filePath = "3models/0.3.0/Graphics/Model/DirectX.hs",
-        lines = NonEmptyVector.of(28)
+        lines = NonEmptyVector.of(28),
+        totalMatches = 1
       ),
       SnippetInfo(
         filePath = "3models/0.3.0/Graphics/Model/DirectX.hs",
-        lines = NonEmptyVector.of(39)
+        lines = NonEmptyVector.of(39),
+        totalMatches = 1
       )
     )
   }
@@ -78,11 +81,13 @@ class SnippetsGrouperSpec extends WordSpec with Matchers {
     snippets should contain theSameElementsAs List(
       SnippetInfo(
         filePath = "3models/0.3.0/Graphics/Model/DirectX.hs",
-        lines = NonEmptyVector.of(14)
+        lines = NonEmptyVector.of(14),
+        totalMatches = 1
       ),
       SnippetInfo(
         filePath = "3models/0.3.0/Graphics/Model/Obj.hs",
-        lines = NonEmptyVector.of(16)
+        lines = NonEmptyVector.of(16),
+        totalMatches = 1
       )
     )
   }

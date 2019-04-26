@@ -12,7 +12,7 @@ import codesearch.core.index.repository.Extensions
 import codesearch.core.search.Search.{CSearchPage, CSearchResult, CodeSnippet, Package, PackageResult, snippetConfig}
 import codesearch.core.search.SnippetsGrouper.SnippetInfo
 import codesearch.core.util.Helper.readFileAsync
-import fs2.{Pipe, Pure, Stream}
+import fs2.{Pipe, Stream}
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import codesearch.core.regex.RegexConstructor
