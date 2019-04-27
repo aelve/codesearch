@@ -1,9 +1,7 @@
 package codesearch.web.controllers
 
 import cats.data.OptionT
-import cats.effect.IO
 import cats.instances.future._
-import codesearch.core.config.Config
 import codesearch.core.db.DefaultDB
 import codesearch.core.index.directory.Directory
 import codesearch.core.model.DefaultTable
@@ -25,17 +23,7 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
   def searchEngine: Search
   def lang: String
 
-  val database = Config
-    .load[IO]
-    .map { config =>
-      val dbConfig = config.db
-      Database.forURL(
-        driver = "org.postgresql.Driver",
-        url =
-          s"jdbc:postgresql://${dbConfig.host}:${dbConfig.port}/${dbConfig.name}?user=${dbConfig.user}&password=${dbConfig.password}"
-      )
-    }
-    .unsafeRunSync()
+  val database = Database.forConfig("db")
 
   def index: Action[AnyContent] = Action.async { implicit request =>
     db.updated.map(

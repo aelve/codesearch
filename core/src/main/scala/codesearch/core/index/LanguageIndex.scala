@@ -55,8 +55,8 @@ trait LanguageIndex[A <: DefaultTable] {
     )
 
     def indexPackages(packageDirs: Seq[NioPath]): IO[Unit] = {
-      val args = Seq("cindex", cindexDir.dirsToIndex[String](cindexDir.root))
-      val env  = Seq("CSEARCHINDEX" -> cindexDir.tempIndexDirAs[String](cindexDir.root))
+      val args = Seq("cindex", cindexDir.dirsToIndex[String])
+      val env  = Seq("CSEARCHINDEX" -> cindexDir.tempIndexDirAs[String])
       for {
         _ <- Stream
           .emits(packageDirs)

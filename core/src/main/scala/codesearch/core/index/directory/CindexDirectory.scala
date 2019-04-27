@@ -57,7 +57,7 @@ trait DirAs[A] {
 }
 
 object DirAs {
-  implicit def asString(root: Path): DirAs[String] = new DirAs[String] {
+  implicit def asString: DirAs[String] = new DirAs[String] {
     private def fullPath(relativePath: Path): String = relativePath.toFile.getCanonicalPath
     override def dirsToIndex(packageManager: String, root: Path): String =
       s"${asPath.dirsToIndex(packageManager, root)}"
