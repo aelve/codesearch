@@ -57,6 +57,9 @@ staging-deploy-to-swarm:
     - scp ./docker/docker-stack-compose.yml deployer@$STAGING_HOST:~/docker
     - ssh deployer@$STAGING_HOST "docker login quay.io -u $DOCKER_USER -p $DOCKER_PASS" || true
     - ssh deployer@$STAGING_HOST "SECRET_KEY=$STAGING_SECRET_KEY SERVER_PORT=$SERVER_PORT docker stack deploy --with-registry-auth -c ~/docker/docker-stack-compose.yml codesearch" || true
+  only:
+    - develop
+    - master
 
 deploy-to-swarm:
   stage: deploy
@@ -65,3 +68,6 @@ deploy-to-swarm:
     - scp ./docker/docker-stack-compose.yml deployer@$HOST:~/docker
     - ssh deployer@$HOST "docker login quay.io -u $DOCKER_USER -p $DOCKER_PASS" || true
     - ssh deployer@$HOST "SECRET_KEY=$SECRET_KEY SERVER_PORT=$SERVER_PORT docker stack deploy --with-registry-auth -c ~/docker/docker-stack-compose.yml codesearch" || true
+  only:
+    - develop
+    - master
