@@ -8,25 +8,25 @@ import cats.instances.list._
 import cats.syntax.foldable._
 import cats.syntax.functor._
 import codesearch.core.config.HaskellConfig
-import codesearch.core.db.repository.PackageIndex
+import codesearch.core.db.repository.PackageIndexTableRow
 import codesearch.core.model.Version
 import codesearch.core.util.Unarchiver
 import fs2.{Chunk, Stream}
 import org.rauschig.jarchivelib.ArchiveFormat.TAR
 import org.rauschig.jarchivelib.CompressionType.GZIP
 
-final class HaskellIndexUnarchiver[F[_]: Sync](
+private[meta] final class HaskellIndexUnarchiver[F[_]: Sync](
     unarchiver: Unarchiver[F],
     config: HaskellConfig
 ) extends StreamIndexUnarchiver[F] {
 
-  def unarchive(path: Path): F[Stream[F, PackageIndex]] = {
+  def unarchive(path: Path): F[Stream[F, PackageIndexTableRow]] = {
     for {
       _ <- unarchiver.extract(path, config.repoPath, TAR, GZIP)
     } yield flatPackages
   }
 
-  private def flatPackages: F[Stream[F, PackageIndex]] = {
+  private def flatPackages: F[Stream[F, PackageIndexTableRow]] = {
     Sync[F].pure(
       Stream
         .evalUnChunk(Sync[F].delay(Chunk.array(config.repoPath.toFile.listFiles)))
@@ -37,7 +37,7 @@ final class HaskellIndexUnarchiver[F[_]: Sync](
               .filter(_.isDirectory)
               .map(_.getName)
               .maximumOption(Order.fromLessThan(Version.less))
-              .map(version => PackageIndex(packageDir.getName, version, config.repository))
+              .map(version => PackageIndexTableRow(packageDir.getName, version, config.repository))
           }
         }
         .unNone

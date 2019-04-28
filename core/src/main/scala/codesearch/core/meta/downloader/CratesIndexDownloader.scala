@@ -3,7 +3,7 @@ package codesearch.core.meta.downloader
 import cats.effect.{ContextShift, Sync}
 import cats.syntax.functor._
 import codesearch.core.config.RustConfig
-import codesearch.core.db.repository.PackageIndexRep
+import codesearch.core.db.repository.PackageIndexDbRepository
 import codesearch.core.index.repository.Downloader
 import codesearch.core.meta.unarchiver.RustIndexUnarchiver
 import codesearch.core.util.Unarchiver
@@ -24,7 +24,7 @@ object CratesIndexDownloader {
         config,
         downloader,
         RustIndexUnarchiver(unarchiver, config),
-        PackageIndexRep(xa),
+        PackageIndexDbRepository(xa),
         logger
       )
 }

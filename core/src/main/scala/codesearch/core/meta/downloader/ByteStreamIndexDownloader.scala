@@ -4,17 +4,17 @@ import cats.effect.{ContextShift, Sync}
 import cats.syntax.applicative._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import codesearch.core.config.RemoteIndexConfig
-import codesearch.core.db.repository.PackageIndexRep
+import codesearch.core.config.RepositoryConfig
+import codesearch.core.db.repository.PackageIndexDbRepository
 import codesearch.core.index.repository.Downloader
 import codesearch.core.meta.parser.IndexByteStreamParser
 import com.softwaremill.sttp.Uri
 import io.chrisdavenport.log4cats.Logger
 
-class ByteStreamIndexDownloader[F[_]: Sync: ContextShift](
-    config: RemoteIndexConfig,
+private[meta] class ByteStreamIndexDownloader[F[_]: Sync: ContextShift](
+    config: RepositoryConfig,
     downloader: Downloader[F],
-    indexRep: PackageIndexRep[F],
+    indexRep: PackageIndexDbRepository[F],
     indexParser: IndexByteStreamParser[F],
     logger: Logger[F]
 ) extends RepositoryIndexDownloader[F] {
@@ -22,9 +22,9 @@ class ByteStreamIndexDownloader[F[_]: Sync: ContextShift](
   def download: F[Unit] =
     for {
       _      <- logger.info(s"Downloading ${config.repository} meta information")
-      stream <- downloader.download(Uri(config.repoIndexUrl)).pure[F]
+      stream <- downloader.download(Uri(config.repoIndexUrl)).pure[F].widen
       index  <- indexParser.parse(stream)
-      _      <- indexRep.insertIndexes(index)
+      _      <- indexRep.batchUpsert(index)
       _      <- logger.info("Downloading finished")
     } yield ()
 }

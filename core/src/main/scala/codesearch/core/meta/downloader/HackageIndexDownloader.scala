@@ -3,7 +3,7 @@ package codesearch.core.meta.downloader
 import cats.effect.{ConcurrentEffect, ContextShift}
 import codesearch.core.config.HaskellConfig
 import cats.syntax.functor._
-import codesearch.core.db.repository.PackageIndexRep
+import codesearch.core.db.repository.PackageIndexDbRepository
 import codesearch.core.index.repository.Downloader
 import codesearch.core.meta.unarchiver.HaskellIndexUnarchiver
 import codesearch.core.util.Unarchiver
@@ -24,7 +24,7 @@ object HackageIndexDownloader {
         config,
         downloader,
         HaskellIndexUnarchiver(unarchiver, config),
-        PackageIndexRep(xa),
+        PackageIndexDbRepository(xa),
         logger
       )
 }

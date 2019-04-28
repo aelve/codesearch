@@ -7,12 +7,13 @@ import cats.effect.Sync
 import pureconfig.module.catseffect._
 import pureconfig.{CamelCase, ConfigFieldMapping, ProductHint}
 
-trait RemoteIndexConfig {
+trait RepositoryConfig {
   def repository: String
   def repoIndexUrl: URI
+  def packageUrl: String
 }
 
-trait IndexArchiveConfig extends RemoteIndexConfig {
+trait ArchivedIndexConfig extends RepositoryConfig {
   def repoArchivePath: Path
 }
 
@@ -28,7 +29,13 @@ case class DatabaseConfig(
     port: Int,
     name: String,
     user: String,
-    password: String
+    password: String,
+    properties: DatabaseProperties
+)
+
+case class DatabaseProperties(
+    driver: String,
+    url: String
 )
 
 case class SnippetConfig(
@@ -47,34 +54,43 @@ case class LanguagesConfig(
 case class HaskellConfig(
     repository: String,
     repoIndexUrl: URI,
+    packageUrl: String,
     repoArchivePath: Path,
     repoPath: Path,
     concurrentTasksCount: Int
-) extends IndexArchiveConfig
+) extends ArchivedIndexConfig
 
 case class RubyConfig(
     repository: String,
     repoIndexUrl: URI,
+    packageUrl: String,
     repoArchivePath: Path,
     repoJsonPath: Path,
     scriptPath: Path,
     concurrentTasksCount: Int
-) extends IndexArchiveConfig
+) extends ArchivedIndexConfig
 
 case class RustConfig(
     repository: String,
     repoIndexUrl: URI,
+    packageUrl: String,
     repoArchivePath: Path,
     repoPath: Path,
     concurrentTasksCount: Int,
     ignoreFiles: Set[String]
-) extends IndexArchiveConfig
+) extends ArchivedIndexConfig
 
 case class JavaScriptConfig(
     repository: String,
     repoIndexUrl: URI,
+    packageUrl: String,
     concurrentTasksCount: Int
-) extends RemoteIndexConfig
+) extends RepositoryConfig
+
+case class SourceFilesExtensions(
+    commonExtensions: Set[String],
+    sourcesExtensions: Set[String]
+)
 
 case class MetricsConfig(
     enableMatomoMetrics: Boolean

@@ -3,13 +3,13 @@ package codesearch.core.meta.downloader
 import cats.effect.{ContextShift, Sync}
 import cats.syntax.functor._
 import codesearch.core.config.JavaScriptConfig
-import codesearch.core.db.repository.PackageIndexRep
+import codesearch.core.db.repository.PackageIndexDbRepository
 import codesearch.core.index.repository.Downloader
 import codesearch.core.meta.parser.JavaScriptIndexParser
 import doobie.util.transactor.Transactor
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
-object NpmMetaDownloader {
+object NpmIndexDownloader {
   def apply[F[_]: Sync: ContextShift](
       config: JavaScriptConfig,
       downloader: Downloader[F],
@@ -21,7 +21,7 @@ object NpmMetaDownloader {
       new ByteStreamIndexDownloader(
         config,
         downloader,
-        PackageIndexRep(xa),
+        PackageIndexDbRepository(xa),
         JavaScriptIndexParser(config),
         logger
       )

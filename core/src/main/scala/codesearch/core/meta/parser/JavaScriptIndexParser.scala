@@ -2,7 +2,7 @@ package codesearch.core.meta.parser
 
 import cats.effect.Sync
 import codesearch.core.config.JavaScriptConfig
-import codesearch.core.db.repository.PackageIndex
+import codesearch.core.db.repository.PackageIndexTableRow
 import fs2.{Pipe, Stream}
 import fs2json.{JsonToken, TokenFilter, prettyPrinter, tokenParser}
 import io.circe.fs2.byteArrayParser
@@ -10,16 +10,16 @@ import io.circe.{Decoder, Json}
 
 final class JavaScriptIndexParser[F[_]: Sync](config: JavaScriptConfig) extends IndexByteStreamParser[F] {
 
-  private implicit val docDecoder: Decoder[PackageIndex] = { cursor =>
+  private implicit val docDecoder: Decoder[PackageIndexTableRow] = { cursor =>
     val doc = cursor.downField("doc")
     for {
       name <- doc.get[String]("name")
       distTag = doc.downField("dist-tags")
       tag <- distTag.get[String]("latest")
-    } yield PackageIndex(name, tag, config.repository)
+    } yield PackageIndexTableRow(name, tag, config.repository)
   }
 
-  def parse(stream: Stream[F, Byte]): F[Stream[F, PackageIndex]] = {
+  def parse(stream: Stream[F, Byte]): F[Stream[F, PackageIndexTableRow]] = {
     Sync[F].pure(
       stream
         .through(tokenParser[F])
@@ -65,7 +65,7 @@ final class JavaScriptIndexParser[F[_]: Sync](config: JavaScriptConfig) extends 
     }
   }
 
-  private def decoder(implicit decode: Decoder[PackageIndex]): Pipe[F, Json, PackageIndex] = { input =>
+  private def decoder(implicit decode: Decoder[PackageIndexTableRow]): Pipe[F, Json, PackageIndexTableRow] = { input =>
     input.flatMap { json =>
       decode(json.hcursor) match {
         case Left(_)  => Stream.empty

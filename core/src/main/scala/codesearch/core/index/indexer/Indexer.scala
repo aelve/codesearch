@@ -8,7 +8,7 @@ import cats.effect._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import codesearch.core.BlockingEC
-import codesearch.core.db.repository.{Package, PackageRep}
+import codesearch.core.db.repository.{Package, PackageDbRepository}
 import codesearch.core.index.directory.{Directory, СindexDirectory}
 import codesearch.core.syntax.path._
 import doobie.util.transactor.Transactor
@@ -40,7 +40,7 @@ private[indexer] class SourcesIndexer[F[_]: Sync: ContextShift](
   }
 
   private def latestPackagePaths: F[Stream[F, NioPath]] = Sync[F].pure(
-    PackageRep[F](xa)
+    PackageDbRepository[F](xa)
       .findByRepository(repository)
       .through(buildFsPath)
   )
@@ -49,14 +49,14 @@ private[indexer] class SourcesIndexer[F[_]: Sync: ContextShift](
     input.map(`package` => Directory.sourcesDir / repository / `package`.name / `package`.version)
   }
 
-  private def dropTempIndexFile: F[Boolean] =
-    Sync[F].delay(Files.deleteIfExists(indexDir.tempIndexDirAs[NioPath]))
-
   private def createCSearchDir: F[Option[NioPath]] = Sync[F].delay(
     if (Files.notExists(СindexDirectory.root))
       Some(Files.createDirectories(СindexDirectory.root))
     else None
   )
+
+  private def dropTempIndexFile: F[Boolean] =
+    Sync[F].delay(Files.deleteIfExists(indexDir.tempIndexDirAs[NioPath]))
 
   private def dirsToIndex(stream: Stream[F, NioPath]): F[Unit] = {
     stream

@@ -3,7 +3,7 @@ package codesearch.core.meta.downloader
 import cats.effect.{ContextShift, Sync}
 import cats.syntax.functor._
 import codesearch.core.config.RubyConfig
-import codesearch.core.db.repository.PackageIndexRep
+import codesearch.core.db.repository.PackageIndexDbRepository
 import codesearch.core.index.repository.Downloader
 import codesearch.core.meta.unarchiver.RubyIndexUnarchiver
 import doobie.util.transactor.Transactor
@@ -22,7 +22,7 @@ object GemIndexDownloader {
         config,
         downloader,
         RubyIndexUnarchiver(config),
-        PackageIndexRep(xa),
+        PackageIndexDbRepository(xa),
         logger
       )
 }
