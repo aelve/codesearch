@@ -34,19 +34,19 @@ trait СindexDirectory {
   def dirsToIndex[O](implicit D: DirAs[O]): O = D.dirsToIndex(packageRepository, root)
 }
 
-case class HaskellCindex(root: Path) extends СindexDirectory {
+final case class HaskellCindex(root: Path) extends СindexDirectory {
   def packageRepository: String = "hackage"
 }
 
-case class JavaScriptCindex(root: Path) extends СindexDirectory {
+final case class JavaScriptCindex(root: Path) extends СindexDirectory {
   def packageRepository: String = "npm"
 }
 
-case class RubyCindex(root: Path) extends СindexDirectory {
+final case class RubyCindex(root: Path) extends СindexDirectory {
   def packageRepository: String = "gem"
 }
 
-case class RustCindex(root: Path) extends СindexDirectory {
+final case class RustCindex(root: Path) extends СindexDirectory {
   def packageRepository: String = "crates"
 }
 

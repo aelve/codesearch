@@ -1,10 +1,13 @@
 stages:
   - build
   - publish
+  - deploy-staging
+  - deploy
 
 variables:
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_DRIVER: overlay2
+  SSH_CONFIG: "-o StrictHostKeyChecking=no"
 
 build_and_test:
   stage: build
@@ -46,3 +49,19 @@ build_and_publish_docker_images:
   only:
     - develop
     - master
+
+staging-deploy-to-swarm:
+  stage: deploy-staging
+  script:
+    - ssh deployer@$STAGING_HOST "mkdir -p ~/docker && echo $DEPLOYER_PASS | sudo -S mkdir -p /mnt/vol/{portainer/data,postgresql,data,index,logs}" || true
+    - scp ./docker/docker-stack-compose.yml deployer@$STAGING_HOST:~/docker
+    - ssh deployer@$STAGING_HOST "docker login quay.io -u $DOCKER_USER -p $DOCKER_PASS" || true
+    - ssh deployer@$STAGING_HOST "SECRET_KEY=$STAGING_SECRET_KEY SERVER_PORT=$SERVER_PORT docker stack deploy --with-registry-auth -c ~/docker/docker-stack-compose.yml codesearch" || true
+
+deploy-to-swarm:
+  stage: deploy
+  script:
+    - ssh deployer@$HOST "mkdir -p ~/docker && echo $DEPLOYER_PASS | sudo -S mkdir -p /mnt/vol/{portainer/data,postgresql,data,index,logs}" || true
+    - scp ./docker/docker-stack-compose.yml deployer@$HOST:~/docker
+    - ssh deployer@$HOST "docker login quay.io -u $DOCKER_USER -p $DOCKER_PASS" || true
+    - ssh deployer@$HOST "SECRET_KEY=$SECRET_KEY SERVER_PORT=$SERVER_PORT docker stack deploy --with-registry-auth -c ~/docker/docker-stack-compose.yml codesearch" || true
