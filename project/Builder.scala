@@ -84,6 +84,7 @@ object Builder {
         "org.tpolecat"          %% "doobie-postgres"               % "0.6.0",
         "org.tpolecat"          %% "doobie-specs2"                 % "0.6.0",
         "org.flywaydb"          % "flyway-core"                    % "5.2.4",
+        "org.systemfw"          % "upperbound_2.12"                % "0.2.0-M2",
       ),
       assemblyMergeStrategy in assembly := {
         case PathList("META-INF", _ @_*) => MergeStrategy.discard

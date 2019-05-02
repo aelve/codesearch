@@ -24,7 +24,7 @@ private[meta] final class RustIndexUnarchiver[F[_]: Sync](
     } yield PackageIndexTableRow(name, version, config.repository)
   }
 
-  def unarchive(path: Path): F[Stream[F, PackageIndexTableRow]] = {
+  def unarchiveToStream(path: Path): F[Stream[F, PackageIndexTableRow]] = {
     for {
       _ <- unarchiver.extract(path, config.repoPath, ZIP)
     } yield flatPackages

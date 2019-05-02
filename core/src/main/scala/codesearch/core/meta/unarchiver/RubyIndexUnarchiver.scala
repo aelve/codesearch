@@ -13,9 +13,11 @@ import io.circe.fs2.{byteArrayParser, decoder}
 
 import scala.sys.process._
 
-private[meta] final class RubyIndexUnarchiver[F[_]: Sync: ContextShift](config: RubyConfig) extends StreamIndexUnarchiver[F] {
+private[meta] final class RubyIndexUnarchiver[F[_]: Sync: ContextShift](
+    config: RubyConfig
+) extends StreamIndexUnarchiver[F] {
 
-  def unarchive(path: Path): F[Stream[F, PackageIndexTableRow]] = {
+  def unarchiveToStream(path: Path): F[Stream[F, PackageIndexTableRow]] = {
     for {
       _ <- Sync[F].delay {
         Seq(

@@ -24,13 +24,13 @@ object FileFilter {
 
     private val maxFileSize: Int = 1024 * 1024
 
-    def filter(dir: Path): F[Int] = Sync[F].delay(deleteRecursively(dir.toFile, filter))
+    def filter(dir: Path): F[Int] = Sync[F].delay(filterRecursively(dir.toFile, filter))
 
-    private def deleteRecursively(dir: File, predicate: File => Boolean): F[Int] = {
+    private def filterRecursively(dir: File, predicate: File => Boolean): F[Int] = {
       for {
         (dirs, files)      <- Sync[F].delay(dir.listFiles.toList.partition(_.isDirectory))
         filesDeleted       <- files.filterNot(predicate).traverse(file => Sync[F].delay(file.delete)).map(_.size)
-        nestedFilesDeleted <- dirs.traverse(dir => deleteRecursively(dir, predicate)).map(_.size)
+        nestedFilesDeleted <- dirs.traverse(dir => filterRecursively(dir, predicate)).map(_.size)
         _                  <- Sync[F].delay(dir.delete).whenA(dir.listFiles.isEmpty)
       } yield filesDeleted + nestedFilesDeleted
     }

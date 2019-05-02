@@ -10,7 +10,6 @@ import pureconfig.{CamelCase, ConfigFieldMapping, ProductHint}
 trait RepositoryConfig {
   def repository: String
   def repoIndexUrl: URI
-  def packageUrl: String
 }
 
 trait ArchivedIndexConfig extends RepositoryConfig {
@@ -54,43 +53,54 @@ case class LanguagesConfig(
 case class HaskellConfig(
     repository: String,
     repoIndexUrl: URI,
-    packageUrl: String,
     repoArchivePath: Path,
     repoPath: Path,
-    concurrentTasksCount: Int
+    downloaderConfig: PackageDownloaderConfig
 ) extends ArchivedIndexConfig
 
 case class RubyConfig(
     repository: String,
     repoIndexUrl: URI,
-    packageUrl: String,
     repoArchivePath: Path,
     repoJsonPath: Path,
     scriptPath: Path,
-    concurrentTasksCount: Int
+    downloaderConfig: PackageDownloaderConfig
 ) extends ArchivedIndexConfig
 
 case class RustConfig(
     repository: String,
     repoIndexUrl: URI,
-    packageUrl: String,
     repoArchivePath: Path,
     repoPath: Path,
-    concurrentTasksCount: Int,
-    ignoreFiles: Set[String]
+    ignoreFiles: Set[String],
+    downloaderConfig: PackageDownloaderConfig
 ) extends ArchivedIndexConfig
 
 case class JavaScriptConfig(
     repository: String,
     repoIndexUrl: URI,
-    packageUrl: String,
-    concurrentTasksCount: Int
+    downloaderConfig: PackageDownloaderConfig
 ) extends RepositoryConfig
 
-case class SourceFilesExtensions(
-    commonExtensions: Set[String],
-    sourcesExtensions: Set[String]
+case class SourcesFilterConfig(
+    allowedFileNames: Set[String]
 )
+
+case class IndexDownloaderConfig(
+
+                                )
+
+case class PackageDownloaderConfig(
+    packageUrl: String,
+    packageArchivePath: String,
+    packageSourcesPath: String,
+    filterConfig: SourcesFilterConfig
+)
+
+case class RateLimitConfig(
+                              numberTasks: Int,
+                              seconds
+                          )
 
 case class MetricsConfig(
     enableMatomoMetrics: Boolean

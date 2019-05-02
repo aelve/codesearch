@@ -20,7 +20,7 @@ private[meta] final class HaskellIndexUnarchiver[F[_]: Sync](
     config: HaskellConfig
 ) extends StreamIndexUnarchiver[F] {
 
-  def unarchive(path: Path): F[Stream[F, PackageIndexTableRow]] = {
+  def unarchiveToStream(path: Path): F[Stream[F, PackageIndexTableRow]] = {
     for {
       _ <- unarchiver.extract(path, config.repoPath, TAR, GZIP)
     } yield flatPackages

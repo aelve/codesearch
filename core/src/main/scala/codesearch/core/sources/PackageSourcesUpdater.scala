@@ -2,9 +2,7 @@ package codesearch.core.sources
 
 import cats.effect.Sync
 import codesearch.core.config.RepositoryConfig
-import cats.syntax.applicative._
-import cats.syntax.functor._
-import codesearch.core.db.repository.{Package, PackageIndexDbRepository}
+import codesearch.core.db.repository.PackageIndexDbRepository
 import codesearch.core.sources.downloader.SourcesDownloader
 
 trait SourcesUpdater[F[_]] {
@@ -13,16 +11,15 @@ trait SourcesUpdater[F[_]] {
 
 class PackageSourcesUpdater[F[_]: Sync](
     config: RepositoryConfig,
-    indexRep: PackageIndexDbRepository[F],
-    downloader: SourcesDownloader[F, A]
+    indexDbRepository: PackageIndexDbRepository[F],
+    downloader: SourcesDownloader[F]
 ) extends SourcesUpdater[F] {
 
   def update: F[Unit] = {
-    for {
-      newIndexes <- indexRep.findNew(config.repository).pure[F]
-
-    } yield ()
+    indexDbRepository
+      .findNewByRepository(config.repository)
+      .map(downloader.download)
+      .compile
+      .drain
   }
-
-  private def download(`package`: Package): F[Unit] = {}
 }

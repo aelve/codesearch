@@ -17,14 +17,14 @@ final case class PackageIndex(
     version: String
 )
 
-trait PackageIndexDbRepository[F[_]] {
+trait PackageIndexRepository[F[_]] {
   def batchUpsert(packages: List[PackageIndexTableRow]): F[Int]
   def batchUpsert(stream: Stream[F, PackageIndexTableRow]): F[Int]
-  def findNew(repository: String): Stream[F, PackageIndex]
+  def findNewByRepository(repository: String): Stream[F, PackageIndexTableRow]
 }
 
 object PackageIndexDbRepository {
-  def apply[F[_]: Monad](xa: Transactor[F]): PackageIndexDbRepository[F] = new PackageIndexDbRepository[F] {
+  def apply[F[_]: Monad](xa: Transactor[F]): PackageIndexRepository[F] = new PackageIndexRepository[F] {
 
     def batchUpsert(packages: List[PackageIndexTableRow]): F[Int] = {
       Update[PackageIndexTableRow](
@@ -46,13 +46,13 @@ object PackageIndexDbRepository {
         .drain
     }
 
-    def findNew(repository: String): Stream[F, PackageIndexTableRow] = {
+    def findNewByRepository(repository: String): Stream[F, PackageIndexTableRow] = {
       sql"""
         SELECT r.name, r.version, r.repository
         FROM repository_index r
           LEFT JOIN package p
             ON r.name <> p.name AND r.version <> p.version
-      """.query[PackageIndex].stream.transact(xa)
+      """.query[PackageIndexTableRow].stream.transact(xa)
     }
   }
 }
