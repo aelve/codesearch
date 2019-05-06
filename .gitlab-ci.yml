@@ -42,10 +42,10 @@ build_and_publish_docker_images:
   services:
     - docker:dind
   script:
-    - make build-docker-core
-    - make build-docker-web-server
-    - make push-docker-core
-    - make push-docker-web-server
+    - make build-docker-core "branch=${CI_COMMIT_REF_NAME}"
+    - make build-docker-web-server "branch=${CI_COMMIT_REF_NAME}"
+    - make push-docker-core "branch=${CI_COMMIT_REF_NAME}"
+    - make push-docker-web-server "branch=${CI_COMMIT_REF_NAME}"
   only:
     - develop
     - master
