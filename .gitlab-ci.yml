@@ -49,6 +49,7 @@ build_and_publish_docker_images:
   only:
     - develop
     - master
+    - hotfix-fixed-bug-with-gitlabci
 
 staging-deploy-to-swarm:
   stage: deploy-staging
