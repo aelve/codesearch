@@ -53,8 +53,7 @@ serve:
 
 # Build a Docker image (the project must be built already)
 build-docker-%:
-	if [ "$(branch)" == "master" ] || [ "$(branch)" == "develop" ] \
-	|| [ "$(branch)" == "hotfix-fixed-bug-with-gitlabci" ]; \
+	if [ "$(branch)" == "hotfix-fixed-bug-with-gitlabci" ] || [ "$(branch)" == "develop" ]; \
 	then \
 		docker build \
 			-f "docker/$*/Dockerfile" \
