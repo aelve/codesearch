@@ -9,7 +9,8 @@ RUN apk --no-cache add \
   curl \
   wget \
   ruby \
-  ruby-json
+  ruby-json \
+  docker
 
 
 RUN go get github.com/aelve/codesearch-engine/cmd/...
