@@ -41,6 +41,8 @@ build_and_publish_docker_images:
   image: registry.gitlab.com/aelve/codesearch/ci-test-env
   services:
     - docker:dind
+  before_script:
+    - docker info
   script:
     - make build-docker-core "branch=${CI_COMMIT_REF_NAME}"
     - make build-docker-web-server "branch=${CI_COMMIT_REF_NAME}"
