@@ -61,7 +61,7 @@ build-docker-%:
 	else \
 		docker build \
 			-f "docker/$*/Dockerfile" \
-			-t "quay.io/aelve/codesearch-$*:latest" . ; \
+			-t "quay.io/aelve/codesearch-$*:hotfix-fixed-bug-with-gitlabci" . ; \
 	fi \
 
 	if [ "$(branch)" == "master" ]; \
