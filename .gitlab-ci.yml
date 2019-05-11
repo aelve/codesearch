@@ -42,7 +42,7 @@ build_and_publish_docker_images:
   services:
     - docker:dind
   before_script:
-    - docker login quay.io -u "$DOCKER_USER" -p "$DOCKER_PASS"
+    - docker login quay.io -u $DOCKER_USER -p $DOCKER_PASS
   script:
     - make build-docker-core "branch=${CI_COMMIT_REF_NAME}"
     - make build-docker-web-server "branch=${CI_COMMIT_REF_NAME}"
