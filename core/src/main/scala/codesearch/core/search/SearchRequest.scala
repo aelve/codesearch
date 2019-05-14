@@ -21,7 +21,8 @@ case class SearchRequest(
     spaceInsensitive: Boolean,
     preciseMatch: Boolean,
     sourcesOnly: Boolean,
-    page: Int
+    page: Int,
+    limit: Int
 ) {
 
   /**
@@ -46,7 +47,8 @@ object SearchRequest {
       spaceInsensitive: String,
       preciseMatch: String,
       sourcesOnly: String,
-      page: String
+      page: String,
+      limit: String
   ): SearchRequest = {
     SearchRequest(
       lang,
@@ -58,6 +60,7 @@ object SearchRequest {
       isEnabled(preciseMatch),
       isEnabled(sourcesOnly),
       page.toInt,
+      limit.toInt
     )
   }
 

@@ -82,25 +82,27 @@ case class JavaScriptConfig(
     downloaderConfig: PackageDownloaderConfig
 ) extends RepositoryConfig
 
-case class SourcesFilterConfig(
-    allowedFileNames: Set[String]
-)
-
-case class IndexDownloaderConfig(
-
-                                )
+case class SourcesUpdaterConfig()
 
 case class PackageDownloaderConfig(
     packageUrl: String,
     packageArchivePath: String,
     packageSourcesPath: String,
-    filterConfig: SourcesFilterConfig
+    filterConfig: SourcesFilterConfig,
 )
 
-case class RateLimitConfig(
-                              numberTasks: Int,
-                              seconds
-                          )
+case class SourcesFilterConfig(
+    allowedFileNames: Set[String]
+)
+
+case class SourcesExtraConfig(
+    testDirs: Set[String],
+)
+
+case class RateLimiterConfig(
+    numberTasks: Int,
+    per: Int
+)
 
 case class MetricsConfig(
     enableMatomoMetrics: Boolean

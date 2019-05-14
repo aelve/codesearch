@@ -20,7 +20,7 @@ final case class PackageIndex(
 trait PackageIndexRepository[F[_]] {
   def batchUpsert(packages: List[PackageIndexTableRow]): F[Int]
   def batchUpsert(stream: Stream[F, PackageIndexTableRow]): F[Int]
-  def findNewByRepository(repository: String): Stream[F, PackageIndexTableRow]
+  def findLatestByRepository(repository: String): Stream[F, PackageIndexTableRow]
 }
 
 object PackageIndexDbRepository {
@@ -37,16 +37,15 @@ object PackageIndexDbRepository {
       ).updateMany(packages).transact(xa)
     }
 
-    def batchUpsert(stream: Stream[F, PackageIndexTableRow]): F[Int] = {
-      val insertBatchSize = 10000
+    def batchUpsert(stream: Stream[F, PackageIndexTableRow], batchSize: Int = 10000): F[Int] = {
       stream
-        .chunkN(insertBatchSize)
+        .chunkN(batchSize)
         .map(packages => batchUpsert(packages.toList))
         .compile
         .drain
     }
 
-    def findNewByRepository(repository: String): Stream[F, PackageIndexTableRow] = {
+    def findLatestByRepository(repository: String): Stream[F, PackageIndexTableRow] = {
       sql"""
         SELECT r.name, r.version, r.repository
         FROM repository_index r
