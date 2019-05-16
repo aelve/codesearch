@@ -3,10 +3,10 @@ package codesearch.core.config
 case class SourcesFilesConfig(
     testDirsNames: Set[String],
     allowedFileNames: Set[String],
-    filesExtensions: FilesExtensions
+    filesExtensions: FilesExtensionsConfig
 )
 
-case class FilesExtensions(
+case class FilesExtensionsConfig(
     commonExtensions: Set[String],
     sourceExtensions: Set[String],
 ) { def extensions: Set[String] = commonExtensions ++ sourceExtensions }

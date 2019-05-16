@@ -4,8 +4,7 @@ import cats.effect.Sync
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.syntax.applicative._
-import codesearch.core.index.directory.СindexDirectory
-import codesearch.core.index.repository.Extensions
+import codesearch.core.config.{CindexConfig, SourcesFilesConfig}
 import codesearch.core.regex.RegexConstructor
 import codesearch.core.search.SearchRequest
 import codesearch.core.search.engine.SearchProvider
@@ -18,12 +17,12 @@ case class MatchedRow(path: String, lineNumber: Int)
 
 object CsearchProvider {
   def apply[F[_]: Sync](
-      cindex: СindexDirectory,
-      extensions: Extensions,
+      sourcesFilesConfig: SourcesFilesConfig,
+      cindexConfig: CindexConfig,
       logger: Logger[F]
   ): SearchProvider[F, SearchRequest, Stream[F, MatchedRow]] = (request: SearchRequest) => {
 
-    val indexDir    = cindex.indexDirAs[String]
+    val indexDir    = cindexConfig.indexDir
     val environment = ("CSEARCHINDEX", indexDir)
     val pipe        = Seq("head", s"-${request.limit}")
     val process     = Process(arguments(request), None, environment) #| pipe
@@ -36,21 +35,25 @@ object CsearchProvider {
     }
 
     def arguments(request: SearchRequest): Seq[String] = {
-      val forExtensions: String = request.filePath match {
+      val searchInFilesRegexp: String = request.filePath match {
         case Some(filePath) => filePath
         case None =>
           if (request.sourcesOnly) {
-            //val testDirsRegexp         = ".*(!(\\/test|\\/spec|\\/tests))"
-            val sourcesExtensionsRegexp = extensions.sourceExtensions.mkString(".*\\.(", "|", ")$")
-            sourcesExtensionsRegexp
+            val sourcesExtensionsRegexp =
+              sourcesFilesConfig.filesExtensions.sourceExtensions.mkString(".*\\.(", "|", ")$")
+            if (request.excludeTests) {
+              val excludedTestDirsRegexp = sourcesFilesConfig.testDirsNames.mkString("^(?!.*(", "|", "))")
+              excludedTestDirsRegexp + sourcesExtensionsRegexp
+            } else sourcesExtensionsRegexp
           } else ".*"
       }
 
-      val regex = RegexConstructor(request.query, request.insensitive, request.spaceInsensitive, request.preciseMatch)
+      val queryRegex =
+        RegexConstructor(request.query, request.insensitive, request.spaceInsensitive, request.preciseMatch)
 
       request.filter match {
-        case Some(filter) => Seq("csearch", "-n", "-f", forExtensions, regex, filter)
-        case None         => Seq("csearch", "-n", "-f", forExtensions, regex)
+        case Some(filter) => Seq("csearch", "-n", "-f", searchInFilesRegexp, queryRegex, filter)
+        case None         => Seq("csearch", "-n", "-f", searchInFilesRegexp, queryRegex)
       }
     }
 
