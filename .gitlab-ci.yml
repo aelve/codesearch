@@ -51,12 +51,11 @@ build_and_publish_docker_images:
   only:
     - develop
     - master
-    - hotfix-fixed-bug-with-gitlabci
 
 test_work_ssh:
   stage: testssh
   script:
-    - ssh root@$HOST "docker services ls"
+    - ssh root@codesearch.aelve.com "docker services ls"
   only:
     - hotfix-fixed-bug-with-gitlabci
 
