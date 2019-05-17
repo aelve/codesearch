@@ -39,7 +39,6 @@ build_and_test:
 
 build_and_publish_docker_images:
   stage: publish
-  image: registry.gitlab.com/aelve/codesearch/ci-test-env
   services:
     - docker:dind
   before_script:
@@ -52,6 +51,7 @@ build_and_publish_docker_images:
   only:
     - develop
     - master
+    - hotfix-fixed-bug-with-gitlabci
 
 test_work_ssh:
   stage: testssh
