@@ -56,7 +56,7 @@ build_and_publish_docker_images:
 test_work_ssh:
   stage: testssh
   script:
-    - ssh deployer@$HOST "docker services ls"
+    - ssh root@$HOST "docker services ls"
   only:
     - hotfix-fixed-bug-with-gitlabci
 
