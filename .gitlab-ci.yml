@@ -3,6 +3,7 @@ stages:
   - publish
   - deploy-staging
   - deploy
+  - testssh
 
 variables:
   DOCKER_HOST: tcp://docker:2375/
@@ -52,7 +53,14 @@ build_and_publish_docker_images:
     - develop
     - master
 
-staging-deploy-to-swarm:
+test_work_ssh:
+  stage: testssh
+  script:
+    - ssh deployer@$STAGING_HOST "docker services ls"
+  only:
+    - hotfix-fixed-bug-with-gitlabci
+
+staging_deploy_to_swarm:
   stage: deploy-staging
   script:
     - ssh deployer@$STAGING_HOST "mkdir -p ~/docker && echo $DEPLOYER_PASS | sudo -S mkdir -p /mnt/vol/{portainer/data,postgresql,data,index,logs}" || true
@@ -62,7 +70,7 @@ staging-deploy-to-swarm:
   only:
     - develop
 
-deploy-to-swarm:
+deploy_to_swarm:
   stage: deploy
   script:
     - ssh deployer@$HOST "mkdir -p ~/docker && echo $DEPLOYER_PASS | sudo -S mkdir -p /mnt/vol/{portainer/data,postgresql,data,index,logs}" || true
