@@ -9,7 +9,8 @@ services:
         condition: any
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /mnt/vol/portainer/data:/data
+      - /mnt/vol/portainer:/data
+    command: --admin-password "$2y$05$5wbJ2AIVEJg6ZW8QS1c7FOPM9iQ846eb3KMku1A1twrSNaNiZRLxy"
     ports:
       - 9080:9000
     networks:
