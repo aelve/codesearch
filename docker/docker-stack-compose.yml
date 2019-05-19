@@ -10,6 +10,9 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /mnt/vol/portainer:/data
+    # Set admin password automatically on first start
+    # How to generate password read here:
+    # https://www.notion.so/aelve/Portainer-21744362c6714acd94da1cdb83b715bb#cad1ca2b3f1e427481400fe8d92a53be
     command: --admin-password "$2y$05$5wbJ2AIVEJg6ZW8QS1c7FOPM9iQ846eb3KMku1A1twrSNaNiZRLxy"
     ports:
       - 9080:9000
