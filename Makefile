@@ -18,10 +18,6 @@ psql:
 		-e PGPASSWORD=postgres \
 		postgres psql -h postgres -U postgres sourcesdb
 
-# Create tables
-.PHONY: tables
-tables:
-	java -jar codesearch-core.jar -i
 
 # Destroy Postgres
 .PHONY: db-kill
