@@ -23,14 +23,6 @@ docker run -d -p 5432:5432 \
   --name codesearch-db postgres
 ```
 
-# Create tables
-
-```
-docker run -d \
-  --link codesearch-db:postgres \
-  quay.io/aelve/codesearch-core make tables
-```
-
 # Download packages meta-information (e.g. Haskell)
 
 ```
@@ -86,14 +78,11 @@ docker run -p 80:80 -d \
   -e JAVA_OPTS="-Dplay.filters.hosts.allowed.1=codesearch.aelve.com -Dplay.filters.hosts.allowed.2=cloud.digitalocean.com"\
   quay.io/aelve/codesearch-web-server make serve
 ```
-# Start the core service with all tasks (tables, download, update, index) for all languages via docker-compose
+# Start the core service with all tasks (tables, download, update, index), server and database services for all languages via docker swarm
 
 ```
-docker-compose -f docker-compose-core up -d
+mkdir ./{portainer/data,postgresql,data,index,logs}`
+
+docker stack deploy —with-registry-auth -c docker-stack-compose.yml codesearch
 ```
 
-# Start the server and database services via docker-compose
-
-```
-docker-compose -f docker-compose-server up -d
-```
