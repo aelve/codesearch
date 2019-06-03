@@ -1,13 +1,10 @@
-@import codesearch.core.regex.RegexConstructor
-@import codesearch.core.util.Helper
-@import scala.collection.mutable
-@import scala.collection.mutable.ListBuffer
-@import scala.collection.immutable
-@import play.twirl.api._
-@import codesearch.core.search.Search.PackageResult
-@import codesearch.web.SnippetHelper
-
 @import java.net.URLEncoder
+
+@import codesearch.core.regex.RegexConstructor
+@import codesearch.core.search.Search.PackageResult
+@import codesearch.core.util.Helper
+@import codesearch.web.SnippetHelper
+@import play.twirl.api._
 @(
         lang: String,
         insensitive: Boolean,
