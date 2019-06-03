@@ -1,6 +1,7 @@
 package codesearch.core.search
 
 import java.net.URLDecoder
+import java.nio.file.{Path => NioPath}
 
 import ammonite.ops.{Path, pwd}
 import cats.data.NonEmptyVector
@@ -25,13 +26,16 @@ import scala.util.{Success, Try}
 
 trait Search {
 
-  protected def cindexDir: СindexDirectory
   protected def extensions: Extensions
   protected val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.unsafeCreate[IO]
 
   def checkRegexpForValid(regexp: String): Try[Pattern] = {
     Try(Pattern.compile(regexp))
   }
+
+  def cindexDir: СindexDirectory
+
+  implicit val root: NioPath = cindexDir.root
 
   def search(request: SearchRequest): IO[CSearchPage] = {
     checkRegexpForValid(request.query) match {
