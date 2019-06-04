@@ -166,7 +166,8 @@ class TokenizerSpec extends FreeSpec with Matchers {
 
     "RoundTrip cases" - {
       val cases = Source.fromResource("regex/cases.txt").getLines
-      cases.foreach(caseString => caseString shouldBe roundTrip(caseString))
+      cases.foreach { caseString => caseString shouldBe roundTrip(caseString)
+      }
     }
 
   }

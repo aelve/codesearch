@@ -9,15 +9,15 @@ import codesearch.core.db.CratesDB
 import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
 import codesearch.core.index.directory.СindexDirectory
+import codesearch.core.index.directory.СindexDirectory.RustCindex
 import codesearch.core.index.repository.{CratesPackage, SourcesDownloader}
 import codesearch.core.model.CratesTable
 import codesearch.core.util.Helper
 import fs2.Stream
 import io.circe.Decoder
 import io.circe.fs2._
-import slick.jdbc.PostgresProfile.api._
 
-class RustIndex(rustConfig: RustConfig, val db: Database, val cindexDir: СindexDirectory)(
+class RustIndex(rustConfig: RustConfig)(
     implicit val shift: ContextShift[IO],
     sourcesDownloader: SourcesDownloader[IO, CratesPackage]
 ) extends LanguageIndex[CratesTable] with CratesDB {
@@ -28,6 +28,8 @@ class RustIndex(rustConfig: RustConfig, val db: Database, val cindexDir: Сindex
     "config.json",
     "archive.zip"
   )
+
+  override protected val cindexDir: СindexDirectory = RustCindex
 
   override protected def concurrentTasksCount: Int = rustConfig.concurrentTasksCount
 
@@ -56,8 +58,8 @@ class RustIndex(rustConfig: RustConfig, val db: Database, val cindexDir: Сindex
 }
 
 object RustIndex {
-  def apply(config: Config, db: Database, cindexDir: СindexDirectory)(
+  def apply(config: Config)(
       implicit shift: ContextShift[IO],
       sourcesDownloader: SourcesDownloader[IO, CratesPackage]
-  ) = new RustIndex(config.languagesConfig.rust, db, cindexDir)
+  ) = new RustIndex(config.languagesConfig.rust)
 }

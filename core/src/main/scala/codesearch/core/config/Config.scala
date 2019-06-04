@@ -16,7 +16,6 @@ case class Config(
 
 case class DatabaseConfig(
     dataSourceClass: String,
-    host: String,
     port: Int,
     name: String,
     user: String,

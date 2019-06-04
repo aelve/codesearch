@@ -1,6 +1,4 @@
-# Aelve Codesearch
-
-![Gitlab pipeline status](https://img.shields.io/gitlab/pipeline/aelve/codesearch/develop.svg)
+# codesearch
 
 ## Deployment instructions
 

@@ -1,18 +1,15 @@
 package codesearch.core
 
-import java.nio.file.Paths
-
 import cats.effect.{ExitCode, IO, IOApp, Resource}
 import cats.syntax.flatMap._
 import codesearch.core.config.Config
+import codesearch.core.db._
 import codesearch.core.index._
-import codesearch.core.index.directory._
 import codesearch.core.index.repository.Downloader
 import codesearch.core.meta._
 import codesearch.core.model._
 import codesearch.core.util.Unarchiver
 import com.softwaremill.sttp.asynchttpclient.fs2.AsyncHttpClientFs2Backend
-import slick.jdbc.PostgresProfile.api._
 
 object Main extends IOApp {
 
@@ -26,6 +23,7 @@ object Main extends IOApp {
   )
 
   case class LangRep[A <: DefaultTable](
+      db: DefaultDB[A],
       langIndex: LanguageIndex[A],
       metaDownloader: MetaDownloader[IO]
   )
@@ -44,20 +42,11 @@ object Main extends IOApp {
         gemMeta     <- GemMetaDownloader(config.languagesConfig.ruby, downloader)
         npmMeta     <- NpmMetaDownloader(config.languagesConfig.javascript, downloader)
 
-        db = Database.forConfig("db")
-
-        cindexPath = Paths.get("./index/cindex/")
-
-        haskellCindex    = HaskellCindex(cindexPath)
-        rustCindex       = RustCindex(cindexPath)
-        rubyCindex       = RubyCindex(cindexPath)
-        javaScriptCindex = JavaScriptCindex(cindexPath)
-
         langReps = Map(
-          "haskell"    -> LangRep[HackageTable](HaskellIndex(config, db, haskellCindex), hackageMeta),
-          "rust"       -> LangRep[CratesTable](RustIndex(config, db, rustCindex), cratesMeta),
-          "ruby"       -> LangRep[GemTable](RubyIndex(config, db, rubyCindex), gemMeta),
-          "javascript" -> LangRep[NpmTable](JavaScriptIndex(config, db, javaScriptCindex), npmMeta)
+          "haskell"    -> LangRep[HackageTable](HackageDB, HaskellIndex(config), hackageMeta),
+          "rust"       -> LangRep[CratesTable](CratesDB, RustIndex(config), cratesMeta),
+          "ruby"       -> LangRep[GemTable](GemDB, RubyIndex(config), gemMeta),
+          "javascript" -> LangRep[NpmTable](NpmDB, JavaScriptIndex(config), npmMeta)
         )
         exitCode <- Program(langReps) >>= (_.run(params))
       } yield exitCode

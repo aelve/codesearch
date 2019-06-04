@@ -10,17 +10,19 @@ import codesearch.core.db.GemDB
 import codesearch.core.index.directory.Directory._
 import codesearch.core.index.directory.Directory.ops._
 import codesearch.core.index.directory.СindexDirectory
+import codesearch.core.index.directory.СindexDirectory.RubyCindex
 import codesearch.core.index.repository.{GemPackage, SourcesDownloader}
 import codesearch.core.model.GemTable
 import io.circe.fs2._
 import fs2.Stream
 import fs2.io.file
-import slick.jdbc.PostgresProfile.api._
 
-class RubyIndex(rubyConfig: RubyConfig, val db: Database, val cindexDir: СindexDirectory)(
+class RubyIndex(rubyConfig: RubyConfig)(
     implicit val shift: ContextShift[IO],
     sourcesDownloader: SourcesDownloader[IO, GemPackage]
 ) extends LanguageIndex[GemTable] with GemDB {
+
+  override protected val cindexDir: СindexDirectory = RubyCindex
 
   override protected def concurrentTasksCount: Int = rubyConfig.concurrentTasksCount
 
@@ -41,8 +43,8 @@ class RubyIndex(rubyConfig: RubyConfig, val db: Database, val cindexDir: Сindex
 }
 
 object RubyIndex {
-  def apply(config: Config, db: Database, cindexDir: СindexDirectory)(
+  def apply(config: Config)(
       implicit shift: ContextShift[IO],
       sourcesDownloader: SourcesDownloader[IO, GemPackage]
-  ) = new RubyIndex(config.languagesConfig.ruby, db, cindexDir)
+  ) = new RubyIndex(config.languagesConfig.ruby)
 }
