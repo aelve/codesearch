@@ -14,14 +14,12 @@ import codesearch.core.regex.space.SpaceInsensitiveString
 import codesearch.core.search.Search.{CSearchResult, CodeSnippet, Package, PackageResult, snippetConfig}
 import codesearch.core.search.SnippetsGrouper.SnippetInfo
 import codesearch.core.util.Helper.readFileAsync
+import com.google.re2j._
 import fs2.{Pipe, Stream}
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
 import scala.sys.process.{Process, ProcessLogger}
-import com.google.re2j._
-
-import scala.util.{Success, Try}
 
 trait Search {
 
@@ -29,13 +27,18 @@ trait Search {
   protected def extensions: Extensions
   protected val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.unsafeCreate[IO]
 
-  def checkRegexpForValid(regexp: String): Try[Pattern] = {
-    Try(Pattern.compile(regexp))
+  def checkRegexpForValid(regexp: String): IO[Pattern] = {
+    IO { Pattern.compile(regexp) }
   }
 
-  def search(request: SearchRequest): IO[CSearchPage] = {
-    checkRegexpForValid(request.query) match {
-      case Success(_) => {
+  def search(request: SearchRequest): IO[Response] = {
+    checkRegexpForValid(request.query).attempt.flatMap {
+      case Left(error) => {
+        IO(
+          ErrorResponse(
+            error.getMessage.substring(0, 1).toUpperCase + error.getMessage.substring(1, error.getMessage.length)))
+      }
+      case Right(_) => {
         val entity = csearch(request)
         for {
           results <- Stream
@@ -47,14 +50,7 @@ trait Search {
             .through(groupByPackage)
             .compile
             .toList
-        } yield CSearchPage(results.sortBy(_.pack.name), entity.lists.size, ErrorResponse(""))
-      }
-      case scala.util.Failure(exception) => {
-        val message = exception.getMessage
-        IO(
-          CSearchPage(Seq.empty[Search.PackageResult],
-                      0,
-                      ErrorResponse(message.substring(0, 1).toUpperCase + message.substring(1, message.size))))
+        } yield CSearchPage(results.sortBy(_.pack.name), entity.lists.length)
       }
     }
   }
@@ -144,11 +140,11 @@ trait Search {
     * Returns index of first matched lines and lines of code
     */
   private def extractRows(
-      path: String,
-      codeLines: NonEmptyVector[Int],
-      beforeLines: Int,
-      afterLines: Int
-  ): IO[(Int, Seq[String])] = {
+                           path: String,
+                           codeLines: NonEmptyVector[Int],
+                           beforeLines: Int,
+                           afterLines: Int
+                         ): IO[(Int, Seq[String])] = {
     readFileAsync(path).map { lines =>
       val (code, indexes) = lines.zipWithIndex.filter {
         case (_, index) => index >= codeLines.head - beforeLines - 1 && index <= codeLines.last + afterLines - 1
@@ -182,12 +178,12 @@ object Search {
     * @param lines lines of snippet
     */
   final case class CodeSnippet(
-      relativePath: String,
-      fileLink: String,
-      numberOfFirstLine: Int,
-      matchedLines: NonEmptyVector[Int],
-      lines: Seq[String]
-  )
+                                relativePath: String,
+                                fileLink: String,
+                                numberOfFirstLine: Int,
+                                matchedLines: NonEmptyVector[Int],
+                                lines: Seq[String]
+                              )
 
   /**
     * Grouped code snippets by package
@@ -196,9 +192,9 @@ object Search {
     * @param results code snippets
     */
   final case class PackageResult(
-      pack: Package,
-      results: Seq[CodeSnippet]
-  )
+                                  pack: Package,
+                                  results: Seq[CodeSnippet]
+                                )
 
   /**
     * Representation of package
@@ -214,15 +210,29 @@ object Search {
     * @param result matched code snippet
     */
   private[search] final case class CSearchResult(
-      pack: Package,
-      result: CodeSnippet
-  )
+                                                  pack: Package,
+                                                  result: CodeSnippet
+                                                )
 }
 sealed trait Response
 final case class SearchByIndexResult(lists: List[String], error: ErrorResponse)
 final case class ErrorResponse(message: String) extends Response
 final case class CSearchPage(
-    data: Seq[PackageResult],
-    total: Int,
-    error: ErrorResponse
-) extends Response
+                              data: Seq[PackageResult],
+                              total: Int
+                            ) extends Response
+final case class SuccessResponse(
+                                  updated: String,
+                                  packages: Seq[PackageResult],
+                                  query: String,
+                                  filter: Option[String],
+                                  filePath: Option[String],
+                                  insensitive: Boolean,
+                                  space: Boolean,
+                                  precise: Boolean,
+                                  sources: Boolean,
+                                  page: Int,
+                                  totalMatches: Int,
+                                  callURI: String,
+                                  lang: String
+                                ) extends Response
