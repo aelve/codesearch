@@ -1,6 +1,5 @@
 package codesearch.core.index.directory
 
-import java.io.File
 import java.nio.file.Path
 
 import cats.effect.Sync
