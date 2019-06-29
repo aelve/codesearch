@@ -33,12 +33,9 @@ trait Search {
 
   def search(request: SearchRequest): IO[Response] = {
     checkRegexpForValid(request.query).attempt.flatMap {
-      case Left(error) => {
-        IO(
-          ErrorResponse(
-            error.getMessage.substring(0, 1).toUpperCase + error.getMessage.substring(1, error.getMessage.length)))
-      }
-      case Right(_) => {
+      case Left(error) =>
+        IO(createErrorResponse(error))
+      case Right(_) =>
         val entity = csearch(request)
         for {
           results <- Stream
@@ -51,7 +48,11 @@ trait Search {
             .compile
             .toList
         } yield CSearchPage(results.sortBy(_.pack.name), entity.lists.length)
-      }
+    }
+
+    def createErrorResponse(error: Throwable): ErrorResponse = {
+      ErrorResponse(
+        error.getMessage.substring(0, 1).toUpperCase + error.getMessage.substring(1, error.getMessage.length))
     }
   }
 
@@ -61,7 +62,6 @@ trait Search {
     var stderr   = new String
     val log      = ProcessLogger((o: String) => o, (e: String) => stderr = e)
     val test = for {
-      _       <- logger.debug(s"running CSEARCHINDEX=$indexDir ${arguments(request).mkString(" ")}")
       results <- IO((Process(arguments(request), None, env) #| Seq("head", "-1001")).lineStream_!(log).toList)
     } yield SearchByIndexResult(results, ErrorResponse(stderr))
     test.unsafeRunSync()
