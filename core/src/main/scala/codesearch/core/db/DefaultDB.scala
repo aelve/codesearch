@@ -27,7 +27,8 @@ trait DefaultDB[T <: DefaultTable] {
         pack.name,
         pack.version,
         new Timestamp(System.currentTimeMillis())
-      ))
+      )
+    )
     IO.fromFuture(IO(db.run(insOrUpdate)))
   }
 

@@ -52,8 +52,7 @@ trait Search {
   }
 
   private def createErrorResponse(error: Throwable): ErrorResponse =
-    ErrorResponse(
-      error.getMessage.substring(0, 1).toUpperCase + error.getMessage.substring(1, error.getMessage.length))
+    ErrorResponse(error.getMessage.substring(0, 1).toUpperCase + error.getMessage.substring(1, error.getMessage.length))
 
   private def csearch(request: SearchRequest): SearchByIndexResult = {
     val indexDir = cindexDir.indexDirAs[String]

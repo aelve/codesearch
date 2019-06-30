@@ -25,17 +25,21 @@ class TokenizerSpec extends FreeSpec with Matchers {
 
       testParseAndRender(
         "Hello World + ?",
-        Seq(Literal("Hello"),
-            Space(" "),
-            Literal("World"),
-            Space(" "),
-            SpecialSymbol("+"),
-            Space(" "),
-            SpecialSymbol("?"))
+        Seq(
+          Literal("Hello"),
+          Space(" "),
+          Literal("World"),
+          Space(" "),
+          SpecialSymbol("+"),
+          Space(" "),
+          SpecialSymbol("?")
+        )
       )
 
-      testParseAndRender("Hello World [^Gared]",
-                         Seq(Literal("Hello"), Space(" "), Literal("World"), Space(" "), CharSet("[^Gared]")))
+      testParseAndRender(
+        "Hello World [^Gared]",
+        Seq(Literal("Hello"), Space(" "), Literal("World"), Space(" "), CharSet("[^Gared]"))
+      )
 
       testParseAndRender(
         "Hello World [^Gared] (Bale) \\Symbol",
@@ -101,12 +105,16 @@ class TokenizerSpec extends FreeSpec with Matchers {
       testParseAndRender("|", Seq(SpecialSymbol("|")))
       testParseAndRender("^", Seq(SpecialSymbol("^")))
       testParseAndRender("$", Seq(SpecialSymbol("$")))
-      testParseAndRender("ax.,.c",
-                         Seq(Literal("ax"), SpecialSymbol("."), Literal(","), SpecialSymbol("."), Literal("c")))
+      testParseAndRender(
+        "ax.,.c",
+        Seq(Literal("ax"), SpecialSymbol("."), Literal(","), SpecialSymbol("."), Literal("c"))
+      )
       testParseAndRender("a|^", Seq(Literal("a"), SpecialSymbol("|"), SpecialSymbol("^")))
       testParseAndRender("a|b", Seq(Literal("a"), SpecialSymbol("|"), Literal("b")))
-      testParseAndRender("(a)|b",
-                         Seq(SpecialSymbol("("), Literal("a"), SpecialSymbol(")"), SpecialSymbol("|"), Literal("b")))
+      testParseAndRender(
+        "(a)|b",
+        Seq(SpecialSymbol("("), Literal("a"), SpecialSymbol(")"), SpecialSymbol("|"), Literal("b"))
+      )
       testParseAndRender("a*", Seq(Literal("a"), SpecialSymbol("*")))
       testParseAndRender("a??", Seq(Literal("a"), SpecialSymbol("?"), SpecialSymbol("?")))
     }
@@ -121,7 +129,8 @@ class TokenizerSpec extends FreeSpec with Matchers {
       testParseAndRender("a{2,3}", Seq(Literal("a"), RepetitionSeq("{2,3}")))
       testParseAndRender(
         "a{2, 3}",
-        Seq(Literal("a"), SpecialSymbol("{"), Literal("2,"), Space(" "), Literal("3"), SpecialSymbol("}")))
+        Seq(Literal("a"), SpecialSymbol("{"), Literal("2,"), Space(" "), Literal("3"), SpecialSymbol("}"))
+      )
       testParseAndRender("a{,3}", Seq(Literal("a"), SpecialSymbol("{"), Literal(",3"), SpecialSymbol("}")))
       testParseAndRender("a{2,}", Seq(Literal("a"), RepetitionSeq("{2,}")))
       testParseAndRender("a{,}", Seq(Literal("a"), SpecialSymbol("{"), Literal(","), SpecialSymbol("}")))
@@ -166,7 +175,8 @@ class TokenizerSpec extends FreeSpec with Matchers {
 
     "RoundTrip cases" - {
       val cases = Source.fromResource("regex/cases.txt").getLines
-      cases.foreach { caseString => caseString shouldBe roundTrip(caseString)
+      cases.foreach { caseString =>
+        caseString shouldBe roundTrip(caseString)
       }
     }
 

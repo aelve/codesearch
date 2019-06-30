@@ -14,7 +14,7 @@ class SnippetsGrouperSpec extends WordSpec with Matchers {
       "3models/0.3.0/Graphics/Model/DirectX.hs:14:import Data.Attoparsec.ByteString.Char8 as A",
       "3models/0.3.0/Graphics/Model/DirectX.hs:15:import qualified Data.ByteString as B",
       "3models/0.3.0/Graphics/Model/DirectX.hs:16:import Data.Traversable",
-      "3models/0.3.0/Graphics/Model/DirectX.hs:17:import Data.Word",
+      "3models/0.3.0/Graphics/Model/DirectX.hs:17:import Data.Word"
     )
 
     val snippets: List[SnippetInfo] = fs2.Stream
@@ -37,7 +37,7 @@ class SnippetsGrouperSpec extends WordSpec with Matchers {
 
     val matchedLines = Seq(
       "3models/0.3.0/Graphics/Model/DirectX.hs:28:} deriving Show",
-      "3models/0.3.0/Graphics/Model/DirectX.hs:39:} deriving Show",
+      "3models/0.3.0/Graphics/Model/DirectX.hs:39:} deriving Show"
     )
 
     val snippets: List[SnippetInfo] = fs2.Stream
@@ -64,7 +64,7 @@ class SnippetsGrouperSpec extends WordSpec with Matchers {
 
     val matchedLines = Seq(
       "3models/0.3.0/Graphics/Model/DirectX.hs:14:import Data.Attoparsec.ByteString.Char8 as A",
-      "3models/0.3.0/Graphics/Model/Obj.hs:16:import Data.Attoparsec.ByteString.Char8 as A",
+      "3models/0.3.0/Graphics/Model/Obj.hs:16:import Data.Attoparsec.ByteString.Char8 as A"
     )
 
     val snippets: List[SnippetInfo] = fs2.Stream

@@ -22,15 +22,18 @@ class Application @Inject()(
       .zip(NpmDB.updated.zip(NpmDB.getSize))
       .zip(GemDB.updated.zip(GemDB.getSize))
       .map {
-        case ((((updatedHackage, sizeHackage), (updatedCrates, sizeCrates)), (updatedNpm, sizeNpm)),
-              (updatedGem, sizeGem)) =>
+        case (
+            (((updatedHackage, sizeHackage), (updatedCrates, sizeCrates)), (updatedNpm, sizeNpm)),
+            (updatedGem, sizeGem)
+            ) =>
           Ok(
             views.html.index(
               LangInfo(updatedHackage.getTime, sizeHackage),
               LangInfo(updatedCrates.getTime, sizeCrates),
               LangInfo(updatedGem.getTime, sizeGem),
               LangInfo(updatedNpm.getTime, sizeNpm)
-            ))
+            )
+          )
       }
   }
 

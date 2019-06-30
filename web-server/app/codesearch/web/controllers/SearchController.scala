@@ -29,7 +29,7 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
             updated = TimeAgo.using(updated.getTime),
             lang = lang
           )
-      )
+        )
     )
   }
 
@@ -52,21 +52,23 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
         searchEngine.search(searchRequest) map {
           case CSearchPage(results, total) =>
             Ok(
-              views.html.searchResults(response = SuccessResponse(
-                updated = TimeAgo.using(updated.getTime),
-                packages = results,
-                query = searchRequest.query,
-                filter = searchRequest.filter,
-                filePath = searchRequest.filePath,
-                insensitive = searchRequest.insensitive,
-                space = searchRequest.spaceInsensitive,
-                precise = searchRequest.preciseMatch,
-                sources = searchRequest.sourcesOnly,
-                page = searchRequest.page,
-                totalMatches = total,
-                callURI = searchRequest.callURI(host).toString,
-                lang = lang
-              ))
+              views.html.searchResults(
+                response = SuccessResponse(
+                  updated = TimeAgo.using(updated.getTime),
+                  packages = results,
+                  query = searchRequest.query,
+                  filter = searchRequest.filter,
+                  filePath = searchRequest.filePath,
+                  insensitive = searchRequest.insensitive,
+                  space = searchRequest.spaceInsensitive,
+                  precise = searchRequest.preciseMatch,
+                  sources = searchRequest.sourcesOnly,
+                  page = searchRequest.page,
+                  totalMatches = total,
+                  callURI = searchRequest.callURI(host).toString,
+                  lang = lang
+                )
+              )
             )
           case er @ ErrorResponse(_) =>
             Ok(

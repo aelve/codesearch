@@ -46,5 +46,7 @@ object Tokenizer {
   private def parserAnyStringBeforeSpecialSymbol[_: P] = P((!" " ~ !specialSymbols ~ AnyChar).rep(1).!.map(Literal))
 
   private def parseStringWithSpecialSymbols[_: P] =
-    P(parserEscaped | parserCharSet | parserAnyStringBeforeSpecialSymbol | parseSpaces | parseRepetitionSeq | parserSpecialSymbol).rep
+    P(
+      parserEscaped | parserCharSet | parserAnyStringBeforeSpecialSymbol | parseSpaces | parseRepetitionSeq | parserSpecialSymbol
+    ).rep
 }

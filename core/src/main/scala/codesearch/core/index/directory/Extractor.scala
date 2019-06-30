@@ -44,9 +44,13 @@ private[index] trait Extractor {
     val dir = unarchived.toFile
     dir.listFiles
       .filter(_.isDirectory)
-      .foreach(_.listFiles.foreach(file =>
-        if (file.isDirectory) moveDirectoryToDirectory(file, dir, false)
-        else moveFileToDirectory(file, dir, false)))
+      .foreach(
+        _.listFiles.foreach(
+          file =>
+            if (file.isDirectory) moveDirectoryToDirectory(file, dir, false)
+            else moveFileToDirectory(file, dir, false)
+        )
+      )
     unarchived
   }
 }
