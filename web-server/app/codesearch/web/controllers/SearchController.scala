@@ -29,7 +29,7 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
             updated = TimeAgo.using(updated.getTime),
             lang = lang
           )
-        )
+      )
     )
   }
 
