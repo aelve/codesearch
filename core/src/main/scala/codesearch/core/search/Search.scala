@@ -10,15 +10,15 @@ import cats.syntax.option._
 import codesearch.core.config.{Config, SnippetConfig}
 import codesearch.core.index.directory.СindexDirectory
 import codesearch.core.index.repository.Extensions
-import codesearch.core.search.Search.{CSearchPage, CSearchResult, CodeSnippet, Package, PackageResult, snippetConfig}
+import codesearch.core.regex.RegexConstructor
+import codesearch.core.search.Search.{CSearchPage, CSearchResult, CodeSnippet, ErrorResponse, Package, PackageResult, Response, SearchByIndexResult, snippetConfig}
 import codesearch.core.search.SnippetsGrouper.SnippetInfo
 import codesearch.core.util.Helper.readFileAsync
 import fs2.{Pipe, Stream}
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
-import codesearch.core.regex.RegexConstructor
 
-import scala.sys.process.Process
+import scala.sys.process.{Process, ProcessLogger}
 
 trait Search {
 
@@ -29,20 +29,32 @@ trait Search {
 
   implicit val root: NioPath = cindexDir.root
 
-  def search(request: SearchRequest): IO[CSearchPage] = {
-    for {
-      lines <- csearch(request)
-      results <- Stream
-        .emits(lines)
-        .through(SnippetsGrouper.groupLines(snippetConfig))
-        .drop(snippetConfig.pageSize * (request.page - 1))
-        .take(snippetConfig.pageSize)
-        .evalMap(createSnippet)
-        .through(groupByPackage)
-        .compile
-        .toList
-    } yield CSearchPage(results.sortBy(_.pack.name), lines.size)
+  def search(request: SearchRequest): IO[Response] = {
+    checkRegexpForValid(request.query).attempt.flatMap {
+      case Left(error) =>
+        IO(createErrorResponse(error))
+      case Right(_) =>
+        val entity = csearch(request)
+        for {
+          results <- Stream
+            .emits(entity.lists)
+            .through(SnippetsGrouper.groupLines(snippetConfig))
+            .drop(snippetConfig.pageSize * (request.page - 1))
+            .take(snippetConfig.pageSize)
+            .evalMap(createSnippet)
+            .through(groupByPackage)
+            .compile
+            .toList
+        } yield CSearchPage(results.sortBy(_.pack.name), entity.lists.length)
+    }
   }
+
+  def checkRegexpForValid(regexp: String): IO[Pattern] = {
+    IO { Pattern.compile(regexp) }
+  }
+
+  private def createErrorResponse(error: Throwable): ErrorResponse =
+    ErrorResponse(error.getMessage.substring(0, 1).toUpperCase + error.getMessage.substring(1, error.getMessage.length))
 
   /**
     * Build package name and path to remote repository
@@ -69,14 +81,15 @@ trait Search {
     */
   protected def buildRepUrl(packageName: String, version: String): String
 
-  private def csearch(request: SearchRequest): IO[List[String]] = {
+  private def csearch(request: SearchRequest): SearchByIndexResult = {
     val indexDir = cindexDir.indexDirAs[String]
     val env      = ("CSEARCHINDEX", indexDir)
-
-    for {
-      _       <- logger.debug(s"running CSEARCHINDEX=$indexDir ${arguments(request).mkString(" ")}")
-      results <- IO((Process(arguments(request), None, env) #| Seq("head", "-1001")).lineStream.toList)
-    } yield results
+    var stderr   = new String
+    val log      = ProcessLogger((o: String) => o, (e: String) => stderr = e)
+    val test = for {
+      results <- IO((Process(arguments(request), None, env) #| Seq("head", "-1001")).lineStream_!(log).toList)
+    } yield SearchByIndexResult(results, ErrorResponse(stderr))
+    test.unsafeRunSync()
   }
 
   private def arguments(request: SearchRequest): List[String] = {
@@ -149,17 +162,6 @@ object Search {
       .unsafeRunSync()
 
   /**
-    * result of searching
-    *
-    * @param data code snippets grouped by package
-    * @param total number of total matches
-    */
-  final case class CSearchPage(
-      data: Seq[PackageResult],
-      total: Int
-  )
-
-  /**
     *
     * @param relativePath path into package sources
     * @param fileLink link to file with source code (relative)
@@ -203,4 +205,35 @@ object Search {
       pack: Package,
       result: CodeSnippet
   )
+
+
+  sealed trait Response
+  /**
+    * result of searching
+    *
+    * @param data code snippets grouped by package
+    * @param total number of total matches
+    */
+  final case class CSearchPage(
+                                data: Seq[PackageResult],
+                                total: Int
+                              ) extends Response
+
+  final case class SearchByIndexResult(lists: List[String], error: ErrorResponse)
+  final case class ErrorResponse(message: String) extends Response
+  final case class SuccessResponse(
+      updated: String,
+      packages: Seq[PackageResult],
+      query: String,
+      filter: Option[String],
+      filePath: Option[String],
+      insensitive: Boolean,
+      space: Boolean,
+      precise: Boolean,
+      sources: Boolean,
+      page: Int,
+      totalMatches: Int,
+      callURI: String,
+      lang: String
+  ) extends Response
 }
