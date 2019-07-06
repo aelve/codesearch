@@ -5,7 +5,7 @@ import java.nio.ByteBuffer
 import java.nio.file.Paths
 
 import cats.effect.{IO, Resource}
-import codesearch.core.{BlockingEC, config}
+import codesearch.core.BlockingEC
 import codesearch.core.config._
 import com.softwaremill.sttp.SttpBackend
 import com.softwaremill.sttp.asynchttpclient.fs2.AsyncHttpClientFs2Backend
@@ -33,7 +33,7 @@ trait TestFixture {
       port = 5432,
       name = "sourcesdb",
       user = "postgres",
-      password = "postgres",
+      password = "postgres"
     ),
     SnippetConfig(
       pageSize = 30,

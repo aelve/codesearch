@@ -2,6 +2,7 @@ package codesearch.core.search
 
 import java.net.URLDecoder
 import java.nio.file.{Path => NioPath}
+import java.util.regex.Pattern
 
 import ammonite.ops.{Path, pwd}
 import cats.data.NonEmptyVector
@@ -206,8 +207,8 @@ object Search {
       result: CodeSnippet
   )
 
-
   sealed trait Response
+
   /**
     * result of searching
     *

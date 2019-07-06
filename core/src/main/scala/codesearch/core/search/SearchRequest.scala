@@ -32,7 +32,9 @@ case class SearchRequest(
     def stringify(x: Boolean): String = if (x) "on" else "off"
 
     uri"$host/$lang/search?query=$query&filter=$filter&filePath=$filePath&insensitive=${stringify(insensitive)}&space=${stringify(
-      spaceInsensitive)}&precise=${stringify(preciseMatch)}&sources=${stringify(sourcesOnly)}"
+      spaceInsensitive
+    )
+    }&precise=${stringify(preciseMatch)}&sources=${stringify(sourcesOnly)}"
   }
 }
 
@@ -57,7 +59,7 @@ object SearchRequest {
       isEnabled(spaceInsensitive),
       isEnabled(preciseMatch),
       isEnabled(sourcesOnly),
-      page.toInt,
+      page.toInt
     )
   }
 
