@@ -19,7 +19,7 @@ import fs2.{Pipe, Stream}
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
-import scala.sys.process.{Process, ProcessLogger}
+import scala.sys.process.Process
 
 trait Search {
 
@@ -85,11 +85,10 @@ trait Search {
   private def csearch(request: SearchRequest): SearchByIndexResult = {
     val indexDir = cindexDir.indexDirAs[String]
     val env      = ("CSEARCHINDEX", indexDir)
-    var stderr   = new String
-    val log      = ProcessLogger((o: String) => o, (e: String) => stderr = e)
     val test = for {
-      results <- IO((Process(arguments(request), None, env) #| Seq("head", "-1001")).lineStream_!(log).toList)
-    } yield SearchByIndexResult(results, ErrorResponse(stderr))
+      _ <- logger.debug(s"running CSEARCHINDEX=$indexDir ${arguments(request).mkString(" ")}")
+      results <- IO((Process(arguments(request), None, env) #| Seq("head", "-1001")).lineStream.toList)
+    } yield SearchByIndexResult(results, ErrorResponse("Regular expression is wrong. Check it"))
     test.unsafeRunSync()
   }
 
