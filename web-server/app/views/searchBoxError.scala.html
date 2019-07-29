@@ -1,0 +1,107 @@
+@(errorMessageT: String)
+
+<section class="container-fluid">
+    <div class="col-lg-6 mx-auto p-3 h7 justify-content-center" style="position: relative;">
+        <form>
+            <section class="warning warning-query">Please provide a string to search for.</section>
+            @if(errorMessageT.nonEmpty) {
+            <section class="error error-query" style="color:#f44336;">️⚠️ @{errorMessageT}</section>
+            }
+            <div class="input-group mb-2">
+                <input type="text" class="form-control" name="query" class="query">
+                <div class="input-group-append">
+                    <input class="btn btn-secondary btn-send-from" id="btn-send-from" type="button" value="Go!">
+                </div>
+            </div>
+            <section class="warning warning-filter">3+ characters are required.</section>
+            <div class="input-group mb-2">
+                <input type="text" class="form-control" name="filter" class="filter" placeholder="Only files containing...">
+                <input type="text" class="form-control" name="path" placeholder="Only paths matching...">
+            </div>
+            <div class="form-check form-check-inline">
+                <input type="checkbox" class="form-check-input" name="insensitive" id="insensitive-search")>
+                <label class="form-check-label" for="insensitive-search">Case-insensitive search</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input type="checkbox" class="form-check-input" name="space" id="space-insensitive" )>
+                <label class="form-check-label" for="space-insensitive">Space-insensitive search</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input type="checkbox" class="form-check-input" name="precise" id="precise-match")>
+                <label class="form-check-label" for="precise-match">Precise match</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input type="checkbox" class="form-check-input" name="sources" id="sources")>
+                <label class="form-check-label" for="sources">Sources only</label>
+            </div>
+        </form>
+    </div>
+</section>
+<script>
+        const inpQuery = document.getElementsByName("query")[0]
+        const inpFilter = document.getElementsByName("filter")[0]
+        const inpPath = document.getElementsByName("path")[0]
+
+        function focusQueryInput() {
+            inpQuery.addEventListener('input', function(e){
+                if(inpQuery.value.trim().length >= 1) {
+                    document.getElementsByClassName('warning-query')[0].classList.remove('show')
+                    inpQuery.classList.remove('warn')
+                }
+            })
+        }
+
+
+        function formValidate() {
+            if (inpQuery.value.trim().length) {
+                const sendArr = []
+                this.query = encodeURIComponent(inpQuery.value)
+                this.filter = encodeURIComponent(inpFilter.value)
+                this.filePath = encodeURIComponent(inpPath.value)
+
+                this.inpsCheck = document.querySelectorAll('input[type="checkbox"]')
+
+                sendArr.push('query='+this.query)
+
+                if (this.filter.trim().length > 0) {
+                    sendArr.push('filter='+this.filter)
+                }
+
+                if (this.filePath.trim().length) {
+                    sendArr.push('filePath='+this.filePath)
+                }
+
+                for (let i = 0; i < this.inpsCheck.length; i++) {
+                    if (this.inpsCheck[i].checked) {
+                        sendArr.push(`${this.inpsCheck[i].getAttribute('name')}=on`)
+                    } else {
+                        sendArr.push(`${this.inpsCheck[i].getAttribute('name')}=off`)
+                    }
+                }
+                let arr = sendArr.join('&')
+                document.location.href = document.location.pathname + '/search' + '?' + arr
+                const pathname = document.location.pathname
+                if(pathname.endsWith("/search"))
+                    document.location.href = pathname + '?' + arr
+                else
+                    document.location.href = pathname + '/search' + '?' + arr
+            } else {
+                if (!document.getElementsByClassName('warning-query')[0].classList.contains('show')) {
+                    document.getElementsByClassName('warning-query')[0].classList.add('show')
+                    inpQuery.classList.add('warn')
+                }
+            }
+        }
+
+        function clickByEnter(event) {
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                document.getElementById('btn-send-from').click();
+            }
+        }
+        document.getElementById('btn-send-from').addEventListener('click', formValidate)
+        inpQuery.addEventListener('click', focusQueryInput)
+        inpQuery.addEventListener('keyup', clickByEnter)
+        inpFilter.addEventListener('keyup', clickByEnter)
+        inpPath.addEventListener('keyup', clickByEnter)
+</script>

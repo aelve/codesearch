@@ -5,7 +5,7 @@ import cats.instances.future._
 import codesearch.core.db.DefaultDB
 import codesearch.core.index.directory.Directory
 import codesearch.core.model.DefaultTable
-import codesearch.core.search.Search.CSearchPage
+import codesearch.core.search.Search.{CSearchPage, ErrorResponse, SuccessResponse}
 import codesearch.core.search.{Search, SearchRequest}
 import codesearch.core.util.Helper
 import com.github.marlonlom.utilities.timeago.TimeAgo
@@ -33,7 +33,7 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
             updated = TimeAgo.using(updated.getTime),
             lang = lang
           )
-      )
+        )
     )
   }
 
@@ -57,20 +57,26 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
           case CSearchPage(results, total) =>
             Ok(
               views.html.searchResults(
-                updated = TimeAgo.using(updated.getTime),
-                packages = results,
-                query = searchRequest.query,
-                filter = searchRequest.filter,
-                filePath = searchRequest.filePath,
-                insensitive = searchRequest.insensitive,
-                space = searchRequest.spaceInsensitive,
-                precise = searchRequest.preciseMatch,
-                sources = searchRequest.sourcesOnly,
-                page = searchRequest.page,
-                totalMatches = total,
-                callURI = searchRequest.callURI(host).toString,
-                lang = lang
+                response = SuccessResponse(
+                  updated = TimeAgo.using(updated.getTime),
+                  packages = results,
+                  query = searchRequest.query,
+                  filter = searchRequest.filter,
+                  filePath = searchRequest.filePath,
+                  insensitive = searchRequest.insensitive,
+                  space = searchRequest.spaceInsensitive,
+                  precise = searchRequest.preciseMatch,
+                  sources = searchRequest.sourcesOnly,
+                  page = searchRequest.page,
+                  totalMatches = total,
+                  callURI = searchRequest.callURI(host).toString,
+                  lang = lang
+                )
               )
+            )
+          case er @ ErrorResponse(_) =>
+            Ok(
+              views.html.searchResults(er)
             )
         } unsafeToFuture
       }

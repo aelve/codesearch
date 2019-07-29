@@ -1,10 +1,10 @@
 package integration
 
-import codesearch.core.search.Search.PackageResult
+import codesearch.core.search.Search.{PackageResult, SuccessResponse}
 import codesearch.core.search.{Search, SearchRequest}
-import slick.jdbc.PostgresProfile.api._
 import com.dimafeng.testcontainers.PostgreSQLContainer
 import org.scalatest.Matchers
+import slick.jdbc.PostgresProfile.api._
 
 trait IntegrationSpecBase extends Matchers {
 
@@ -21,7 +21,11 @@ trait IntegrationSpecBase extends Matchers {
       .search(lookFor)
       .unsafeRunSync()
 
-    searchResult.total shouldBe totalResults
-    searchResult.data shouldBe result
+    searchResult match {
+      case x: SuccessResponse => {
+        x.totalMatches shouldBe totalResults
+        x.packages shouldBe result
+      }
+    }
   }
 }

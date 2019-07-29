@@ -50,7 +50,8 @@ object Builder {
       "org.codehaus.janino"  % "janino"          % "3.0.11",
       "com.typesafe.play"    %% "play-json"      % "2.6.9",
       "com.github.mpilquist" %% "simulacrum"     % "0.13.0",
-      "org.typelevel"        %% "cats-core"      % "1.2.0"
+      "org.typelevel"        %% "cats-core"      % "1.2.0",
+      "com.google.re2j" % "re2j" % "1.2"
     )
   )
 
