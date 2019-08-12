@@ -10,6 +10,7 @@ import codesearch.core.search.{Search, SearchRequest}
 import codesearch.core.util.Helper
 import com.github.marlonlom.utilities.timeago.TimeAgo
 import play.api.mvc.{Action, AnyContent, InjectedController}
+import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -21,6 +22,8 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
   def db: DefaultDB[V]
   def searchEngine: Search
   def lang: String
+
+  val database = Database.forConfig("db")
 
   def index: Action[AnyContent] = Action.async { implicit request =>
     db.updated.map(

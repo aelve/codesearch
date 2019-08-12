@@ -12,14 +12,11 @@ import slick.lifted.TableQuery
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object DefaultDB {
-  lazy val db = Database.forConfig("db")
-}
-
 trait DefaultDB[T <: DefaultTable] {
 
+  def db: Database
+
   val table: TableQuery[T]
-  lazy val db = DefaultDB.db
 
   def insertOrUpdate[A <: SourcePackage](pack: A): IO[Int] = {
     val insOrUpdate = table.insertOrUpdate(
@@ -93,8 +90,3 @@ trait NpmDB extends DefaultDB[NpmTable] {
 trait GemDB extends DefaultDB[GemTable] {
   val table = TableQuery[GemTable]
 }
-
-object HackageDB extends HackageDB
-object CratesDB  extends CratesDB
-object NpmDB     extends NpmDB
-object GemDB     extends GemDB

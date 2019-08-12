@@ -25,11 +25,13 @@ import scala.sys.process.Process
 trait LanguageIndex[A <: DefaultTable] {
   self: DefaultDB[A] =>
 
+  def initDB: IO[Unit]
+
   protected implicit def shift: ContextShift[IO]
 
   protected val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.unsafeCreate[IO]
 
-  protected def cindexDir: СindexDirectory
+  def cindexDir: СindexDirectory
 
   protected def concurrentTasksCount: Int
 
@@ -48,8 +50,8 @@ trait LanguageIndex[A <: DefaultTable] {
     def dropTempIndexFile = IO(Files.deleteIfExists(cindexDir.tempIndexDirAs[NioPath]))
 
     def createCSearchDir = IO(
-      if (Files.notExists(СindexDirectory.root))
-        Files.createDirectories(СindexDirectory.root)
+      if (Files.notExists(cindexDir.root))
+        Files.createDirectories(cindexDir.root)
     )
 
     def indexPackages(packageDirs: Seq[NioPath]): IO[Unit] = {

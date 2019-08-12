@@ -1,6 +1,7 @@
 package codesearch.core.search
 
 import java.net.URLDecoder
+import java.nio.file.{Path => NioPath}
 
 import ammonite.ops.{Path, pwd}
 import cats.data.NonEmptyVector
@@ -22,10 +23,13 @@ import scala.sys.process.Process
 
 trait Search {
 
-  protected def cindexDir: СindexDirectory
   protected def extensions: Extensions
   protected val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.unsafeCreate[IO]
   def isTestInPath(path: String): Boolean
+
+  def cindexDir: СindexDirectory
+
+  implicit val root: NioPath = cindexDir.root
 
   def search(request: SearchRequest): IO[CSearchPage] = {
     for {
