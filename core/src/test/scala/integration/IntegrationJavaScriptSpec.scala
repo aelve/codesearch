@@ -11,9 +11,9 @@ import codesearch.core.meta._
 import codesearch.core.search.Search.{CodeSnippet, Package, PackageResult}
 import codesearch.core.search.{JavaScriptSearch, Search, SearchRequest}
 import codesearch.core.util.Unarchiver
+import com.dimafeng.testcontainers.{ForAllTestContainer, PostgreSQLContainer}
 import integration.fakes.FakeDownloader
 import org.scalatest.FreeSpec
-import com.dimafeng.testcontainers.{ForAllTestContainer, PostgreSQLContainer}
 
 class IntegrationJavaScriptSpec extends FreeSpec with ForAllTestContainer with IntegrationSpecBase {
 
@@ -48,7 +48,8 @@ class IntegrationJavaScriptSpec extends FreeSpec with ForAllTestContainer with I
         spaceInsensitive = true,
         preciseMatch = true,
         sourcesOnly = true,
-        page = 1
+        page = 1,
+        withoutTests = false
       ),
       2,
       Seq(
@@ -89,7 +90,8 @@ class IntegrationJavaScriptSpec extends FreeSpec with ForAllTestContainer with I
         spaceInsensitive = false,
         preciseMatch = true,
         sourcesOnly = true,
-        page = 1
+        page = 1,
+        withoutTests = false
       ),
       1,
       Seq(
