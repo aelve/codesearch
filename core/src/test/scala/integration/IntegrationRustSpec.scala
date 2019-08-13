@@ -11,9 +11,9 @@ import codesearch.core.meta._
 import codesearch.core.search.Search.{CodeSnippet, Package, PackageResult}
 import codesearch.core.search.{RustSearch, Search, SearchRequest}
 import codesearch.core.util.Unarchiver
+import com.dimafeng.testcontainers.{ForAllTestContainer, PostgreSQLContainer}
 import integration.fakes.FakeDownloader
 import org.scalatest.FreeSpec
-import com.dimafeng.testcontainers.{ForAllTestContainer, PostgreSQLContainer}
 
 class IntegrationRustSpec extends FreeSpec with ForAllTestContainer with IntegrationSpecBase {
 
@@ -48,7 +48,8 @@ class IntegrationRustSpec extends FreeSpec with ForAllTestContainer with Integra
         spaceInsensitive = false,
         preciseMatch = true,
         sourcesOnly = false,
-        page = 1
+        page = 1,
+        withoutTests = false
       ),
       2,
       Seq(
@@ -104,7 +105,8 @@ class IntegrationRustSpec extends FreeSpec with ForAllTestContainer with Integra
         spaceInsensitive = false,
         preciseMatch = true,
         sourcesOnly = true,
-        page = 1
+        page = 1,
+        withoutTests = false
       ),
       1,
       Seq(

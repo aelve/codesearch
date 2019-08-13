@@ -13,7 +13,7 @@ object SnippetsGrouper {
     * @param filePath absolute path to file
     * @param lines numbers of matched lines in file
     */
-  case class SnippetInfo(filePath: String, lines: NonEmptyVector[Int])
+  case class SnippetInfo(filePath: String, lines: NonEmptyVector[Int], totalMatches: Int)
 
   private case class ResultRow(path: String, lineNumber: Int)
 
@@ -40,12 +40,13 @@ object SnippetsGrouper {
       snippets.lastOption match {
         case Some(snippet) =>
           if (row.lineNumber < snippet.lines.last + config.linesAfter) {
-            snippets.init :+ snippet.copy(lines = snippet.lines :+ row.lineNumber)
+            snippets.init :+ snippet.copy(lines = snippet.lines :+ row.lineNumber,
+                                          totalMatches = snippet.totalMatches + 1)
           } else {
-            snippets :+ SnippetInfo(row.path, NonEmptyVector.one(row.lineNumber))
+            snippets :+ SnippetInfo(row.path, NonEmptyVector.one(row.lineNumber), 1)
           }
         case None =>
-          snippets :+ SnippetInfo(row.path, NonEmptyVector.one(row.lineNumber))
+          snippets :+ SnippetInfo(row.path, NonEmptyVector.one(row.lineNumber), 1)
       }
     }
   }

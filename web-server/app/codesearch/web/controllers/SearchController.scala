@@ -45,13 +45,24 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
       spaceInsensitive: String,
       precise: String,
       sources: String,
+      withoutTests: String,
       page: String
   ): Action[AnyContent] =
     Action.async { implicit request =>
       val host: String = request.host
       val searchRequest =
-        SearchRequest.applyRaw(lang, query, filter, filePath, caseInsensitive, spaceInsensitive, precise, sources, page)
-
+        SearchRequest.applyRaw(lang,
+                               query,
+                               filter,
+                               filePath,
+                               caseInsensitive,
+                               spaceInsensitive,
+                               precise,
+                               sources,
+                               withoutTests,
+                               page)
+      println(withoutTests)
+      println(searchRequest.withoutTests)
       db.updated.flatMap { updated =>
         searchEngine.search(searchRequest) map {
           case CSearchPage(results, total) =>
@@ -66,6 +77,7 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
                 space = searchRequest.spaceInsensitive,
                 precise = searchRequest.preciseMatch,
                 sources = searchRequest.sourcesOnly,
+                withoutTests = searchRequest.withoutTests,
                 page = searchRequest.page,
                 totalMatches = total,
                 callURI = searchRequest.callURI(host).toString,

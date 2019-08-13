@@ -10,6 +10,7 @@ import com.softwaremill.sttp._
   * @param spaceInsensitive space insensitive search flag
   * @param preciseMatch precise match flag
   * @param sourcesOnly sources only flag
+  * @param withoutTests search without tests
   * @param page next pagination
   */
 case class SearchRequest(
@@ -21,6 +22,7 @@ case class SearchRequest(
     spaceInsensitive: Boolean,
     preciseMatch: Boolean,
     sourcesOnly: Boolean,
+    withoutTests: Boolean,
     page: Int
 ) {
 
@@ -32,7 +34,7 @@ case class SearchRequest(
     def stringify(x: Boolean): String = if (x) "on" else "off"
 
     uri"$host/$lang/search?query=$query&filter=$filter&filePath=$filePath&insensitive=${stringify(insensitive)}&space=${stringify(
-      spaceInsensitive)}&precise=${stringify(preciseMatch)}&sources=${stringify(sourcesOnly)}"
+      spaceInsensitive)}&precise=${stringify(preciseMatch)}&sources=${stringify(sourcesOnly)}&withoutTests=${stringify(withoutTests)}"
   }
 }
 
@@ -46,6 +48,7 @@ object SearchRequest {
       spaceInsensitive: String,
       preciseMatch: String,
       sourcesOnly: String,
+      withoutTests: String,
       page: String
   ): SearchRequest = {
     SearchRequest(
@@ -57,6 +60,7 @@ object SearchRequest {
       isEnabled(spaceInsensitive),
       isEnabled(preciseMatch),
       isEnabled(sourcesOnly),
+      isEnabled(withoutTests),
       page.toInt,
     )
   }

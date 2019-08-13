@@ -11,9 +11,9 @@ import codesearch.core.meta._
 import codesearch.core.search.Search.{CodeSnippet, Package, PackageResult}
 import codesearch.core.search.{HaskellSearch, Search, SearchRequest}
 import codesearch.core.util.Unarchiver
+import com.dimafeng.testcontainers.{ForAllTestContainer, PostgreSQLContainer}
 import integration.fakes.FakeDownloader
 import org.scalatest.FreeSpec
-import com.dimafeng.testcontainers.{ForAllTestContainer, PostgreSQLContainer}
 
 class IntegrationHaskellSpec extends FreeSpec with ForAllTestContainer with IntegrationSpecBase {
 
@@ -48,7 +48,8 @@ class IntegrationHaskellSpec extends FreeSpec with ForAllTestContainer with Inte
         spaceInsensitive = false,
         preciseMatch = false,
         sourcesOnly = false,
-        page = 1
+        page = 1,
+        withoutTests = false
       ),
       1,
       Seq(
@@ -87,7 +88,8 @@ class IntegrationHaskellSpec extends FreeSpec with ForAllTestContainer with Inte
         spaceInsensitive = false,
         preciseMatch = false,
         sourcesOnly = true,
-        page = 1
+        page = 1,
+        withoutTests = false
       ),
       1,
       Seq(

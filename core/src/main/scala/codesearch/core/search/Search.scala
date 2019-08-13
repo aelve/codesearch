@@ -17,6 +17,7 @@ import fs2.{Pipe, Stream}
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import codesearch.core.regex.RegexConstructor
+import codesearch.core.syntax.stream._
 
 import scala.sys.process.Process
 
@@ -24,6 +25,7 @@ trait Search {
 
   protected def extensions: Extensions
   protected val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.unsafeCreate[IO]
+  def isTestInPath(path: String): Boolean
 
   def cindexDir: СindexDirectory
 
@@ -32,16 +34,25 @@ trait Search {
   def search(request: SearchRequest): IO[CSearchPage] = {
     for {
       lines <- csearch(request)
-      results <- Stream
+
+      snippetsInfo = Stream
         .emits(lines)
         .through(SnippetsGrouper.groupLines(snippetConfig))
+
+      filteredSnippetsInfo = if (request.withoutTests)
+        snippetsInfo.filterNot(snippetInfo => isTestInPath(snippetInfo.filePath))
+      else
+        snippetsInfo
+
+      results <- filteredSnippetsInfo
         .drop(snippetConfig.pageSize * (request.page - 1))
         .take(snippetConfig.pageSize)
         .evalMap(createSnippet)
         .through(groupByPackage)
         .compile
         .toList
-    } yield CSearchPage(results.sortBy(_.pack.name), lines.size)
+      totalMatches = filteredSnippetsInfo.fold(0)((total, snippet) => total + snippet.totalMatches).compile.toList.last
+    } yield CSearchPage(results.sortBy(_.pack.name), totalMatches)
   }
 
   /**
