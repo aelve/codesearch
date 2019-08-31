@@ -64,6 +64,7 @@ deploy_to_staging:
     - echo "$SSH_PRIVATE_KEY_STAGING" > ~/.ssh/id_rsa
     - chmod 600 ~/.ssh/id_rsa
     - ssh deployer@$STAGING_HOST "ls -la"
+    - ssh deployer@$STAGING_HOST "ls -la"
     - ssh deployer@$STAGING_HOST "mkdir -p ~/docker && echo $DEPLOYER_PASS | sudo -S mkdir -p /mnt/vol/{portainer/data,postgresql,data,index,logs}" || true
     - scp ./docker/docker-stack-compose.yml deployer@$STAGING_HOST:~/docker
     - ssh deployer@$STAGING_HOST "docker login quay.io -u $DOCKER_USER -p $DOCKER_PASS" || true
