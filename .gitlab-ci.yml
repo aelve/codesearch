@@ -33,8 +33,6 @@ build_and_test:
       - Makefile
       - codesearch-core.jar
       - codesearch-server.jar
-  after_script:
-    - echo "Build was successful"
 
 build_and_publish_docker_images:
   stage: publish
@@ -51,8 +49,6 @@ build_and_publish_docker_images:
   only:
     - develop
     - master
-  after_script:
-    - echo "Images was successful pushed to registry"
 
 deploy_to_staging:
   stage: deploy-staging
@@ -69,8 +65,6 @@ deploy_to_staging:
     - ssh deployer@$STAGING_HOST "SECRET_KEY=$STAGING_SECRET_KEY SERVER_PORT=$SERVER_PORT docker stack deploy --with-registry-auth -c ~/docker/docker-stack-compose.yml codesearch"
   only:
     - develop
-  after_script:
-    - echo "Application was successful deployed"
 
 deploy_to_production:
   stage: deploy
@@ -87,5 +81,3 @@ deploy_to_production:
     - ssh deployer@$HOST "SECRET_KEY=$SECRET_KEY SERVER_PORT=$SERVER_PORT docker stack deploy --with-registry-auth -c ~/docker/docker-stack-compose.yml codesearch"
   only:
     - master
-  after_script:
-    - echo "Application was successful deployed"
