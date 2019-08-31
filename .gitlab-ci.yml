@@ -7,7 +7,6 @@ stages:
 variables:
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_DRIVER: overlay2
-  SSH_CONFIG: "-o StrictHostKeyChecking=no"
 
 build_and_test:
   stage: build
@@ -20,52 +19,73 @@ build_and_test:
     - sbt web-server/assembly
     - sbt scalafmt exit
     - git diff --exit-code
-  artifacts:
+  cache:
+    key: codesearch-{{ checksum "project/Builder.scala" }}-{{ checksum "build.sbt" }}
     paths:
-      - target/resolution-cache
-      - target/streams
-      - project/target/resolution-cache
-      - project/target/streams
       - ~/.sbt
       - ~/.iv2/cache
       - ~/.m2
+  artifacts:
+    paths:
       - .dockerignore
       - docker
       - scripts
       - Makefile
       - codesearch-core.jar
       - codesearch-server.jar
+  after_script:
+    - echo "Build was successful"
 
 build_and_publish_docker_images:
   stage: publish
   image: registry.gitlab.com/aelve/codesearch/ci-test-env
   services:
     - docker:dind
+  before_script:
+    - docker login quay.io -u "$DOCKER_USER" -p "$DOCKER_PASS"
   script:
-    - make build-docker-core
-    - make build-docker-web-server
-    - make push-docker-core
-    - make push-docker-web-server
+    - make build-docker-core "branch=${CI_COMMIT_REF_NAME}"
+    - make build-docker-web-server "branch=${CI_COMMIT_REF_NAME}"
+    - make push-docker-core "branch=${CI_COMMIT_REF_NAME}"
+    - make push-docker-web-server "branch=${CI_COMMIT_REF_NAME}"
   only:
     - develop
     - master
+  after_script:
+    - echo "Images was successful pushed to registry"
 
-staging-deploy-to-swarm:
+deploy_to_staging:
   stage: deploy-staging
+  image: kroniak/ssh-client
   script:
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+    - echo "$SSH_PRIVATE_KEY_STAGING" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
     - ssh deployer@$STAGING_HOST "mkdir -p ~/docker && echo $DEPLOYER_PASS | sudo -S mkdir -p /mnt/vol/{portainer/data,postgresql,data,index,logs}" || true
     - scp ./docker/docker-stack-compose.yml deployer@$STAGING_HOST:~/docker
     - ssh deployer@$STAGING_HOST "docker login quay.io -u $DOCKER_USER -p $DOCKER_PASS" || true
     - ssh deployer@$STAGING_HOST "SECRET_KEY=$STAGING_SECRET_KEY SERVER_PORT=$SERVER_PORT docker stack deploy --with-registry-auth -c ~/docker/docker-stack-compose.yml codesearch" || true
   only:
     - develop
+  after_script:
+    - echo "Application was successful deployed"
 
-deploy-to-swarm:
+deploy_to_production:
   stage: deploy
+  image: kroniak/ssh-client
   script:
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
     - ssh deployer@$HOST "mkdir -p ~/docker && echo $DEPLOYER_PASS | sudo -S mkdir -p /mnt/vol/{portainer/data,postgresql,data,index,logs}" || true
     - scp ./docker/docker-stack-compose.yml deployer@$HOST:~/docker
     - ssh deployer@$HOST "docker login quay.io -u $DOCKER_USER -p $DOCKER_PASS" || true
     - ssh deployer@$HOST "SECRET_KEY=$SECRET_KEY SERVER_PORT=$SERVER_PORT docker stack deploy --with-registry-auth -c ~/docker/docker-stack-compose.yml codesearch" || true
   only:
     - master
+  after_script:
+    - echo "Application was successful deployed"
