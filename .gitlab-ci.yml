@@ -20,7 +20,7 @@ build_and_test:
     - sbt scalafmt exit
     - git diff --exit-code
   cache:
-    key: codesearch-{ checksum "build.sbt" }
+    key: codesearch
     paths:
       - ~/.sbt
       - ~/.iv2/cache
