@@ -1,25 +1,8 @@
 version: '3.3'
 
 services:
-  portainer:
-    image: portainer/portainer:latest
-    deploy:
-      mode: global
-      restart_policy:
-        condition: any
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /mnt/vol/portainer/data:/data
-    ports:
-      - 9080:9000
-    networks:
-      - overlay
   postgres:
     image: postgres:latest
-    deploy:
-      mode: global
-      restart_policy:
-        condition: any
     volumes:
       - /mnt/vol/postgresql:/var/lib/postgresql/data
     environment:
@@ -33,13 +16,6 @@ services:
       - overlay
   core:
     image: quay.io/aelve/codesearch-core:latest
-    deploy:
-      mode: global
-      restart_policy:
-        condition: any
-        delay: 5h
-      update_config:
-        failure_action: rollback
     depends_on:
       - postgres
     volumes:
@@ -54,12 +30,6 @@ services:
       - overlay
   server:
     image: quay.io/aelve/codesearch-web-server:latest
-    deploy:
-      mode: global
-      restart_policy:
-        condition: any
-      update_config:
-        failure_action: rollback
     volumes:
       - /mnt/vol/data:/data
       - /mnt/vol/index:/index
