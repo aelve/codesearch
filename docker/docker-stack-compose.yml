@@ -79,4 +79,3 @@ services:
       - overlay
 networks:
   overlay:
-    
