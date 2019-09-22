@@ -41,8 +41,6 @@ object Main extends IOApp {
 
         hackageMeta <- HackageMetaDownloader(config.languagesConfig.haskell, unarchiver, downloader)
         cratesMeta  <- CratesMetaDownloader(config.languagesConfig.rust, unarchiver, downloader)
-        gemMeta     <- GemMetaDownloader(config.languagesConfig.ruby, downloader)
-        npmMeta     <- NpmMetaDownloader(config.languagesConfig.javascript, downloader)
 
         db = Database.forConfig("db")
 
@@ -50,14 +48,10 @@ object Main extends IOApp {
 
         haskellCindex    = HaskellCindex(cindexPath)
         rustCindex       = RustCindex(cindexPath)
-        rubyCindex       = RubyCindex(cindexPath)
-        javaScriptCindex = JavaScriptCindex(cindexPath)
 
         langReps = Map(
           "haskell"    -> LangRep[HackageTable](HaskellIndex(config, db, haskellCindex), hackageMeta),
-          "rust"       -> LangRep[CratesTable](RustIndex(config, db, rustCindex), cratesMeta),
-          "ruby"       -> LangRep[GemTable](RubyIndex(config, db, rubyCindex), gemMeta),
-          "javascript" -> LangRep[NpmTable](JavaScriptIndex(config, db, javaScriptCindex), npmMeta)
+          "rust"       -> LangRep[CratesTable](RustIndex(config, db, rustCindex), cratesMeta)
         )
         exitCode <- Program(langReps) >>= (_.run(params))
       } yield exitCode
