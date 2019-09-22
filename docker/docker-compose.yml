@@ -1,25 +1,8 @@
 version: '3.3'
 
 services:
-  portainer:
-    image: portainer/portainer:latest
-    deploy:
-      mode: global
-      restart_policy:
-        condition: any
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /mnt/vol/portainer/data:/data
-    ports:
-      - 9080:9000
-    networks:
-      - overlay
   postgres:
     image: postgres:latest
-    deploy:
-      mode: global
-      restart_policy:
-        condition: any
     volumes:
       - /mnt/vol/postgresql:/var/lib/postgresql/data
     environment:
@@ -32,14 +15,7 @@ services:
     networks:
       - overlay
   core:
-    image: quay.io/aelve/codesearch-core:develop
-    deploy:
-      mode: global
-      restart_policy:
-        condition: any
-        delay: 5h
-      update_config:
-        failure_action: rollback
+    image: quay.io/aelve/codesearch-core:latest
     depends_on:
       - postgres
     volumes:
@@ -53,13 +29,7 @@ services:
     networks:
       - overlay
   server:
-    image: quay.io/aelve/codesearch-web-server:develop
-    deploy:
-      mode: global
-      restart_policy:
-        condition: any
-      update_config:
-        failure_action: rollback
+    image: quay.io/aelve/codesearch-web-server:latest
     volumes:
       - /mnt/vol/data:/data
       - /mnt/vol/index:/index
@@ -69,7 +39,7 @@ services:
       make serve
     environment:
       LOG_LEVEL: DEBUG
-      JAVA_OPTS: "-Dplay.filters.hosts.allowed.1=staging.codesearch.aelve.com -Dplay.filters.hosts.allowed.2=cloud.digitalocean.com"
+      JAVA_OPTS: "-Dplay.filters.hosts.allowed.1=codesearch.aelve.com -Dplay.filters.hosts.allowed.2=cloud.digitalocean.com"
       # In production you must override the APPLICATION_SECRET key
       APPLICATION_SECRET: ${SECRET_KEY:-"u?:IPZT:Cun;SP>edigHDs:cpUf2cY\`<7D>b9lHg98^NsVGn]:eLCIjz1Tt_VyIv"}
     ports:
