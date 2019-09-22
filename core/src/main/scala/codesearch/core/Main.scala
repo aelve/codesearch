@@ -42,19 +42,17 @@ object Main extends IOApp {
         hackageMeta <- HackageMetaDownloader(config.languagesConfig.haskell, unarchiver, downloader)
         cratesMeta  <- CratesMetaDownloader(config.languagesConfig.rust, unarchiver, downloader)
 
-        db = Database.forConfig("db")
+        cindexPath    = Paths.get("./index/cindex/")
+        haskellCindex = HaskellCindex(cindexPath)
+        rustCindex    = RustCindex(cindexPath)
 
-        cindexPath = Paths.get("./index/cindex/")
-
-        haskellCindex    = HaskellCindex(cindexPath)
-        rustCindex       = RustCindex(cindexPath)
-
-        langReps = Map(
-          "haskell"    -> LangRep[HackageTable](HaskellIndex(config, db, haskellCindex), hackageMeta),
-          "rust"       -> LangRep[CratesTable](RustIndex(config, db, rustCindex), cratesMeta)
-        )
-        exitCode <- Program(langReps) >>= (_.run(params))
+        exitCode <- Resource.make(IO(Database.forConfig("db")))(connection => IO(connection.close)).use { db =>
+          val langReps = Map(
+            "haskell" -> LangRep[HackageTable](HaskellIndex(config, db, haskellCindex), hackageMeta),
+            "rust"    -> LangRep[CratesTable](RustIndex(config, db, rustCindex), cratesMeta)
+          )
+          Program(langReps) >>= (_.run(params))
+        }
       } yield exitCode
     }
 }
-
