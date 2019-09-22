@@ -2,6 +2,7 @@ package codesearch.core
 
 import java.nio.file.Paths
 
+import cats.effect.internals.IOContextShift
 import cats.effect.{ExitCode, IO, IOApp, Resource}
 import cats.syntax.flatMap._
 import codesearch.core.config.Config
@@ -30,29 +31,31 @@ object Main extends IOApp {
       metaDownloader: MetaDownloader[IO]
   )
 
-  def run(args: List[String]): IO[ExitCode] =
-    Resource.make(IO(AsyncHttpClientFs2Backend[IO]()))(client => IO(client.close())).use { implicit httpClient =>
-      for {
-        params <- CLI.params(args)
-        config <- Config.load[IO]
+  def run(args: List[String]): IO[ExitCode] = {
+    Resource.make(IO(Database.forConfig("db")))(con => IOContextShift.global.evalOn(BlockingEC)(IO(con.close()))).use {
+      db =>
+        Resource.make(IO(AsyncHttpClientFs2Backend[IO]()))(client => IO(client.close())).use { implicit httpClient =>
+          for {
+            params <- CLI.params(args)
+            config <- Config.load[IO]
 
-        unarchiver                            = Unarchiver[IO]
-        implicit0(downloader: Downloader[IO]) = Downloader.create[IO]
+            unarchiver                            = Unarchiver[IO]
+            implicit0(downloader: Downloader[IO]) = Downloader.create[IO]
 
-        hackageMeta <- HackageMetaDownloader(config.languagesConfig.haskell, unarchiver, downloader)
-        cratesMeta  <- CratesMetaDownloader(config.languagesConfig.rust, unarchiver, downloader)
+            hackageMeta <- HackageMetaDownloader(config.languagesConfig.haskell, unarchiver, downloader)
+            cratesMeta  <- CratesMetaDownloader(config.languagesConfig.rust, unarchiver, downloader)
 
-        cindexPath    = Paths.get("./index/cindex/")
-        haskellCindex = HaskellCindex(cindexPath)
-        rustCindex    = RustCindex(cindexPath)
+            cindexPath = Paths.get("./index/cindex/")
+            haskellCindex = HaskellCindex(cindexPath)
+            rustCindex    = RustCindex(cindexPath)
 
-        exitCode <- Resource.make(IO(Database.forConfig("db")))(connection => IO(connection.close)).use { db =>
-          val langReps = Map(
-            "haskell" -> LangRep[HackageTable](HaskellIndex(config, db, haskellCindex), hackageMeta),
-            "rust"    -> LangRep[CratesTable](RustIndex(config, db, rustCindex), cratesMeta)
-          )
-          Program(langReps) >>= (_.run(params))
+            langReps = Map(
+              "haskell" -> LangRep[HackageTable](HaskellIndex(config, db, haskellCindex), hackageMeta),
+              "rust"    -> LangRep[CratesTable](RustIndex(config, db, rustCindex), cratesMeta)
+            )
+            exitCode <- Program(langReps) >>= (_.run(params))
+          } yield exitCode
         }
-      } yield exitCode
     }
+  }
 }
