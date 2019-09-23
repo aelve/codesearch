@@ -22,7 +22,7 @@ object Main extends IOApp {
       downloadMeta: Boolean = false,
       buildIndex: Boolean = false,
       limitedCountPackages: Option[Int] = None,
-      lang: String
+      lang: String = "all"
   )
 
   case class LangRep[A <: DefaultTable](
