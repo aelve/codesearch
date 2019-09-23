@@ -45,7 +45,7 @@ object Main extends IOApp {
             hackageMeta <- HackageMetaDownloader(config.languagesConfig.haskell, unarchiver, downloader)
             cratesMeta  <- CratesMetaDownloader(config.languagesConfig.rust, unarchiver, downloader)
 
-            cindexPath = Paths.get("./index/cindex/")
+            cindexPath    = Paths.get("./index/cindex/")
             haskellCindex = HaskellCindex(cindexPath)
             rustCindex    = RustCindex(cindexPath)
 
