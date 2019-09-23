@@ -20,7 +20,6 @@ object Main extends IOApp {
   final case class Params(
       updatePackages: Boolean = false,
       downloadMeta: Boolean = false,
-      initDB: Boolean = false,
       buildIndex: Boolean = false,
       limitedCountPackages: Option[Int] = None,
       lang: String = "all"

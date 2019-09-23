@@ -4,7 +4,7 @@ services:
   postgres:
     image: postgres:latest
     volumes:
-      - /mnt/vol/postgresql:/var/lib/postgresql/data
+      - ./vol/postgresql:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: sourcesdb
       POSTGRES_USER: postgres
@@ -19,20 +19,19 @@ services:
     depends_on:
       - postgres
     volumes:
-      - /mnt/vol/data:/data
-      - /mnt/vol/index:/index
-      - /mnt/vol/logs:/logs
+      - ./vol/data:/data
+      - ./vol/index:/index
+      - ./vol/logs:/logs
     command: >
-      sh -c "./wait-for postgres:5432 -- make tables && \
-            make download-haskell update-haskell index-haskell && \
+      sh -c "./wait-for postgres:5432 -- make download-haskell update-haskell index-haskell && \
             make download-rust update-rust index-rust"
     networks:
       - overlay
   server:
     image: quay.io/aelve/codesearch-web-server:develop
     volumes:
-      - /mnt/vol/data:/data
-      - /mnt/vol/index:/index
+      - ./vol/data:/data
+      - ./vol/index:/index
     depends_on:
       - postgres
     command:
