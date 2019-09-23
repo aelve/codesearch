@@ -18,16 +18,6 @@ body {
     background-color: #fafafa;
 }
 
-html,
-body {
-    height: 100%;
-}
-
-main {
-    min-height: 100%;
-    position: relative;
-}
-
 .subtitle {
     /* italics for subtitles */
     font-style: italic;
@@ -81,8 +71,6 @@ p {
 
 footer {
     /* just a footer */
-    position: absolute;
-    bottom: 0;
     margin-top: 4rem;
     padding-top: 3rem;
     padding-bottom: 2rem;
