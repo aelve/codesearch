@@ -15,7 +15,7 @@ object SnippetsGrouper {
     */
   case class SnippetInfo(filePath: String, lines: NonEmptyVector[Int], totalMatches: Int)
 
-  private case class ResultRow(path: String, lineNumber: Int)
+  private case class ResultRow(path: String, lineNumber: Int, matchedString: Array[String])
 
   /**
     * Transforms raw search output in format `filePath:lineNumber:matchedString` to snippets grouping matched lines
@@ -23,31 +23,38 @@ object SnippetsGrouper {
     *
     * @param config config for creating a snippet
     */
-  def groupLines[F[_]](config: SnippetConfig): Pipe[F, String, SnippetInfo] = { lines =>
+  def groupLines[F[_]](config: SnippetConfig, query: String): Pipe[F, String, SnippetInfo] = { lines =>
     for {
       (_, resultRows) <- lines.map { row =>
-        val Array(path, lineNumber) = row.split(":").take(2) //filePath:lineNumber:matchedString
-        ResultRow(path, lineNumber.toInt)
+        val Array(path, lineNumber) = row.split(":").take(2) // filePath:lineNumber:matchedString
+        ResultRow(path, lineNumber.toInt, row.split(":").drop(2))
       }.groupAdjacentBy(_.path)
       snippet <- Stream.emits {
-        groupRowsToSnippets(config)(resultRows)
+        groupRowsToSnippets(config, query)(resultRows)
       }
     } yield snippet
   }
 
-  private def groupRowsToSnippets(config: SnippetConfig)(rows: Chunk[ResultRow]): Seq[SnippetInfo] = {
+  private def groupRowsToSnippets(config: SnippetConfig, query: String)(rows: Chunk[ResultRow]): Seq[SnippetInfo] = {
     rows.foldLeft(Vector.empty[SnippetInfo]) { (snippets, row) =>
+      val count = math.max(countSubstring(row.matchedString, query), 1)
       snippets.lastOption match {
         case Some(snippet) =>
           if (row.lineNumber < snippet.lines.last + config.linesAfter) {
             snippets.init :+ snippet.copy(lines = snippet.lines :+ row.lineNumber,
-                                          totalMatches = snippet.totalMatches + 1)
+              totalMatches = snippet.totalMatches + count)
           } else {
-            snippets :+ SnippetInfo(row.path, NonEmptyVector.one(row.lineNumber), 1)
+            snippets :+ SnippetInfo(row.path, NonEmptyVector.one(row.lineNumber), count)
           }
         case None =>
-          snippets :+ SnippetInfo(row.path, NonEmptyVector.one(row.lineNumber), 1)
+          snippets :+ SnippetInfo(row.path, NonEmptyVector.one(row.lineNumber), count)
       }
+    }
+  }
+
+  private def countSubstring(str: Array[String], sub: String): Int = {
+    str.foldLeft(0) { (count, str) =>
+      count + str.sliding(sub.length).count(_ == sub)
     }
   }
 }
