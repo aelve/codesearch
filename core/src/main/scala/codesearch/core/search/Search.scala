@@ -50,7 +50,8 @@ trait Search {
         .compile
         .toList
       totalMatches = filteredSnippetsInfo.fold(0)((total, snippet) => total + snippet.totalMatches).compile.toList.last
-    } yield CSearchPage(results.sortBy(_.pack.name), totalMatches)
+      snippetCount = filteredSnippetsInfo.fold(0)((total, _) => total + 1).compile.toList.last
+    } yield CSearchPage(results.sortBy(_.pack.name), totalMatches, snippetCount)
   }
 
   /**
@@ -165,7 +166,8 @@ object Search {
     */
   final case class CSearchPage(
       data: Seq[PackageResult],
-      total: Int
+      total: Int,
+      snippetCount: Int
   )
 
   /**

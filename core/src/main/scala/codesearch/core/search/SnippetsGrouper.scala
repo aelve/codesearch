@@ -26,8 +26,8 @@ object SnippetsGrouper {
   def groupLines[F[_]](config: SnippetConfig, query: String): Pipe[F, String, SnippetInfo] = { lines =>
     for {
       (_, resultRows) <- lines.map { row =>
-        val Array(path, lineNumber) = row.split(":").take(2) // filePath:lineNumber:matchedString
-        ResultRow(path, lineNumber.toInt, row.split(":").drop(2))
+        val result = row.split(":") // filePath:lineNumber:matchedString
+        ResultRow(result(0), result(1).toInt, result.drop(2))
       }.groupAdjacentBy(_.path)
       snippet <- Stream.emits {
         groupRowsToSnippets(config, query)(resultRows)
