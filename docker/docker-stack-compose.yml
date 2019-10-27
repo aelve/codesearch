@@ -15,7 +15,7 @@ services:
     networks:
       - overlay
   postgres:
-    image: postgres:latest
+    image: postgres:12-alpine
     deploy:
       mode: global
       restart_policy:
