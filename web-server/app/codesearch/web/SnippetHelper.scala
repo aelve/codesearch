@@ -39,5 +39,4 @@ object SnippetHelper {
     htmlBuilder.append(HtmlFormat.raw("\n"))
     htmlBuilder.toList
   }
-
 }

@@ -10,7 +10,6 @@ import codesearch.core.search.{Search, SearchRequest}
 import codesearch.core.util.Helper
 import com.github.marlonlom.utilities.timeago.TimeAgo
 import play.api.mvc.{Action, AnyContent, InjectedController}
-import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
 
