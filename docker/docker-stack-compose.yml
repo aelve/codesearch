@@ -26,7 +26,6 @@ services:
       POSTGRES_DB: sourcesdb
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    command: ["-c", "shared_buffers=512MB", "-c", "max_connections=400"]
     ports:
       - 5432:5432
     networks:
