@@ -11,11 +11,14 @@ import play.api.mvc.InjectedController
 
 import scala.concurrent.ExecutionContext
 
-class GemSearcher @Inject()(
+final class GemSearcher @Inject()(
     implicit override val executionContext: ExecutionContext
 ) extends InjectedController with SearchController[GemTable] {
-  override def db: DefaultDB[GemTable]       = new GemDB { val db = database }
-  override lazy val searchEngine: RubySearch = new RubySearch(RubyCindex(Paths.get("./index/cindex/")))
-  override def lang: String                  = "ruby"
+  val db: DefaultDB[GemTable]       = GemDBImpl
+  lazy val searchEngine: RubySearch = new RubySearch(RubyCindex(Paths.get("./index/cindex/")))
+  val lang: String                  = "ruby"
+}
 
+private object GemDBImpl extends GemDB {
+  val db = Application.database
 }

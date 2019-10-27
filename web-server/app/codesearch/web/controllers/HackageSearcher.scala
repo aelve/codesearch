@@ -11,10 +11,14 @@ import play.api.mvc.InjectedController
 
 import scala.concurrent.ExecutionContext
 
-class HackageSearcher @Inject()(
+final class HackageSearcher @Inject()(
     implicit override val executionContext: ExecutionContext
 ) extends InjectedController with SearchController[HackageTable] {
-  override def db: DefaultDB[HackageTable]      = new HackageDB { val db = database }
-  override lazy val searchEngine: HaskellSearch = new HaskellSearch(HaskellCindex(Paths.get("./index/cindex/")))
-  override def lang: String                     = "haskell"
+  val db: DefaultDB[HackageTable]      = HackageDBImpl
+  lazy val searchEngine: HaskellSearch = new HaskellSearch(HaskellCindex(Paths.get("./index/cindex/")))
+  val lang: String                     = "haskell"
+}
+
+private object HackageDBImpl extends HackageDB {
+  val db = Application.database
 }

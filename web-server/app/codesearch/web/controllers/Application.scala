@@ -8,18 +8,17 @@ import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.ExecutionContext
 
-case class LangInfo(updatedMills: Long, totalPackages: Int) {
-  val updatedAgo: String = TimeAgo.using(updatedMills)
-}
+final case class LangInfo(
+    updatedMills: Long,
+    totalPackages: Int
+) { val updatedAgo: String = TimeAgo.using(updatedMills) }
 
 class Application @Inject()(
     implicit val executionContext: ExecutionContext
 ) extends InjectedController {
 
-  val database: Database = Database.forConfig("db")
-
-  val HackageDB: HackageDB = new HackageDB { val db: Database = database }
-  val CratesDB: CratesDB   = new CratesDB  { val db: Database = database }
+  private val HackageDB: HackageDB = new HackageDB { val db: Database = Application.database }
+  private val CratesDB: CratesDB   = new CratesDB  { val db: Database = Application.database }
 
   def index: Action[AnyContent] = Action.async { implicit request =>
     HackageDB.updated
@@ -36,7 +35,11 @@ class Application @Inject()(
       }
   }
 
-  def untrail(path: String) = Action {
+  def untrail(path: String): Action[AnyContent] = Action {
     MovedPermanently("/" + path)
   }
+}
+
+private object Application {
+  val database = Database.forConfig("db")
 }

@@ -11,11 +11,14 @@ import play.api.mvc.InjectedController
 
 import scala.concurrent.ExecutionContext
 
-class NpmSearcher @Inject()(
+final class NpmSearcher @Inject()(
     implicit override val executionContext: ExecutionContext
 ) extends InjectedController with SearchController[NpmTable] {
-  override def db: DefaultDB[NpmTable] = new NpmDB { val db = database }
-  override lazy val searchEngine: JavaScriptSearch = new JavaScriptSearch(
-    JavaScriptCindex(Paths.get("./index/cindex/")))
-  override def lang: String = "js"
+  val db: DefaultDB[NpmTable]             = NpmDBImpl
+  lazy val searchEngine: JavaScriptSearch = new JavaScriptSearch(JavaScriptCindex(Paths.get("./index/cindex/")))
+  val lang: String                        = "js"
+}
+
+private object NpmDBImpl extends NpmDB {
+  val db = Application.database
 }

@@ -5,8 +5,8 @@ import codesearch.core.index.repository.Extensions
 import codesearch.core.index.repository.Extensions.RustExtensions
 
 class RustSearch(val cindexDir: СindexDirectory) extends Search {
-  override protected def extensions: Extensions = RustExtensions
-  override protected def buildRepUrl(packageName: String, version: String): String =
+  protected def extensions: Extensions = RustExtensions
+  protected def buildRepUrl(packageName: String, version: String): String =
     s"https://docs.rs/crate/$packageName/$version"
   def isTestInPath(path: String): Boolean = path.contains("/tests/")
 }

@@ -16,7 +16,7 @@ trait DefaultDB[T <: DefaultTable] {
 
   def db: Database
 
-  val table: TableQuery[T]
+  def table: TableQuery[T]
 
   def insertOrUpdate[A <: SourcePackage](pack: A): IO[Int] = {
     val insOrUpdate = table.insertOrUpdate(

@@ -23,8 +23,6 @@ trait SearchController[V <: DefaultTable] { self: InjectedController =>
   def searchEngine: Search
   def lang: String
 
-  val database = Database.forConfig("db")
-
   def index: Action[AnyContent] = Action.async { implicit request =>
     db.updated.map(
       updated =>

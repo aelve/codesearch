@@ -11,10 +11,14 @@ import play.api.mvc.InjectedController
 
 import scala.concurrent.ExecutionContext
 
-class CratesSearcher @Inject()(
+final class CratesSearcher @Inject()(
     implicit override val executionContext: ExecutionContext
 ) extends InjectedController with SearchController[CratesTable] {
-  override def db: DefaultDB[CratesTable]    = new CratesDB { val db = database }
-  override lazy val searchEngine: RustSearch = new RustSearch(RustCindex(Paths.get("./index/cindex/")))
-  override def lang: String                  = "rust"
+  val db: DefaultDB[CratesTable]    = CratesDBImpl
+  lazy val searchEngine: RustSearch = new RustSearch(RustCindex(Paths.get("./index/cindex/")))
+  val lang: String                  = "rust"
+}
+
+private object CratesDBImpl extends CratesDB {
+  val db = Application.database
 }

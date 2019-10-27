@@ -17,8 +17,13 @@ import io.circe.Decoder
 import io.circe.fs2._
 import slick.jdbc.PostgresProfile.api._
 
-class RustIndex(rustConfig: RustConfig, val db: Database, val cindexDir: СindexDirectory)(
-    implicit val shift: ContextShift[IO],
+final class RustIndex(
+    rustConfig: RustConfig,
+    val db: Database,
+    val cindexDir: СindexDirectory
+)(
+    implicit
+    val shift: ContextShift[IO],
     sourcesDownloader: SourcesDownloader[IO, CratesPackage]
 ) extends LanguageIndex[CratesTable] with CratesDB {
 
@@ -29,13 +34,13 @@ class RustIndex(rustConfig: RustConfig, val db: Database, val cindexDir: Сindex
     "archive.zip"
   )
 
-  override protected def concurrentTasksCount: Int = rustConfig.concurrentTasksCount
+  protected def concurrentTasksCount: Int = rustConfig.concurrentTasksCount
 
-  override protected def updateSources(name: String, version: String): IO[Int] = {
+  protected def updateSources(name: String, version: String): IO[Int] = {
     logger.info(s"downloading package $name") >> archiveDownloadAndExtract(CratesPackage(name, version))
   }
 
-  override protected def getLastVersions: Stream[IO, (String, String)] = {
+  protected def getLastVersions: Stream[IO, (String, String)] = {
     implicit val packageDecoder: Decoder[(String, String)] = { c =>
       for {
         name    <- c.get[String]("name")
@@ -51,13 +56,18 @@ class RustIndex(rustConfig: RustConfig, val db: Database, val cindexDir: Сindex
       .through(decoder[IO, (String, String)])
   }
 
-  override protected def buildFsUrl(packageName: String, version: String): Path =
+  protected def buildFsUrl(packageName: String, version: String): Path =
     CratesPackage(packageName, version).packageDir
 }
 
 object RustIndex {
-  def apply(config: Config, db: Database, cindexDir: СindexDirectory)(
-      implicit shift: ContextShift[IO],
+  def apply(
+      config: Config,
+      db: Database,
+      cindexDir: СindexDirectory
+  )(
+      implicit
+      shift: ContextShift[IO],
       sourcesDownloader: SourcesDownloader[IO, CratesPackage]
   ) = new RustIndex(config.languagesConfig.rust, db, cindexDir)
 }

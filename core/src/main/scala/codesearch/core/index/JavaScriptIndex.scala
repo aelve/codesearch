@@ -15,26 +15,36 @@ import codesearch.core.model.NpmTable
 import fs2.Stream
 import slick.jdbc.PostgresProfile.api._
 
-class JavaScriptIndex(config: JavaScriptConfig, val db: Database, val cindexDir: СindexDirectory)(
-    implicit val shift: ContextShift[IO],
+final class JavaScriptIndex(
+    config: JavaScriptConfig,
+    val db: Database,
+    val cindexDir: СindexDirectory
+)(
+    implicit
+    val shift: ContextShift[IO],
     sourcesDownloader: SourcesDownloader[IO, NpmPackage]
 ) extends LanguageIndex[NpmTable] with NpmDB {
 
-  override protected def concurrentTasksCount: Int = config.concurrentTasksCount
+  protected def concurrentTasksCount: Int = config.concurrentTasksCount
 
-  override protected def updateSources(name: String, version: String): IO[Int] = {
+  protected def updateSources(name: String, version: String): IO[Int] = {
     logger.info(s"downloading package $name") >> archiveDownloadAndExtract(NpmPackage(name, version))
   }
 
-  override protected def getLastVersions: Stream[IO, (String, String)] = NpmDetails(config).detailsMap
+  protected def getLastVersions: Stream[IO, (String, String)] = NpmDetails(config).detailsMap
 
-  override protected def buildFsUrl(packageName: String, version: String): Path =
+  protected def buildFsUrl(packageName: String, version: String): Path =
     NpmPackage(packageName, version).packageDir
 }
 
 object JavaScriptIndex {
-  def apply(config: Config, db: Database, cindexDir: СindexDirectory)(
-      implicit shift: ContextShift[IO],
+  def apply(
+      config: Config,
+      db: Database,
+      cindexDir: СindexDirectory
+  )(
+      implicit
+      shift: ContextShift[IO],
       sourcesDownloader: SourcesDownloader[IO, NpmPackage]
   ) = new JavaScriptIndex(config.languagesConfig.javascript, db, cindexDir)
 }
