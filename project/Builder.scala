@@ -66,7 +66,7 @@ object Builder {
         "com.typesafe.slick"    %% "slick"                         % "3.2.3",
         "com.typesafe.slick"    %% "slick-hikaricp"                % "3.2.3",
         "org.postgresql"        % "postgresql"                     % "42.2.2",
-        "com.softwaremill.sttp" %% "async-http-client-backend-fs2" % "1.3.8",
+        "com.softwaremill.sttp" %% "async-http-client-backend-fs2" % "1.3.8" % "provided",
         "co.fs2"                %% "fs2-core"                      % "1.0.0",
         "co.fs2"                %% "fs2-io"                        % "1.0.0",
         "io.circe"              %% "circe-fs2"                     % "0.10.0",
@@ -81,9 +81,13 @@ object Builder {
         "org.scalatest"         %% "scalatest"                     % "3.0.5" % "test"
       ),
       assemblyMergeStrategy in assembly := {
-        case PathList("META-INF", _ @_*) => MergeStrategy.discard
-        case PathList("reference.conf")  => MergeStrategy.concat
-        case _                           => MergeStrategy.first
+        case "reference.conf" => MergeStrategy.concat
+        case "application.conf" => MergeStrategy.concat
+        case PathList("META-INF", xs@_*) => xs match {
+          case ("MANIFEST.MF" :: Nil) => MergeStrategy.discard
+          case _ => MergeStrategy.first
+        }
+        case _ => MergeStrategy.first
       }
     )
 
@@ -98,7 +102,6 @@ object Builder {
       ),
       fullClasspath in assembly += Attributed.blank(PlayKeys.playPackageAssets.value),
       assemblyMergeStrategy in assembly := {
-        case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.concat
         case manifest if manifest.contains("MANIFEST.MF")         =>
           // We don't need manifest files since sbt-assembly will create
           // one with the given settings
@@ -107,11 +110,16 @@ object Builder {
           MergeStrategy.first
         case referenceOverrides if referenceOverrides.contains("reference-overrides.conf") =>
           MergeStrategy.concat
-        case "application.conf" | "production.conf" => MergeStrategy.concat
+        case "reference.conf" => MergeStrategy.concat
+        case "application.conf" => MergeStrategy.concat
         case "logback.xml"                          => MergeStrategy.first
         case x =>
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
+        case PathList("META-INF", xs@_*) => xs match {
+          case _ => MergeStrategy.first
+        }
+        case _ => MergeStrategy.first
       },
       assemblyJarName in assembly := "codesearch-server.jar",
       assemblyOutputPath in assembly := baseDirectory.value / "../codesearch-server.jar",
