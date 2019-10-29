@@ -1,6 +1,6 @@
 @import codesearch.core.search.Search.snippetConfig
 
-@(page: Int = 0, totalMatches: Int, callURI: String = "#")
+@(page: Int = 0, totalMatches: Int, callURI: String = "#", snippetCount: Int = 0)
 
 @if(page != 0) {
 
@@ -14,7 +14,7 @@
                     </a>
                 </li>
                 @for(curPage <- 1 to 10) {
-                    @{if ((curPage - 1) * snippetConfig.pageSize + 1 <= math.min(1000, totalMatches)) {
+                    @{if ((curPage - 1) * snippetConfig.pageSize + 1 <= math.min(1000, snippetCount)) {
                             <li class={if (page == curPage) "page-item active" else "page-item"}>
                             <a class="page-link" href={callURI ++ s"&page=$curPage"}>
                             <span aria-hidden="true">{curPage}</span>
@@ -22,8 +22,8 @@
                             </li>
                     } }
                 }
-                <li class="@{if (page * snippetConfig.pageSize + 1 <= math.min(1000, totalMatches)) "page-item" else "page-item disabled"}">
-                    <a class="page-link" href=@{if (page * snippetConfig.pageSize + 1 <= math.min(1000, totalMatches)) callURI ++ s"&page=${math.min(page + 1, 10)}" else "#"} aria-label="Next">
+                <li class="@{if (page * snippetConfig.pageSize + 1 <= math.min(1000, snippetCount)) "page-item" else "page-item disabled"}">
+                    <a class="page-link" href=@{if (page * snippetConfig.pageSize + 1 <= math.min(1000, snippetCount)) callURI ++ s"&page=${math.min(page + 1, 10)}" else "#"} aria-label="Next">
                         <span aria-hidden="true">&raquo;</span>
                         <span class="sr-only">Next</span>
                     </a>

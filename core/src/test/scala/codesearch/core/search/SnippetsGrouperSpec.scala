@@ -20,7 +20,7 @@ class SnippetsGrouperSpec extends WordSpec with Matchers {
     val snippets: List[SnippetInfo] = fs2.Stream
       .emits(matchedLines)
       .through(
-        SnippetsGrouper.groupLines(SnippetConfig(pageSize = 30, linesBefore = 5, linesAfter = 5))
+        SnippetsGrouper.groupLines(SnippetConfig(pageSize = 30, linesBefore = 5, linesAfter = 5), "import")
       )
       .compile
       .toList
@@ -44,7 +44,7 @@ class SnippetsGrouperSpec extends WordSpec with Matchers {
     val snippets: List[SnippetInfo] = fs2.Stream
       .emits(matchedLines)
       .through(
-        SnippetsGrouper.groupLines(SnippetConfig(pageSize = 30, linesBefore = 5, linesAfter = 5))
+        SnippetsGrouper.groupLines(SnippetConfig(pageSize = 30, linesBefore = 5, linesAfter = 5), "deriving")
       )
       .compile
       .toList
@@ -73,7 +73,7 @@ class SnippetsGrouperSpec extends WordSpec with Matchers {
     val snippets: List[SnippetInfo] = fs2.Stream
       .emits(matchedLines)
       .through(
-        SnippetsGrouper.groupLines(SnippetConfig(pageSize = 30, linesBefore = 5, linesAfter = 5))
+        SnippetsGrouper.groupLines(SnippetConfig(pageSize = 30, linesBefore = 5, linesAfter = 5), "import")
       )
       .compile
       .toList

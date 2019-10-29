@@ -10,14 +10,14 @@ import cats.syntax.option._
 import codesearch.core.config.{Config, SnippetConfig}
 import codesearch.core.index.directory.СindexDirectory
 import codesearch.core.index.repository.Extensions
+import codesearch.core.regex.RegexConstructor
 import codesearch.core.search.Search.{CSearchPage, CSearchResult, CodeSnippet, Package, PackageResult, snippetConfig}
 import codesearch.core.search.SnippetsGrouper.SnippetInfo
+import codesearch.core.syntax.stream._
 import codesearch.core.util.Helper.readFileAsync
 import fs2.{Pipe, Stream}
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
-import codesearch.core.regex.RegexConstructor
-import codesearch.core.syntax.stream._
 
 import scala.sys.process.Process
 
@@ -34,16 +34,14 @@ trait Search {
   def search(request: SearchRequest): IO[CSearchPage] = {
     for {
       lines <- csearch(request)
-
       snippetsInfo = Stream
         .emits(lines)
-        .through(SnippetsGrouper.groupLines(snippetConfig))
+        .through(SnippetsGrouper.groupLines(snippetConfig, request.query))
 
-      filteredSnippetsInfo = if (request.withoutTests)
+      filteredSnippetsInfo: Stream[fs2.Pure, SnippetsGrouper.SnippetInfo] = if (request.withoutTests)
         snippetsInfo.filterNot(snippetInfo => isTestInPath(snippetInfo.filePath))
       else
         snippetsInfo
-
       results <- filteredSnippetsInfo
         .drop(snippetConfig.pageSize * (request.page - 1))
         .take(snippetConfig.pageSize)
@@ -52,7 +50,8 @@ trait Search {
         .compile
         .toList
       totalMatches = filteredSnippetsInfo.fold(0)((total, snippet) => total + snippet.totalMatches).compile.toList.last
-    } yield CSearchPage(results.sortBy(_.pack.name), totalMatches)
+      snippetCount = filteredSnippetsInfo.fold(0)((total, _) => total + 1).compile.toList.last
+    } yield CSearchPage(results.sortBy(_.pack.name), totalMatches, snippetCount)
   }
 
   /**
@@ -167,7 +166,8 @@ object Search {
     */
   final case class CSearchPage(
       data: Seq[PackageResult],
-      total: Int
+      total: Int,
+      snippetCount: Int
   )
 
   /**
