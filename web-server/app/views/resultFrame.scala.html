@@ -8,21 +8,38 @@
 @import codesearch.web.SnippetHelper
 
 @import java.net.URLEncoder
+@import codesearch.core.util.RegexTester
 @(
         lang: String,
         insensitive: Boolean,
         space: Boolean,
-        precise: Boolean,
         query: String,
         updated: String,
         packages: Seq[PackageResult],
-        totalMatches: Int
+        totalMatches: Int,
+        precise: Boolean,
+        sources: Boolean,
+        withoutTests: Boolean,
 )
 
 @regex = @{
     RegexConstructor(query = query, space = space, insensitive = insensitive, precise = precise)
 }
 
+@if(RegexTester.regexIsInvalid(regex, "line")) {
+    <script>
+        if (!document.getElementsByClassName('error')[0].classList.contains('show')) {
+            document.getElementsByClassName('error')[0].classList.add('show')
+            inpQuery.classList.add('error')
+        }
+    </script>
+}
+@if(!RegexTester.regexIsInvalid(regex, "line")) {
+    <script>
+            document.getElementsByClassName('error')[0].classList.remove('show')
+        inpQuery.classList.remove('error')
+    </script>
+}
 <section class="container">
     <span class="text-secondary">Index updated @updated</span> <br>
 
