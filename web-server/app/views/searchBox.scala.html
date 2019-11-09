@@ -8,12 +8,14 @@
         precise: Boolean,
         sources: Boolean,
         withoutTests: Boolean,
+        invalidRegex: Boolean = false
 )
 
 <section class="container-fluid">
     <div class="col-lg-6 mx-auto p-3 h7 justify-content-center" style="position: relative;">
         <form>
             <section class="warning warning-query">Please provide a string to search for.</section>
+            <section class="error warning-query">You entered wrong regexp.</section>
             <div class="input-group mb-2">
                 <input type="text" class="form-control" name="query" value="@query" class="query">
                 <div class="input-group-append">

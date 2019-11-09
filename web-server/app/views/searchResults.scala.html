@@ -25,6 +25,6 @@
 
     @wrapper(s"Codesearch | $lang", headExtra) {
         @searchBox(s"/$lang/search", query, filter, filePath, insensitive, space, precise, sources, withoutTests)
-        @resultFrame(lang, insensitive, space, precise, query, updated, packages, totalMatches)
+        @resultFrame(lang, insensitive, space, query, updated, packages, totalMatches, precise, sources, withoutTests)
         @pagination(page, totalMatches, callURI)
     }
